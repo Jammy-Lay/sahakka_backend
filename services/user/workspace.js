@@ -32,63 +32,6 @@ exports.findWorkspaceWithTeam = async (team_id, workspace_id, user) => {
   };
 };
 
-// exports.getMyWorkspace = async (workspace_id, user_id) => {
-//   const rows = await workspace.getMyWorkspace(workspace_id, user_id);
-
-//   if (rows.length === 0) throw new Error("Workspace not found");
-
-//   const isOwner = rows[0].workspace_role === "owner";
-
-//   const result = {
-//     workspace: {
-//       workspace_id: rows[0].workspace_id,
-//       name: rows[0].workspace_name,
-//       role: rows[0].workspace_role,
-//       created_at: rows[0].created_at,
-//     },
-//     teams: [],
-//   };
-
-//   for (let row of rows) {
-//     if (!row.team_id) continue;
-
-//     // IF NOT OWNER → only allow teams user belongs to
-//     if (!isOwner) {
-//       const isInTeam = rows.some(
-//         (r) => r.team_id === row.team_id && r.user_id === user_id,
-//       );
-
-//       if (!isInTeam) continue;
-//     }
-
-//     let team = result.teams.find((t) => t.team_id === row.team_id);
-
-//     if (!team) {
-//       team = {
-//         team_id: row.team_id,
-//         title: row.team_title,
-//         description: row.description,
-//         members: [],
-//       };
-//       result.teams.push(team);
-//     }
-
-//     // show all members in that team
-//     if (row.user_id) {
-//       let exist = team.members.find((m) => m.user_id === row.user_id);
-
-//       if (!exist) {
-//         team.members.push({
-//           user_id: row.user_id,
-//           user_name: row.user_name,
-//         });
-//       }
-//     }
-//   }
-
-//   return result;
-// };
-
 exports.getMyWorkspace = async (user_id) => {
   const rows = await workspace.getMyWorkspace(user_id);
 

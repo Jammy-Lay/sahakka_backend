@@ -16,7 +16,6 @@ router.post(
 router.get(
   "/workspace/:workspace_id/teams",
   isLogin,
-  checkWorkspaceRole(["owner"]),
   team.getTeamsByWorkspace,
 );
 

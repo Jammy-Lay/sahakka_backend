@@ -5,6 +5,8 @@ const crypto = require("crypto");
 const { jwtConfig } = require("../configs/jwt");
 const { sendVerificationEmail } = require("./mail/mailService");
 const users = require("../models/users");
+const workspace = require("../models/user/workspace");
+const team = require("../models/user/team");
 
 exports.register = async (body) => {
   let checkEmail = await users.findByEmail(body.email);
@@ -97,13 +99,6 @@ exports.verifyEmail = async (token) => {
     throw new Error("Email already verify");
   }
 
-  // if (
-  //   !userInfo[0].verification_expires ||
-  //   new Date(userInfo[0].verification_expires) < new Date()
-  // ) {
-  //   throw new Error("Token is expired");
-  // }
-
   if (!userInfo[0].verification_expires) {
     throw new Error("Token has no expiration date");
   }
@@ -113,6 +108,30 @@ exports.verifyEmail = async (token) => {
   }
 
   await users.verifyEmail(userInfo[0].id);
+
+  let owner_id = userInfo[0].id;
+  const workspace_id = await workspace.createWorkspace(
+    "My Workspace",
+    owner_id,
+  );
+
+  let dataWorkspace = {
+    workspace_id: workspace_id,
+    user_id: owner_id,
+    role: "owner",
+  };
+
+  await workspace.addWorkspaceMember(dataWorkspace);
+
+  let dataTeam = {
+    workspace_id: workspace_id,
+    title: "My Team",
+    description: "Teamwork",
+  };
+
+  const team_id = await team.defaultTeam(dataTeam);
+  await team.addTeamMember(team_id, owner_id);
+  await team.addTeamSection(team_id);
 };
 
 exports.resendVerificationEmail = async (email) => {
