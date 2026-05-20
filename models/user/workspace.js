@@ -1,0 +1,72 @@
+const pool = require("../../configs/db");
+
+exports.createWorkspace = async (name, owner_id) => {
+  let sql = "INSERT INTO workspaces(name, owner_id) VALUES (?, ?)";
+  let [result] = await pool.query(sql, [name, owner_id]);
+  return result.insertId;
+};
+
+exports.addWorkspaceMember = async (body) => {
+  let sql =
+    "INSERT INTO workspace_members(workspace_id, user_id, role) VALUES (?, ?, ?)";
+  let data = [body.workspace_id, body.user_id, body.role];
+  await pool.query(sql, data);
+};
+
+exports.checkWorkspaceMember = async (user_id, workspace_id) => {
+  let sql =
+    "SELECT role FROM workspace_members WHERE user_id = ? AND workspace_id = ?";
+  let [row] = await pool.query(sql, [user_id, workspace_id]);
+  return row;
+};
+
+
+exports.findWorkspaceWithTeam = async (team_id, workspace_id) => {
+  const sql = `
+    SELECT
+      w.id AS workspace_id,
+      w.name AS workspace_name,
+      w.created_at AS workspace_created_at,
+
+      t.id AS team_id,
+      t.title,
+      t.description,
+      t.created_at AS team_created_at
+
+    FROM workspaces w
+    LEFT JOIN teams t ON t.id = ?
+    WHERE w.id = ? `;
+
+  const [row] = await pool.query(sql, [team_id, workspace_id]);
+
+  return row[0];
+};
+
+exports.getMyWorkspace = async (user_id) => {
+  const sql = `
+    SELECT
+      w.id AS workspace_id,
+      w.name AS workspace_name,
+      w.created_at,
+
+      wm.role,
+
+      u.id AS owner_id,
+      u.name AS owner_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS owner_avatar
+
+    FROM workspace_members wm
+
+    JOIN workspaces w
+      ON w.id = wm.workspace_id
+
+    JOIN users u
+      ON u.id = w.owner_id 
+
+    WHERE wm.user_id = ?
+
+    ORDER BY w.created_at DESC `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, user_id]);
+  return rows;
+};
