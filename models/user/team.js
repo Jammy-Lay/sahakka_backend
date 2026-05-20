@@ -29,6 +29,13 @@ exports.addTeamSection = async (team_id) => {
   }
 };
 
+exports.getSectionsByTeam = async (team_id) => {
+  let sql = "SELECT id, team_id, name FROM team_sections WHERE team_id = ? ORDER BY id ASC";
+
+  const [rows] = await pool.query(sql, [team_id]);
+  return rows;
+};
+
 exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
   let sql = `
     SELECT

@@ -1,5 +1,4 @@
 const team = require("../../models/user/team");
-const workspace = require("../../models/user/workspace");
 
 exports.defaultTeam = async (body) => {
   let result = await team.defaultTeam(body);
@@ -17,6 +16,14 @@ exports.addTeamMember = async (team_id, user_id) => {
 
 exports.addTeamSection = async (team_id) => {
   await team.addTeamSection(team_id);
+};
+
+exports.getSectionsByTeam = async (team_id) => {
+  const rows = await team.getSectionsByTeam(team_id);
+  if (rows.length === 0) {
+    throw new Error("Team not found");
+  }
+  return rows;
 };
 
 exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
