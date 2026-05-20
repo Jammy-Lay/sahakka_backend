@@ -13,10 +13,8 @@ router.post(
   team.createTeam,
 );
 
-router.get(
-  "/workspace/:workspace_id/teams",
-  isLogin,
-  team.getTeamsByWorkspace,
-);
+router.get("/workspace/:workspace_id/teams", isLogin, team.getTeamsByWorkspace);
+
+router.get("/team/:team_id/sections", isLogin, team.getSectionsByTeam);
 
 module.exports = router;
