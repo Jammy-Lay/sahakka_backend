@@ -29,7 +29,7 @@ exports.addTeamSection = async (team_id) => {
   }
 };
 
-exports.getTeamsByWorkspace = async (workspace_id) => {
+exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
   let sql = `
     SELECT
       t.id AS team_id,
@@ -51,14 +51,28 @@ exports.getTeamsByWorkspace = async (workspace_id) => {
       ON u.id = tm.user_id
 
     LEFT JOIN workspace_members wm
-      ON wm.user_id = u.id 
+      ON wm.user_id = ?
       AND wm.workspace_id = t.workspace_id
 
     WHERE t.workspace_id = ?
 
-    ORDER BY t.created_at DESC `;
+    AND (
+      wm.role = 'owner'
+      OR t.id IN (
+        SELECT team_id FROM team_members WHERE user_id = ?
+      )
+    )
 
-  const [rows] = await pool.query(sql, [process.env.BASE_URL, workspace_id]);
+    ORDER BY t.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
+    user_id,
+    workspace_id,
+    user_id,
+  ]);
+
   return rows;
 };
 

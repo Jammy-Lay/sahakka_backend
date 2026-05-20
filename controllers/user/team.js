@@ -3,7 +3,7 @@ const workspace = require("../../services/user/workspace");
 
 exports.createTeam = async (req, res) => {
   try {
-    let workspace_id = req.params.workspace_id;
+    const { workspace_id } = req.params;
 
     const team_id = await team.createTeam(
       workspace_id,
@@ -36,19 +36,19 @@ exports.createTeam = async (req, res) => {
 exports.getTeamsByWorkspace = async (req, res) => {
   try {
     const { workspace_id } = req.params;
+    const user_id = req.user.id;
 
-    const rows = await team.getTeamsByWorkspace(workspace_id);
+    const data = await team.getTeamsByWorkspace(workspace_id, user_id);
 
     return res.json({
       result: true,
-      message: "Get Teams Successfully",
-      data: rows,
+      message: "Get teams successfully",
+      data,
     });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
+  } catch (err) {
+    return res.status(400).json({
       result: false,
-      message: error.message,
+      message: err.message,
     });
   }
 };

@@ -19,13 +19,17 @@ exports.addTeamSection = async (team_id) => {
   await team.addTeamSection(team_id);
 };
 
-exports.getTeamsByWorkspace = async (workspace_id) => {
-  const rows = await team.getTeamsByWorkspace(workspace_id);
+exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
+  const rows = await team.getTeamsByWorkspace(workspace_id, user_id);
+
+  if (rows.length === 0) {
+    throw new Error("You are not in this workspace");
+  }
 
   const teams = [];
 
   for (const row of rows) {
-    // find team
+    // find existing team
     let team = null;
 
     for (const t of teams) {
@@ -35,7 +39,7 @@ exports.getTeamsByWorkspace = async (workspace_id) => {
       }
     }
 
-    // create team if not exist
+    // create new team
     if (!team) {
       team = {
         team_id: row.team_id,
@@ -46,14 +50,18 @@ exports.getTeamsByWorkspace = async (workspace_id) => {
       teams.push(team);
     }
 
-    // add member
+    // add member (avoid duplicate)
     if (row.user_id) {
-      team.members.push({
-        user_id: row.user_id,
-        name: row.user_name,
-        role: row.workspace_role,
-        avatar: row.avatar,
-      });
+      const exist = team.members.find((m) => m.user_id === row.user_id);
+
+      if (!exist) {
+        team.members.push({
+          user_id: row.user_id,
+          name: row.user_name,
+          role: row.workspace_role,
+          avatar: row.avatar,
+        });
+      }
     }
   }
 
