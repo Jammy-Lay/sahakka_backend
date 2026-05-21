@@ -1,4 +1,5 @@
 const task = require("../../services/user/task");
+const { getIO } = require("../../configs/socket");
 
 exports.getTasksByTeam = async (req, res) => {
   try {
@@ -27,6 +28,13 @@ exports.createTask = async (req, res) => {
 
     const result = await task.createTask(team_id, req.body, user_id);
     const row = await task.findTaskById(result);
+
+    const io = getIO();
+
+    io.emit("task-created", {
+      team_id: Number(team_id),
+      task: row[0],
+    });
 
     return res.json({
       result: true,
