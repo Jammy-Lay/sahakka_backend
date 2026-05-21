@@ -10,6 +10,8 @@ exports.getTasksByTeam = async (team_id, workspace_id) => {
       t.status,
       t.priority,
       t.created_at,
+      t.start_date,
+      t.end_date,
 
       u1.name AS created_by_name,
       u2.name AS assigned_to_name
