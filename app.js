@@ -4,7 +4,7 @@ const http = require("http");
 require("dotenv").config();
 
 const app = express();
-const profileRoute = require('./routes/profile');
+const profileRoute = require("./routes/profile");
 app.use(cors());
 app.use(express.json());
 
@@ -15,10 +15,11 @@ app.use(require("./routes/demo"));
 app.use(require("./routes/user/workspace"));
 app.use(require("./routes/user/team"));
 app.use(require("./routes/user/task"));
+app.use(require("./routes/user/invite"));
 
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static("uploads"));
 
-app.use('/profile', profileRoute);
+app.use("/profile", profileRoute);
 
 const server = http.createServer(app);
 

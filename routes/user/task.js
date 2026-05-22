@@ -19,4 +19,11 @@ router.post(
   task.createTask,
 );
 
+router.get(
+  "/workspace/:workspace_id/team/:team_id/task/:task_id/activities",
+  isLogin,
+  checkAccess,
+  task.getTaskActivityById,
+);
+
 module.exports = router;

@@ -1,5 +1,4 @@
 const task = require("../../services/user/task");
-const { getIO } = require("../../configs/socket");
 
 exports.getTasksByTeam = async (req, res) => {
   try {
@@ -29,13 +28,6 @@ exports.createTask = async (req, res) => {
     const result = await task.createTask(team_id, req.body, user_id);
     const row = await task.findTaskById(result);
 
-    const io = getIO();
-
-    io.emit("task-created", {
-      team_id: Number(team_id),
-      task: row[0],
-    });
-
     return res.json({
       result: true,
       message: "Task created successfully",
@@ -45,6 +37,24 @@ exports.createTask = async (req, res) => {
     return res.status(400).json({
       result: false,
       message: err.message,
+    });
+  }
+};
+
+exports.getTaskActivityById = async (req, res) => {
+  try {
+    const { task_id, team_id } = req.params;
+    const rows = await task.getTaskActivityById(task_id, team_id);
+    return res.json({
+      result: true,
+      message: "Get Task Activity Successfully",
+      data: rows,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      result: false,
+      message: error.message,
     });
   }
 };

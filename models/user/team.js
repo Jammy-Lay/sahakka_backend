@@ -30,7 +30,8 @@ exports.addTeamSection = async (team_id) => {
 };
 
 exports.getSectionsByTeam = async (team_id) => {
-  let sql = "SELECT id, team_id, name FROM team_sections WHERE team_id = ? ORDER BY id ASC";
+  let sql =
+    "SELECT id, team_id, name FROM team_sections WHERE team_id = ? ORDER BY id ASC";
 
   const [rows] = await pool.query(sql, [team_id]);
   return rows;
@@ -58,13 +59,18 @@ exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
       ON u.id = tm.user_id
 
     LEFT JOIN workspace_members wm
-      ON wm.user_id = ?
+      ON wm.user_id = u.id
       AND wm.workspace_id = t.workspace_id
 
     WHERE t.workspace_id = ?
 
     AND (
-      wm.role = 'owner'
+      EXISTS (
+        SELECT 1 FROM workspace_members 
+        WHERE user_id = ? 
+        AND workspace_id = ?
+        AND role = 'owner'
+      )
       OR t.id IN (
         SELECT team_id FROM team_members WHERE user_id = ?
       )
@@ -75,6 +81,7 @@ exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
 
   const [rows] = await pool.query(sql, [
     process.env.BASE_URL,
+    workspace_id,
     user_id,
     workspace_id,
     user_id,
@@ -93,4 +100,25 @@ exports.checkTeamMember = async (user_id, team_id) => {
   let sql = "SELECT id FROM team_members WHERE user_id = ? AND team_id = ?";
   const [row] = await pool.query(sql, [user_id, team_id]);
   return row;
+};
+
+exports.getTeamActivityById = async (team_id) => {
+  let sql = `
+    SELECT ta.*, u.name
+    FROM team_activities ta
+    JOIN users u ON u.id = ta.user_id
+    WHERE ta.team_id = ?
+    ORDER BY ta.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [team_id]);
+  return rows;
+};
+
+exports.createTeamActivity = async (team_id, user_id, action, message) => {
+  let sql =
+    "INSERT INTO team_activities (team_id, user_id, action, message) VALUES (?, ?, ?, ?)";
+
+  const result = await pool.query(sql, [team_id, user_id, action, message]);
+  return result.insertId;
 };
