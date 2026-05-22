@@ -76,3 +76,29 @@ exports.findTaskById = async (task_id) => {
   const [row] = await pool.query(sql, [task_id]);
   return row;
 };
+
+exports.getTaskActivityById = async (task_id) => {
+  let sql = `
+    SELECT ta.*, u.name
+    FROM task_activities ta
+    JOIN users u ON u.id = ta.user_id
+    WHERE ta.task_id = ?
+    ORDER BY ta.created_at DESC`;
+
+  const [rows] = await pool.query(sql, [task_id]);
+  return rows;
+};
+
+exports.checkTaskInTeam = async (task_id, team_id) => {
+  let sql = "SELECT id FROM tasks WHERE id = ? AND team_id = ?";
+  const [row] = await pool.query(sql, [task_id, team_id]);
+  return row;
+};
+
+exports.createTaskActivity = async (task_id, user_id, action, message) => {
+  let sql =
+    "INSERT INTO task_activities (task_id, user_id, action, message) VALUES (?, ?, ?, ?)";
+
+  const result = await pool.query(sql, [task_id, user_id, action, message]);
+  return result.insertId;
+};

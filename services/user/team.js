@@ -74,3 +74,13 @@ exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
 
   return teams;
 };
+
+exports.getTeamActivityById = async (team_id) => {
+  const rows = await team.getTeamActivityById(team_id);
+  return rows;
+};
+
+exports.createTeamActivity = async (team_id, user_id, action, message) => {
+  const row = await team.createTeamActivity(team_id, user_id, action, message);
+  return row;
+}

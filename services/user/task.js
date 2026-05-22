@@ -19,8 +19,25 @@ exports.createTask = async (team_id, body, user_id) => {
 
 exports.findTaskById = async (task_id) => {
   const row = await task.findTaskById(task_id);
-  if (row.length === 0) {
+  return row;
+};
+
+exports.getTaskActivityById = async (task_id, team_id) => {
+  const checkTask = await task.findTaskById(task_id);
+  if (checkTask.length === 0) {
     throw new Error("Task not found");
   }
+
+  const checkTaskInTeam = await task.checkTaskInTeam(task_id, team_id);
+  if (checkTaskInTeam.length === 0) {
+    throw new Error("Task is not in that team");
+  }
+
+  const rows = await task.getTaskActivityById(task_id);
+  return rows;
+};
+
+exports.createTaskActivity = async (task_id, user_id, action, message) => {
+  const row = await task.createTaskActivity(task_id, user_id, action, message);
   return row;
 };

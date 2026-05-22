@@ -44,9 +44,9 @@ exports.getMyWorkspace = async (user_id) => {
       workspace_id: row.workspace_id,
       workspace_name: row.workspace_name,
       created_at: row.created_at,
-
+      my_role: row.my_role,
       creator: {
-        role: row.role,
+        role: "owner",
         user_id: row.owner_id,
         user_name: row.owner_name,
         avatar: row.owner_avatar,

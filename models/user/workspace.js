@@ -20,7 +20,6 @@ exports.checkWorkspaceMember = async (user_id, workspace_id) => {
   return row;
 };
 
-
 exports.findWorkspaceWithTeam = async (team_id, workspace_id) => {
   const sql = `
     SELECT
@@ -49,7 +48,7 @@ exports.getMyWorkspace = async (user_id) => {
       w.name AS workspace_name,
       w.created_at,
 
-      wm.role,
+      wm.role AS my_role, 
 
       u.id AS owner_id,
       u.name AS owner_name,
@@ -61,12 +60,14 @@ exports.getMyWorkspace = async (user_id) => {
       ON w.id = wm.workspace_id
 
     JOIN users u
-      ON u.id = w.owner_id 
+      ON u.id = w.owner_id
 
     WHERE wm.user_id = ?
 
-    ORDER BY w.created_at DESC `;
+    ORDER BY w.created_at DESC
+  `;
 
   const [rows] = await pool.query(sql, [process.env.BASE_URL, user_id]);
+
   return rows;
 };
