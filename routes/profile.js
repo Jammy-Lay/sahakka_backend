@@ -17,5 +17,7 @@ router.post(
 
 // delete avatar
 router.delete('/delete-avatar',authMiddleware.isLogin, profileController.deleteAvatar);
+// change name
+router.put('/change-name', authMiddleware.isLogin, profileController.changeName)
 
 module.exports = router;
