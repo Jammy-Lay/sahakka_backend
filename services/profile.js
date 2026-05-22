@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const profileModel = require('../models/profile');
+const auth = require('../models/users');
 
 exports.uploadAvatar = async (userId, file) => {
 
@@ -71,3 +72,17 @@ exports.deleteAvatar = async (userId) => {
         message: 'Avatar deleted successfully'
     };
 };
+
+exports.changeName = async (user_id,name) =>{
+    const user = await auth.findById(user_id);
+    if (!user) {
+        throw new Error('User not found');
+    }
+    
+
+    await profileModel.changeName(user_id, name);
+
+    return {
+        message: 'Name changed successfully'
+    };
+}

@@ -1,7 +1,7 @@
 const transporter = require("../../configs/mailer");
 
 const sendVerificationEmail = async (to, token) => {
-  const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
+  const verificationLink = `http://localhost:3000/api/verify-email?token=${token}`;
 
   await transporter.sendMail({
     from: `My App <noreply@myapp.com>`, // Professional "From" header
