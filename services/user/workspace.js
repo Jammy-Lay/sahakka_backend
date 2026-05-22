@@ -32,6 +32,23 @@ exports.findWorkspaceWithTeam = async (team_id, workspace_id, user) => {
   };
 };
 
+exports.findById = async (workspace_id, user) => {
+  const row = await workspace.findById(workspace_id);
+
+  return {
+    workspace: {
+      workspace_id: row.workspace_id,
+      workspace_name: row.workspace_name,
+      creator: {
+        user_id: user.id,
+        user_name: user.name,
+        role: "owner",
+      },
+      created_at: row.workspace_created_at,
+    },
+  };
+};
+
 exports.getMyWorkspace = async (user_id) => {
   const rows = await workspace.getMyWorkspace(user_id);
 
@@ -55,4 +72,12 @@ exports.getMyWorkspace = async (user_id) => {
   }
 
   return result;
+};
+
+exports.deleteWorkspace = async (workspace_id) => {
+  await workspace.deleteWorkspace(workspace_id);
+};
+
+exports.updateWorkspace = async (name, workspace_id) => {
+  await workspace.updateWorkspace(name, workspace_id);
 };

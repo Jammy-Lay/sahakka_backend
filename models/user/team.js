@@ -122,3 +122,13 @@ exports.createTeamActivity = async (team_id, user_id, action, message) => {
   const result = await pool.query(sql, [team_id, user_id, action, message]);
   return result.insertId;
 };
+
+exports.deleteTeam = async (team_id) => {
+  let sql = "DELETE FROM teams WHERE id = ?";
+  await pool.query(sql, [team_id]);
+};
+
+exports.updateTeam = async (title, description, team_id) => {
+  let sql = "UPDATE teams SET title = ? , description = ? WHERE id = ?";
+  await pool.query(sql, [title, description, team_id]);
+};

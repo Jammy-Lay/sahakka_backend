@@ -64,3 +64,41 @@ exports.getMyWorkspace = async (req, res) => {
     });
   }
 };
+
+exports.deleteWorkspace = async (req, res) => {
+  try {
+    const { workspace_id } = req.params;
+    await workspace.deleteWorkspace(workspace_id);
+
+    return res.json({
+      result: true,
+      message: "Delete Workspace Successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.updateWorkspace = async (req, res) => {
+  try {
+    const { workspace_id } = req.params;
+    await workspace.updateWorkspace(req.body.name, workspace_id);
+    const row = await workspace.findById(workspace_id, req.user);
+
+    return res.json({
+      result: true,
+      message: "Update Workspace Successfully",
+      data: row,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};

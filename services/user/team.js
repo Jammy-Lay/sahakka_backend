@@ -83,4 +83,12 @@ exports.getTeamActivityById = async (team_id) => {
 exports.createTeamActivity = async (team_id, user_id, action, message) => {
   const row = await team.createTeamActivity(team_id, user_id, action, message);
   return row;
-}
+};
+
+exports.deleteTeam = async (team_id) => {
+  await team.deleteTeam(team_id);
+};
+
+exports.updateTeam = async (title, description, team_id) => {
+  await team.updateTeam(title, description, team_id);
+};

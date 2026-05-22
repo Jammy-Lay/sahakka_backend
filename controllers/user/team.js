@@ -83,7 +83,43 @@ exports.getTeamActivityById = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.deleteTeam = async (req, res) => {
+  try {
+    const { team_id } = req.params;
+    await team.deleteTeam(team_id);
+    return res.json({
+      result: true,
+      message: "Delete Team Successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.updateTeam = async (req, res) => {
+  try {
+    const { workspace_id, team_id } = req.params;
+    await team.updateTeam(req.body.title, req.body.description, team_id);
+    const row = await workspace.findWorkspaceWithTeam(team_id, workspace_id, req.user);
+    return res.json({
+      result: true,
+      message: "Delete Team Successfully",
+      data: row,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
       result: false,
       message: error.message,
     });

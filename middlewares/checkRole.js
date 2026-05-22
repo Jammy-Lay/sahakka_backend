@@ -17,12 +17,11 @@ exports.checkWorkspaceRole = (roles) => {
 
       const row = await workspace.checkWorkspaceMember(user_id, workspace_id);
 
-      if (row.length === 0) {
-        return res.status(403).json({ message: "You are not a member of this workspace" });
-      }
-
       if (!roles.includes(row[0].role)) {
-        return res.status(403).json({ message: "Permission denied" });
+        return res.status(403).json({
+          result: false,
+          message: "Permission denied",
+        });
       }
 
       next();
