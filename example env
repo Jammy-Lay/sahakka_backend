@@ -6,5 +6,7 @@ DB_NAME = 'Sahakka'
 
 MAIL_HOST = 'localhost'
 MAIL_SERVICE = 'gmail'
+MAIL_EMAIL = ''
+MAIL_PASSWORD = ''
 
 BASE_URL = 'http://localhost:3000'

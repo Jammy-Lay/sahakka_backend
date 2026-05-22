@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 const { jwtConfig } = require("../configs/jwt");
-const { sendVerificationEmail } = require("./mail/mailService");
+const { sendVerificationEmail, sendResetPasswordOTP } = require("./mail/mailService");
 const users = require("../models/users");
 const workspace = require("../models/user/workspace");
 const team = require("../models/user/team");
@@ -159,4 +159,113 @@ exports.resendVerificationEmail = async (email) => {
   });
 
   await sendVerificationEmail(email, verificationToken);
+};
+
+exports.forgotPassword = async (email) => {
+  let userInfo = await users.findByEmail(email);
+  if (!userInfo || userInfo.length === 0) {
+    throw new Error('User not found');
+  }
+
+  // Token reset
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  const expire_at  = new Date(Date.now() + 1 * 60 * 1000);
+
+  await users.resetPassword({
+    email: userInfo[0].email,
+    otp,
+    expire_at
+  })
+  await sendResetPasswordOTP(email,otp)
+  return { message: "Email successfully" };
+
+}
+
+exports.resendOtp = async (email) => {
+  const userInfo = await users.checkUerSendOtp(email);
+
+  if (!userInfo || userInfo.length === 0) {
+    throw new Error('User not found');
+  }
+
+
+  await users.deleteOldOtp(userInfo[0].email);
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  const expire_at = new Date(Date.now() + 5 * 60 * 1000);
+
+  await users.resetPassword({
+    email: userInfo[0].email,
+    otp,
+    expire_at
+  });
+
+  await sendResetPasswordOTP(email, otp);
+
+  return { message: "OTP resent successfully" };
+};
+
+exports.verifyOtp = async (email, otp) => {
+  let userInfo = await users.checkUerSendOtp(email);
+  // console.log(userInfo[0].otp.toString(), otp); return;
+
+  if (!userInfo || userInfo.length === 0) {
+    throw new Error('User not found');
+  }
+  if (otp.toString() !== userInfo[0].otp.toString()) {
+    throw new Error('Invalid otp');
+  }
+  if (userInfo[0].expire_at < new Date()) {
+    throw new Error('OTP expired');
+  }
+  await users.VerificationOtp(userInfo[0].email)
+}
+
+exports.resetPassword = async (email, new_password, comfirm_password) => {
+  let userCheck = await users.checkUerSendOtp(email);
+  // console.log(userCheck); return;
+  if (!userCheck || userCheck.length === 0) {
+    throw new Error('User not found');
+  }
+  if(new_password !== comfirm_password){
+    throw new Error('Password not match')
+  }
+  if(!userCheck[0].verified){
+    throw new Error('No verify email');
+  } 
+
+    let hashpassword = await bcrypt.hash(new_password, 10);
+  // console.log(hashpassword); return;
+    await users.changePassword(email, hashpassword);
+
+  return { message: "Password updated successfully" };
+}
+
+exports.changePassword = async (email, currentPassword, newPassword, confirmPassword) => {
+
+  const userInfo = await users.findByEmail(email);
+  // console.log(userInfo); return;
+
+  if (!userInfo || userInfo.length === 0) {
+    throw new Error('User not found');
+  }
+
+  const user = userInfo[0];
+  // console.log(user); return;
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+  if (!isMatch) {
+    throw new Error('Current password is incorrect');
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new Error('Password not match');
+  }
+
+  const hashPassword = await bcrypt.hash(newPassword, 10);
+
+  await users.changePassword(user.email, hashPassword);
+
+  return { message: 'Password updated successfully' };
 };

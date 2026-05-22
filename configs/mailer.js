@@ -4,8 +4,8 @@ const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
   service: process.env.MAIL_SERVICE,
   auth: {
-    user: "jammylay07@gmail.com",
-    pass: "wwowvagialjuecmk",
+    user: process.env.MAIL_EMAIL,
+    pass: process.env.MAIL_PASSWORD,
   },
 });
 
