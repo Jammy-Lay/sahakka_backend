@@ -4,22 +4,36 @@ const http = require("http");
 require("dotenv").config();
 
 const app = express();
-const profileRoute = require("./routes/profile");
 app.use(cors());
 app.use(express.json());
 
-app.use("/uploads", express.static("uploads"));
+app.get("/", (req, res) => {
+  res.json({
+    result: true,
+    message: "Server is running",
+  });
+});
 
-app.use(require("./routes/auth"));
+const auth = require("./routes/auth");
+app.use("/api", auth);
+
+const profile = require("./routes/profile");
+app.use("/api", profile);
+
+const workspace = require("./routes/user/workspace");
+app.use("/api", workspace);
+
+const team = require("./routes/user/team");
+app.use("/api", team);
+
+const task = require("./routes/user/task");
+app.use("/api", task);
+
+const invite = require("./routes/user/invite");
+app.use("/api", invite);
+
 app.use(require("./routes/demo"));
-app.use(require("./routes/user/workspace"));
-app.use(require("./routes/user/team"));
-app.use(require("./routes/user/task"));
-app.use(require("./routes/user/invite"));
-
 app.use("/uploads", express.static("uploads"));
-
-app.use("/profile", profileRoute);
 
 const server = http.createServer(app);
 

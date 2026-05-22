@@ -105,3 +105,96 @@ exports.resendVerificationEmail = async (req, res) => {
     });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  // console.log(req.body.email);
+  try {
+    let result = await auth.forgotPassword(req.body.email)
+
+    res.json({
+      message: "Request received",
+      data: req.body,
+      message: result.message
+    });
+  } catch (error) {
+    res.status(400).json({
+      result: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+exports.resendOtp = async (req, res) => {
+  try {
+    let result = await auth.resendOtp(req.body.email)
+
+    res.json({
+      message: "Request received",
+      data: req.body,
+      message: result.message
+    });
+  } catch (error) {
+    res.status(400).json({
+      result: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+}
+
+exports.verifyOtp = async (req, res) => {
+  try {
+    let result = await auth.verifyOtp(req.body.email, req.body.otp)
+
+    res.json({
+      message: "Verify Successfully",
+      data: req.body,
+    });
+  } catch (error) {
+    res.status(400).json({
+      result: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+}
+
+exports.resetPassword = async (req,res) => {
+  // console.log(req.body); return;
+  try {
+    let result = await auth.resetPassword(req.body.email,req.body.new_password,req.body.comfirm_password)
+
+    res.json({
+      message: result.message,
+      data: req.body,
+    });
+  } catch (error) {
+    res.status(400).json({
+      result: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+}
+
+exports.changePassword = async (req, res) => {
+  // console.log(req.body); return;
+  try {
+    const { email, currentPassword, newPassword, confirmPassword } = req.body;
+
+    const result = await auth.changePassword(
+      email,
+      currentPassword,
+      newPassword,
+      confirmPassword
+    );
+
+    return res.json({
+      result: true,
+      message: result.message
+    });
+
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message
+    });
+  }
+};

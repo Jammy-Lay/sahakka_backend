@@ -70,3 +70,22 @@ exports.getMe = async (id) => {
   let [row] = await pool.query(sql, [process.env.BASE_URL, id]);
   return row;
 };
+
+exports.resetPassword = async (body) => {
+    let arr = [body.email,body.otp, body.expire_at];
+    await pool.query('INSERT INTO password_resets ( email, otp, expire_at) VALUES (?,?,?)', arr)
+}
+exports.checkUerSendOtp = async (email) =>{
+    const [row] = await pool.query('SELECT email, otp, expire_at, verified FROM password_resets WHERE email = ?;', [email])
+    return row;
+}
+exports.deleteOldOtp = async (email) =>{
+    await pool.query('DELETE FROM password_resets WHERE email = ?;', [email])
+}
+exports.VerificationOtp = async (email) => {
+    await pool.query('UPDATE password_resets SET verified = 1 WHERE email = ?;',[email])
+}
+
+exports.changePassword = async (email, password)=>{
+    await pool.query('UPDATE users SET password = ? WHERE email = ?;', [password,email])
+}

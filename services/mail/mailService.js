@@ -78,4 +78,105 @@ const sendVerificationEmail = async (to, token) => {
   });
 };
 
-module.exports = { sendVerificationEmail };
+const sendResetPasswordOTP = async (to, otp) => {
+  await transporter.sendMail({
+    from: `My App <noreply@myapp.com>`,
+    to,
+    subject: "Password Reset OTP",
+
+    html: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        .container {
+          font-family: Arial, sans-serif;
+          max-width: 600px;
+          margin: auto;
+          padding: 20px;
+          border: 1px solid #e5e7eb;
+          border-radius: 10px;
+          color: #333;
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+
+        .otp-box {
+          text-align: center;
+          margin: 30px 0;
+        }
+
+        .otp {
+          display: inline-block;
+          font-size: 32px;
+          letter-spacing: 10px;
+          font-weight: bold;
+          background: #f3f4f6;
+          padding: 15px 25px;
+          border-radius: 8px;
+          color: #111827;
+        }
+
+        .warning {
+          background: #fef2f2;
+          color: #991b1b;
+          padding: 12px;
+          border-radius: 6px;
+          margin-top: 20px;
+        }
+
+        .footer {
+          text-align: center;
+          font-size: 12px;
+          color: #888;
+          margin-top: 30px;
+        }
+      </style>
+    </head>
+
+    <body>
+      <div class="container">
+
+        <div class="header">
+          <h2>Password Reset OTP</h2>
+        </div>
+
+        <p>Hello,</p>
+
+        <p>
+          Use the OTP below to reset your password.
+        </p>
+
+        <div class="otp-box">
+          <div class="otp">
+            ${otp}
+          </div>
+        </div>
+
+        <div class="warning">
+          This OTP will expire in
+          <strong>1 minute</strong>.
+        </div>
+
+        <p>
+          If you did not request this,
+          please ignore this email.
+        </p>
+
+        <div class="footer">
+          <p>
+            &copy; ${new Date().getFullYear()}
+            MyApp Inc. All rights reserved.
+          </p>
+        </div>
+
+      </div>
+    </body>
+    </html>
+    `,
+  });
+};
+module.exports = { sendVerificationEmail, sendResetPasswordOTP };

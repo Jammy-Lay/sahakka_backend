@@ -12,5 +12,10 @@ router.get("/getMe", isLogin, auth.getMe);
 router.delete("/logout", isLogin, auth.logout);
 router.get("/verify-email", auth.verifyEmail);
 router.put("/resend", auth.resendVerificationEmail);
+router.post('/forgot-password', auth.forgotPassword)
+router.post('/resend-otp', auth.resendOtp)
+router.post('/verify-otp', auth.verifyOtp)
+router.post('/reset-password', auth.resetPassword)
+router.post('/change-password', auth.changePassword);
 
 module.exports = router;
