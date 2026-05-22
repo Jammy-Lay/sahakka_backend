@@ -71,3 +71,28 @@ exports.getMyWorkspace = async (user_id) => {
 
   return rows;
 };
+
+exports.findById = async (workspace_id) => {
+  const sql = `
+    SELECT
+      w.id AS workspace_id,
+      w.name AS workspace_name,
+      w.created_at
+
+    FROM workspaces w
+    WHERE w.id = ?`;
+
+  const [row] = await pool.query(sql, [workspace_id]);
+
+  return row[0];
+};
+
+exports.deleteWorkspace = async (workspace_id) => {
+  let sql = "DELETE FROM workspaces WHERE id = ?";
+  await pool.query(sql, [workspace_id]);
+};
+
+exports.updateWorkspace = async (name, workspace_id) => {
+  let sql = "UPDATE workspaces SET name = ? WHERE id = ?";
+  await pool.query(sql, [name, workspace_id]);
+};

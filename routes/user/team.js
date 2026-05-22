@@ -13,6 +13,22 @@ router.post(
   team.createTeam,
 );
 
+router.delete(
+  "/workspace/:workspace_id/team/:team_id",
+  isLogin,
+  checkAccess,
+  checkWorkspaceRole(["owner"]),
+  team.deleteTeam,
+);
+
+router.put(
+  "/workspace/:workspace_id/team/:team_id",
+  isLogin,
+  checkAccess,
+  checkWorkspaceRole(["owner"]),
+  team.updateTeam,
+);
+
 router.get("/workspace/:workspace_id/teams", isLogin, team.getTeamsByWorkspace);
 
 router.get("/team/:team_id/sections", isLogin, team.getSectionsByTeam);
