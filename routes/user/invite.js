@@ -16,4 +16,14 @@ router.post(
 
 router.post("/invite/join", isLogin, invite.joinByToken);
 
+router.post(
+  "/workspace/:workspace_id/team/:team_id/invite/email",
+  isLogin,
+  checkAccess,
+  checkWorkspaceRole(["owner"]),
+  invite.inviteByEmail,
+);
+
+router.get("/invite/accept", isLogin, invite.acceptInvite);
+
 module.exports = router;

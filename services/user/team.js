@@ -77,7 +77,22 @@ exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
 
 exports.getTeamActivityById = async (team_id) => {
   const rows = await team.getTeamActivityById(team_id);
-  return rows;
+
+  const data = rows.map((item) => ({
+    id: item.id,
+    team_id: item.team_id,
+    action: item.action,
+    message: item.message,
+    created_at: item.created_at,
+
+    created_by: {
+      user_id: item.created_by_id,
+      name: item.created_by_name,
+      avatar: item.created_by_avatar,
+    },
+  }));
+
+  return data;
 };
 
 exports.createTeamActivity = async (team_id, user_id, action, message) => {
@@ -91,4 +106,12 @@ exports.deleteTeam = async (team_id) => {
 
 exports.updateTeam = async (title, description, team_id) => {
   await team.updateTeam(title, description, team_id);
+};
+
+exports.findTeam = async (team_id) => {
+  const row = await team.findById(team_id);
+  return {
+    team_id: row.team_id,
+    team_name: row.team_name,
+  };
 };
