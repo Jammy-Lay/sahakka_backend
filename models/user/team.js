@@ -102,16 +102,38 @@ exports.checkTeamMember = async (user_id, team_id) => {
   return row;
 };
 
+exports.deleteTeam = async (team_id) => {
+  let sql = "DELETE FROM teams WHERE id = ?";
+  await pool.query(sql, [team_id]);
+};
+
+exports.updateTeam = async (title, description, team_id) => {
+  let sql = "UPDATE teams SET title = ? , description = ? WHERE id = ?";
+  await pool.query(sql, [title, description, team_id]);
+};
+
 exports.getTeamActivityById = async (team_id) => {
   let sql = `
-    SELECT ta.*, u.name
+    SELECT 
+      ta.id,
+      ta.team_id,
+      ta.user_id,
+      ta.action,
+      ta.message,
+      ta.created_at,
+
+      u.id AS created_by_id,
+      u.name AS created_by_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS created_by_avatar
+
     FROM team_activities ta
     JOIN users u ON u.id = ta.user_id
     WHERE ta.team_id = ?
     ORDER BY ta.created_at DESC
   `;
 
-  const [rows] = await pool.query(sql, [team_id]);
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, team_id]);
+
   return rows;
 };
 
@@ -123,12 +145,8 @@ exports.createTeamActivity = async (team_id, user_id, action, message) => {
   return result.insertId;
 };
 
-exports.deleteTeam = async (team_id) => {
-  let sql = "DELETE FROM teams WHERE id = ?";
-  await pool.query(sql, [team_id]);
-};
-
-exports.updateTeam = async (title, description, team_id) => {
-  let sql = "UPDATE teams SET title = ? , description = ? WHERE id = ?";
-  await pool.query(sql, [title, description, team_id]);
+exports.findById = async (team_id) => {
+  let sql = "SELECT id AS team_id, title as team_name FROM teams WHERE id = ?";
+  const [row] = await pool.query(sql, [team_id]);
+  return row[0];
 };

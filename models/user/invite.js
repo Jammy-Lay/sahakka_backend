@@ -19,7 +19,7 @@ exports.createTokenInvite = async (
 
 exports.findByToken = async (token) => {
   let sql =
-    "SELECT workspace_id, team_id, status, expires_at FROM invites WHERE token = ?";
+    "SELECT id, workspace_id, team_id, email, status, expires_at FROM invites WHERE token = ?";
   const [row] = await pool.query(sql, [token]);
   return row;
 };
@@ -43,4 +43,34 @@ exports.updateToken = async (workspace_id, team_id, token, expires_at) => {
 exports.updateStatus = async (id, status) => {
   let sql = "UPDATE invites SET status = ? WHERE id = ?";
   await pool.query(sql, [status, id]);
+};
+
+exports.createInviteByEmail = async (
+  workspace_id,
+  team_id,
+  email,
+  token,
+  expires_at,
+) => {
+  const sql =
+    "INSERT INTO invites (workspace_id, team_id, email, token, expires_at)VALUES (?, ?, ?, ?, ?)";
+
+  const [result] = await pool.query(sql, [
+    workspace_id,
+    team_id,
+    email,
+    token,
+    expires_at,
+  ]);
+
+  return result.insertId;
+};
+
+exports.findByEmail = async (workspace_id, team_id, email) => {
+  let sql =
+    "SELECT workspace_id, team_id, email, status, expires_at FROM invites WHERE workspace_id = ? AND team_id = ? AND email = ?";
+
+  const [rows] = await pool.query(sql, [workspace_id, team_id, email]);
+
+  return rows;
 };

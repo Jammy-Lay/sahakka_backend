@@ -33,4 +33,11 @@ router.get("/workspace/:workspace_id/teams", isLogin, team.getTeamsByWorkspace);
 
 router.get("/team/:team_id/sections", isLogin, team.getSectionsByTeam);
 
+router.get(
+  "/workspace/:workspace_id/team/:team_id/activities",
+  isLogin,
+  checkAccess,
+  team.getTeamActivityById,
+);
+
 module.exports = router;

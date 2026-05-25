@@ -19,6 +19,13 @@ router.post(
   task.createTask,
 );
 
+router.put(
+  "/workspace/:workspace_id/team/:team_id/task/:task_id",
+  isLogin,
+  checkAccess,
+  task.updateTask,
+);
+
 router.get(
   "/workspace/:workspace_id/team/:team_id/task/:task_id/activities",
   isLogin,

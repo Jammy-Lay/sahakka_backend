@@ -26,8 +26,8 @@ exports.createWorkspace = async (req, res) => {
     await team.addTeamSection(team_id);
 
     const row = await workspace.findWorkspaceWithTeam(
-      team_id,
       workspace_id,
+      team_id,
       req.user,
     );
 

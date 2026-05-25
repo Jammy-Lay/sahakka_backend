@@ -6,12 +6,21 @@ exports.checkAccess = async (req, res, next) => {
     const user_id = req.user.id;
     const { workspace_id, team_id } = req.params;
 
-    const checkWorkspace = await workspace.checkWorkspaceMember(user_id, workspace_id);
+    const checkWorkspace = await workspace.checkWorkspaceMember(
+      user_id,
+      workspace_id,
+    );
 
     if (checkWorkspace.length === 0) {
       return res.status(403).json({
         message: "You are not in this workspace",
       });
+    }
+
+    req.workspaceRole = checkWorkspace[0].role;
+
+    if (!team_id) {
+      return next();
     }
 
     const checkTeam = await team.checkTeamInWorkspace(team_id, workspace_id);

@@ -12,21 +12,35 @@ exports.checkRole = (role) => {
 exports.checkWorkspaceRole = (roles) => {
   return async (req, res, next) => {
     try {
-      const user_id = req.user.id;
-      const workspace_id = req.params.workspace_id;
+      let role = req.workspaceRole;
 
-      const row = await workspace.checkWorkspaceMember(user_id, workspace_id);
+      if (!role) {
+        const user_id = req.user.id;
+        const workspace_id = req.params.workspace_id;
 
-      if (!roles.includes(row[0].role)) {
+        const row = await workspace.checkWorkspaceMember(user_id, workspace_id);
+
+        if (row.length === 0) {
+          return res.status(403).json({
+            message: "You are not in this workspace",
+          });
+        }
+
+        role = row[0].role;        
+        req.workspaceRole = role; 
+      }
+
+      if (!roles.includes(role)) {
         return res.status(403).json({
-          result: false,
           message: "Permission denied",
         });
       }
 
       next();
     } catch (err) {
-      return res.status(500).json({ message: err.message });
+      return res.status(500).json({
+        message: err.message,
+      });
     }
   };
 };

@@ -9,8 +9,8 @@ exports.addWorkspaceMember = async (body) => {
   await workspace.addWorkspaceMember(body);
 };
 
-exports.findWorkspaceWithTeam = async (team_id, workspace_id, user) => {
-  const row = await workspace.findWorkspaceWithTeam(team_id, workspace_id);
+exports.findWorkspaceWithTeam = async (workspace_id, team_id, user) => {
+  const row = await workspace.findWorkspaceWithTeam(workspace_id, team_id);
 
   return {
     workspace: {
@@ -46,6 +46,14 @@ exports.findById = async (workspace_id, user) => {
       },
       created_at: row.workspace_created_at,
     },
+  };
+};
+
+exports.findWorkspace = async (workspace_id) => {
+  const row = await workspace.findById(workspace_id);
+  return {
+    workspace_id: row.workspace_id,
+    workspace_name: row.workspace_name,
   };
 };
 

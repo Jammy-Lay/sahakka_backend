@@ -71,21 +71,35 @@ exports.getMe = async (id) => {
   return row;
 };
 
-exports.resetPassword = async (body) => {
-    let arr = [body.email,body.otp, body.expire_at];
-    await pool.query('INSERT INTO password_resets ( email, otp, expire_at) VALUES (?,?,?)', arr)
-}
-exports.checkUerSendOtp = async (email) =>{
-    const [row] = await pool.query('SELECT email, otp, expire_at, verified FROM password_resets WHERE email = ?;', [email])
-    return row;
-}
-exports.deleteOldOtp = async (email) =>{
-    await pool.query('DELETE FROM password_resets WHERE email = ?;', [email])
-}
-exports.VerificationOtp = async (email) => {
-    await pool.query('UPDATE password_resets SET verified = 1 WHERE email = ?;',[email])
-}
+exports.resetPassword = async (email, otp, expire_at) => {
+  let sql =
+    "INSERT INTO password_resets (email, otp, expire_at) VALUES (?, ?, ?)";
+  await pool.query(sql, [email, otp, expire_at]);
+};
 
-exports.changePassword = async (email, password)=>{
-    await pool.query('UPDATE users SET password = ? WHERE email = ?;', [password,email])
-}
+exports.checkUerSendOtp = async (email) => {
+  const [row] = await pool.query(
+    "SELECT email, otp, expire_at, verified FROM password_resets WHERE email = ?;",
+    [email],
+  );
+  return row;
+};
+
+exports.updateOtp = async (otp, expire_at, email) => {
+  let sql =
+    "UPDATE password_resets SET otp = ?, expire_at = ?, verified = FALSE WHERE email = ?";
+  await pool.query(sql, [otp, expire_at, email]);
+};
+
+exports.VerificationOtp = async (email) => {
+  await pool.query("UPDATE password_resets SET verified = 1 WHERE email = ?;", [
+    email,
+  ]);
+};
+
+exports.changePassword = async (email, password) => {
+  await pool.query("UPDATE users SET password = ? WHERE email = ?;", [
+    password,
+    email,
+  ]);
+};

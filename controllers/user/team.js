@@ -14,8 +14,8 @@ exports.createTeam = async (req, res) => {
     await team.addTeamSection(team_id);
 
     const row = await workspace.findWorkspaceWithTeam(
-      team_id,
       workspace_id,
+      team_id,
       req.user,
     );
 
@@ -57,12 +57,13 @@ exports.getTeamsByWorkspace = async (req, res) => {
     const { workspace_id } = req.params;
     const user_id = req.user.id;
 
-    const data = await team.getTeamsByWorkspace(workspace_id, user_id);
+    const rows = await team.getTeamsByWorkspace(workspace_id, user_id);
+    const row = await workspace.findWorkspace(workspace_id);
 
     return res.json({
       result: true,
       message: "Get teams successfully",
-      data,
+      data: { workspace: row, team: rows },
     });
   } catch (err) {
     return res.status(400).json({
@@ -111,7 +112,11 @@ exports.updateTeam = async (req, res) => {
   try {
     const { workspace_id, team_id } = req.params;
     await team.updateTeam(req.body.title, req.body.description, team_id);
-    const row = await workspace.findWorkspaceWithTeam(team_id, workspace_id, req.user);
+    const row = await workspace.findWorkspaceWithTeam(
+      team_id,
+      workspace_id,
+      req.user,
+    );
     return res.json({
       result: true,
       message: "Delete Team Successfully",
