@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-const upload = require('../middlewares/upload');
+const upload = require('../../middlewares/upload');
 
-const profileController =require('../controllers/profile');
+const profileController =require('../../controllers/profile/profile');
 
-const authMiddleware = require('../middlewares/auth')
+const authMiddleware = require('../../middlewares/auth')
 
 // upload avatar
 router.post(

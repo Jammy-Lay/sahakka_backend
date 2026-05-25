@@ -42,9 +42,8 @@ exports.login = async (body) => {
   if (userInfo.length === 0) {
     throw new Error("Email and Password are invalid");
   }
-
   let isMatch = await bcrypt.compare(body.password, userInfo[0].password);
-  // console.log(isMatch);
+  
   if (!isMatch) {
     throw new Error("Email and Password are invalid");
   }

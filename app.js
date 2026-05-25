@@ -17,7 +17,7 @@ app.get("/", (req, res) => {
 const auth = require("./routes/auth");
 app.use("/api", auth);
 
-const profile = require("./routes/profile");
+const profile = require("./routes/profile/profile");
 app.use("/api", profile);
 
 const workspace = require("./routes/user/workspace");
@@ -34,6 +34,9 @@ app.use("/api", invite);
 
 app.use(require("./routes/demo"));
 app.use("/uploads", express.static("uploads"));
+
+const admin = require('./routes/admin/admin');
+app.use('/api/admin', admin);
 
 const server = http.createServer(app);
 
