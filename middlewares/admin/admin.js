@@ -1,17 +1,25 @@
-exports.superAdminOnly = (req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
   try {
-    if (req.user.role !== 'super_admin') {
-      return res.status(403).json({
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({
         result: false,
-        message: 'Access denied'
+        message: 'No token provided'
       });
     }
 
+    const token = authHeader.split(' ')[1];
+
+    const decoded = jwt.verify(token, jwtConfig.secret);
+
+    req.user = decoded;
+
     next();
   } catch (error) {
-    return res.status(500).json({
+    return res.status(401).json({
       result: false,
-      message: error.message
+      message: 'Invalid token'
     });
   }
 };

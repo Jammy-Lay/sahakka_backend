@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const profileModel = require('../models/profile');
-const auth = require('../models/users');
+const profileModel = require('../../models/profile/profile');
+const auth = require('../../models/users');
 
 exports.uploadAvatar = async (userId, file) => {
 

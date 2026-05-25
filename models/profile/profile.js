@@ -1,4 +1,4 @@
-const pool = require('../configs/db');
+const pool = require('../../configs/db');
 
 exports.getUserById = async (id) => {
 
