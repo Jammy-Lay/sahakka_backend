@@ -107,7 +107,6 @@ exports.resendVerificationEmail = async (req, res) => {
 };
 
 exports.forgotPassword = async (req, res) => {
-  // console.log(req.body.email);
   try {
     let result = await auth.forgotPassword(req.body.email)
 
@@ -158,7 +157,6 @@ exports.verifyOtp = async (req, res) => {
 }
 
 exports.resetPassword = async (req,res) => {
-  // console.log(req.body); return;
   try {
     let result = await auth.resetPassword(req.body.email,req.body.new_password,req.body.comfirm_password)
 
@@ -175,7 +173,6 @@ exports.resetPassword = async (req,res) => {
 }
 
 exports.changePassword = async (req, res) => {
-  // console.log(req.body); return;
   try {
     const { email, currentPassword, newPassword, confirmPassword } = req.body;
 
