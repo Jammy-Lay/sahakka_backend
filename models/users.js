@@ -2,7 +2,7 @@ const pool = require("../configs/db");
 
 exports.findByEmail = async (email) => {
   let sql =
-    "SELECT id, name, email, password, role, is_verified FROM users WHERE email = ?";
+    "SELECT id, name, email, password, role, is_active ,is_verified FROM users WHERE email = ?";
   let [row] = await pool.query(sql, [email]);
   return row;
 };
