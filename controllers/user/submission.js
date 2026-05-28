@@ -44,7 +44,6 @@ exports.getAllSubmissions = async (req, res) => {
   }
 };
 
-
 exports.updateSubmissionStatus = async (req, res) => {
   try {
     const { workspace_id, team_id, submission_id } = req.params;
