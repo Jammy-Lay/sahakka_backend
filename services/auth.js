@@ -10,6 +10,7 @@ const {
 const users = require("../models/users");
 const workspace = require("../models/user/workspace");
 const team = require("../models/user/team");
+const { error } = require("console");
 
 exports.register = async (body) => {
   let checkEmail = await users.findByEmail(body.email);
@@ -41,7 +42,8 @@ exports.register = async (body) => {
 
 exports.login = async (body) => {
   let userInfo = await users.findByEmail(body.email);
-  // console.log(userInfo); return;
+  // const user = await users.findByEmail(body.email);
+
   if (userInfo.length === 0) {
     throw new Error("Email and Password are invalid");
   }
@@ -49,6 +51,11 @@ exports.login = async (body) => {
   
   if (!isMatch) {
     throw new Error("Email and Password are invalid");
+  }
+  
+
+  if (userInfo[0].is_active !== 1) {
+    throw new Error('Your account has been blocked')
   }
 
   const token = jwt.sign(
@@ -62,7 +69,6 @@ exports.login = async (body) => {
     { expiresIn: jwtConfig.expireIn },
   );
 
-  // console.log(userInfo); return;
 
   if (!userInfo[0].is_verified) {
     throw new Error("Email not verify");

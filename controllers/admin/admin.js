@@ -1,5 +1,6 @@
 const admin = require('../../services/admin/admin');
-
+const teamService = require('../../services/user/team');
+const workspaceService = require('../../services/user/workspace');
 //dashboard
 
 exports.dashboard = async (req, res) => {
@@ -123,17 +124,22 @@ exports.deleteUser = async (req, res) => {
 
 exports.getWorkspaces = async (req, res) => {
     try {
+
         const workspaces = await admin.getWorkspaces();
 
         return res.status(200).json({
             result: true,
+            message: "Get workspaces successfully",
             data: workspaces
         });
+
     } catch (error) {
+
         return res.status(500).json({
             result: false,
             message: error.message
         });
+
     }
 };
 
@@ -182,6 +188,175 @@ exports.getTaskAnalytics = async (req, res) => {
             data: analytics
         });
     } catch (error) {
+        return res.status(500).json({
+            result: false,
+            message: error.message
+        });
+    }
+};
+
+exports.getTeams = async (req, res) => {
+    try {
+
+        const teams = await admin.getTeams();
+
+        return res.status(200).json({
+            result: true,
+            message: "Get teams successfully",
+            data: teams
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            result: false,
+            message: error.message
+        });
+
+    }
+};
+
+exports.getTeamById = async (req, res) => {
+    try {
+        const { team_id } = req.params;
+        const teams = await admin.getTeamById(team_id);
+
+        return res.status(200).json({
+            result: true,
+            message: "Get teams successfully",
+            data: teams
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            result: false,
+            message: error.message
+        });
+
+    }
+};
+
+exports.getTeamMembers = async (req, res) => {
+    try {
+        const { team_id } = req.params;
+        const teams = await admin.getTeamMembers(team_id);
+
+        return res.status(200).json({
+            result: true,
+            message: "Get teams successfully",
+            data: teams
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            result: false,
+            message: error.message
+        });
+
+    }
+};
+
+exports.getDashboardStats = async (req, res) => {
+    try {
+        const analytics = await admin.getTaskAnalytics();
+
+        return res.status(200).json({
+            result: true,
+            data: analytics
+        });
+    } catch (error) {
+        return res.status(500).json({
+            result: false,
+            message: error.message
+        });
+    }
+};
+
+exports.getTeamActivity = async (req, res) => {
+    try {
+
+        const { workspace_id, team_id } = req.params;
+
+        const user_id = req.user.id;
+        const role = req.user.role;
+
+        if (role !== 'admin') {
+
+            const member =
+                await admin.checkWorkspaceMember(
+                    workspace_id,
+                    user_id
+                );
+
+            if (!member) {
+                return res.status(403).json({
+                    result: false,
+                    message: "Access denied"
+                });
+            }
+
+        }
+
+        const team =
+            await admin.checkTeamInWorkspace(
+                team_id,
+                workspace_id
+            );
+
+        if (!team) {
+            return res.status(404).json({
+                result: false,
+                message: "Team not found"
+            });
+        }
+
+        const rows =
+            await admin.getTeamActivity(team_id);
+
+        return res.json({
+            result: true,
+            message: "Get Team Activity Successfully",
+            data: rows,
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        return res.status(400).json({
+            result: false,
+            message: error.message,
+        });
+
+    }
+
+};
+
+exports.getTaskActivities = async (req, res) => {
+    // console.log(req.params); return;
+    try {
+
+        const {
+            workspace_id,
+            team_id,
+            task_id
+        } = req.params;
+
+        const rows =
+            await admin.getTaskActivities(task_id);
+
+        return res.json({
+            result: true,
+            message: "Get Task Activity Successfully",
+            data: rows
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
         return res.status(500).json({
             result: false,
             message: error.message

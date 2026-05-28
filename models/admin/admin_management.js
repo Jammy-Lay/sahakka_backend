@@ -46,28 +46,63 @@ exports.deleteUser = async (userId) => {
 
 // workspaces
 exports.getAllWorkspaces = async () => {
-  const [rows] = await pool.query(`
+  const sql = `
     SELECT
-      w.id,
-      w.name,
+      w.id AS workspace_id,
+      w.name AS workspace_name,
       w.created_at,
-      u.name AS owner_name
-    FROM workspaces w
-    JOIN users u ON w.owner_id = u.id
+
+      wm.role AS my_role, 
+
+      u.id AS owner_id,
+      u.name AS owner_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS owner_avatar
+
+    FROM workspace_members wm
+
+    JOIN workspaces w
+      ON w.id = wm.workspace_id
+
+    JOIN users u
+      ON u.id = w.owner_id
+
+
     ORDER BY w.created_at DESC
-  `);
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL]);
 
   return rows;
 };
 
 exports.getWorkspaceDetails = async (workspaceId) => {
-  const [rows] = await pool.query(`
-    SELECT *
-    FROM workspaces
-    WHERE id = ?
-  `, [workspaceId]);
+  const sql = `
+    SELECT
+      w.id AS workspace_id,
+      w.name AS workspace_name,
+      w.created_at,
 
-  return rows[0];
+      wm.role AS my_role, 
+
+      u.id AS owner_id,
+      u.name AS owner_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS owner_avatar
+
+    FROM workspace_members wm
+
+    JOIN workspaces w
+      ON w.id = wm.workspace_id
+
+    JOIN users u
+      ON u.id = w.owner_id
+
+    WHERE w.id = ?
+    ORDER BY w.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL,workspaceId]);
+
+  return rows;
 };
 
 // tasks
@@ -116,4 +151,211 @@ exports.getDashboardStats = async () => {
     total_workspaces: workspaces.total_workspaces,
     total_tasks: tasks.total_tasks
   };
+};
+
+//teams
+exports.getAllTeams = async () => {
+  const sql = `
+    SELECT
+      t.id AS team_id,
+      t.title,
+      t.description,
+
+      w.id AS workspace_id,
+      w.name AS workspace_name,
+
+      wm.role,
+
+      u.id AS user_id,
+      u.name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar
+
+    FROM teams t
+
+    JOIN workspaces w
+      ON w.id = t.workspace_id
+
+    LEFT JOIN team_members tm
+      ON tm.team_id = t.id
+
+    LEFT JOIN users u
+      ON u.id = tm.user_id
+    LEFT JOIN workspace_members wm
+      ON wm.user_id = u.id
+      AND wm.workspace_id = t.workspace_id
+
+    ORDER BY t.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL]);
+
+  return rows;
+};
+
+exports.getTeamById = async (team_id) => {
+  const sql = `
+    SELECT
+      t.id AS team_id,
+      t.title,
+      t.description,
+
+      w.id AS workspace_id,
+      w.name AS workspace_name,
+
+      wm.role,
+
+      u.id AS user_id,
+      u.name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar
+
+    FROM teams t
+
+    JOIN workspaces w
+      ON w.id = t.workspace_id
+
+    LEFT JOIN team_members tm
+      ON tm.team_id = t.id
+
+    LEFT JOIN users u
+      ON u.id = tm.user_id
+    LEFT JOIN workspace_members wm
+      ON wm.user_id = u.id
+      AND wm.workspace_id = t.workspace_id
+
+    WHERE t.id = ?
+    ORDER BY t.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL,team_id]);
+
+  return rows;
+};
+
+exports.getTeamMembers = async (team_id) =>{
+    const sql = `
+    SELECT
+      t.id AS team_id,
+      t.title,
+      t.description,
+
+      wm.role,
+
+      u.id AS user_id,
+      u.name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar
+
+    FROM teams t
+
+
+    LEFT JOIN team_members tm
+      ON tm.team_id = t.id
+
+    LEFT JOIN users u
+      ON u.id = tm.user_id
+
+    LEFT JOIN workspace_members wm
+      ON wm.user_id = u.id
+      AND wm.workspace_id = t.workspace_id
+
+    WHERE t.id = ?
+    ORDER BY t.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL,team_id]);
+
+  return rows;
+}
+
+exports.getTeamActivityById = async (team_id) => {
+  let sql = `
+    SELECT 
+      ta.id,
+      ta.team_id,
+      ta.user_id,
+      ta.action,
+      ta.message,
+      ta.created_at,
+
+      u.id AS created_by_id,
+      u.name AS created_by_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS created_by_avatar
+
+    FROM team_activities ta
+    JOIN users u ON u.id = ta.user_id
+    WHERE ta.team_id = ?
+    ORDER BY ta.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, team_id]);
+
+  return rows;
+};
+
+  exports.checkWorkspaceMember = async (
+    workspace_id,
+    user_id
+  ) => {
+
+    const [rows] = await pool.query(`
+      SELECT *
+      FROM workspace_members
+      WHERE workspace_id = ?
+      AND user_id = ?
+      LIMIT 1
+    `, [workspace_id, user_id]);
+
+    return rows[0];
+
+  };
+
+  
+exports.checkTeamInWorkspace = async (
+  team_id,
+  workspace_id
+) => {
+
+  const [rows] = await pool.query(`
+    SELECT *
+    FROM teams
+    WHERE id = ?
+    AND workspace_id = ?
+    LIMIT 1
+  `, [team_id, workspace_id]);
+
+  return rows[0];
+
+};
+
+
+exports.getTaskActivityById = async (task_id) => {
+
+  const sql = `
+    SELECT 
+      ta.id,
+      ta.task_id,
+      ta.user_id,
+      ta.action,
+      ta.message,
+      ta.created_at,
+
+      u.id AS created_by_id,
+      u.name AS created_by_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS created_by_avatar
+
+    FROM task_activities ta
+
+    JOIN users u ON u.id = ta.user_id
+    JOIN tasks t ON t.id = ta.task_id
+
+    WHERE ta.task_id = ?
+
+    ORDER BY ta.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
+    task_id
+  ]);
+
+  return rows;
 };
