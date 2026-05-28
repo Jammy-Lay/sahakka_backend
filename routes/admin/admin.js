@@ -110,7 +110,13 @@ router.get(
     '/workspace/:workspace_id/activities/team/:team_id',
     isLogin,
     checkRole('admin'),
-    admin.getTeamActivity
+    admin.getTeamActivityById
+);
+router.get(
+    '/workspace/:workspace_id/activities/teams',
+    isLogin,
+    checkRole('admin'),
+    admin.getAllTeamActivity
 );
 router.get(
     '/workspace/:workspace_id/team/:team_id/task/:task_id/activities',

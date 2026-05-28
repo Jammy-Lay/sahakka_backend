@@ -47,11 +47,11 @@ exports.login = async (body) => {
     throw new Error("Email and Password are invalid");
   }
   let isMatch = await bcrypt.compare(body.password, userInfo[0].password);
-  
+
   if (!isMatch) {
     throw new Error("Email and Password are invalid");
   }
-  
+
 
   const token = jwt.sign(
     {
@@ -166,6 +166,9 @@ exports.resendVerificationEmail = async (email) => {
 
 exports.forgotPassword = async (email) => {
   let userInfo = await users.findByEmail(email);
+  if(!userInfo[0].is_active){
+    throw new Error("Your account has been blocked by admin");
+  }
   if (!userInfo || userInfo.length === 0) {
     throw new Error("OTP has been sent");
   }
@@ -214,7 +217,7 @@ exports.verifyOtp = async (email, otp) => {
   if (userInfo[0].expire_at < new Date()) {
     throw new Error("OTP expired");
   }
- 
+
   await users.VerificationOtp(userInfo[0].email);
 };
 
