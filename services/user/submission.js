@@ -32,7 +32,7 @@ exports.submitTask = async (task_id, user, message, file) => {
     await submission.addSubmissionFile(submission_id, file_url);
   }
 
-  await task.updateStatus(task_id, "submitted");
+  await task.updateStatus("submitted", task_id);
 
   const row = await submission.getSubmissionById(submission_id);
   const data = row[0];
