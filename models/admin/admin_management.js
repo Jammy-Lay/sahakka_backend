@@ -66,7 +66,7 @@ exports.getAllWorkspaces = async () => {
     JOIN users u
       ON u.id = w.owner_id
 
-
+    WHERE u.role = 'user' 
     ORDER BY w.created_at DESC
   `;
 
@@ -96,7 +96,7 @@ exports.getWorkspaceDetails = async (workspaceId) => {
     JOIN users u
       ON u.id = w.owner_id
 
-    WHERE w.id = ?
+    WHERE u.role = 'user' AND w.id = ?
     ORDER BY w.created_at DESC
   `;
 
@@ -183,7 +183,7 @@ exports.getAllTeams = async () => {
     LEFT JOIN workspace_members wm
       ON wm.user_id = u.id
       AND wm.workspace_id = t.workspace_id
-
+    WHERE u.role = 'user'
     ORDER BY t.created_at DESC
   `;
 
@@ -222,7 +222,7 @@ exports.getTeamById = async (team_id) => {
       ON wm.user_id = u.id
       AND wm.workspace_id = t.workspace_id
 
-    WHERE t.id = ?
+    WHERE u.role = 'user' AND t.id = ?
     ORDER BY t.created_at DESC
   `;
 
@@ -257,7 +257,7 @@ exports.getTeamMembers = async (team_id) =>{
       ON wm.user_id = u.id
       AND wm.workspace_id = t.workspace_id
 
-    WHERE t.id = ?
+    WHERE u.role = 'user' AND t.id = ?
     ORDER BY t.created_at DESC
   `;
 

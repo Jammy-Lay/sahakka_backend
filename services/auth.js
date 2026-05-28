@@ -42,7 +42,6 @@ exports.register = async (body) => {
 
 exports.login = async (body) => {
   let userInfo = await users.findByEmail(body.email);
-  // const user = await users.findByEmail(body.email);
 
   if (userInfo.length === 0) {
     throw new Error("Email and Password are invalid");
@@ -53,10 +52,6 @@ exports.login = async (body) => {
     throw new Error("Email and Password are invalid");
   }
   
-
-  if (userInfo[0].is_active !== 1) {
-    throw new Error('Your account has been blocked')
-  }
 
   const token = jwt.sign(
     {
@@ -209,7 +204,6 @@ exports.resendOtp = async (email) => {
 
 exports.verifyOtp = async (email, otp) => {
   let userInfo = await users.checkUerSendOtp(email);
-  // console.log(userInfo[0].otp.toString(), otp); return;
 
   if (!userInfo || userInfo.length === 0) {
     throw new Error("Invalid otp");
@@ -220,7 +214,7 @@ exports.verifyOtp = async (email, otp) => {
   if (userInfo[0].expire_at < new Date()) {
     throw new Error("OTP expired");
   }
-  if (!userInfo[0].verified) {
+  if (userInfo[0].verified) {
     throw new Error("Not yet verified otp");
   }
   await users.VerificationOtp(userInfo[0].email);

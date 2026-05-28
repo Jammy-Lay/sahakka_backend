@@ -146,7 +146,6 @@ exports.verifyOtp = async (req, res) => {
 
     res.json({
       message: "Verify Successfully",
-      data: req.body,
     });
   } catch (error) {
     res.status(400).json({
