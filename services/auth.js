@@ -214,9 +214,6 @@ exports.verifyOtp = async (email, otp) => {
   if (userInfo[0].expire_at < new Date()) {
     throw new Error("OTP expired");
   }
-  if (userInfo[0].verified) {
-    throw new Error("Not yet verified otp");
-  }
   await users.VerificationOtp(userInfo[0].email);
 };
 
