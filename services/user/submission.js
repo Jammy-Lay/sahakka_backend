@@ -125,7 +125,12 @@ exports.updateSubmissionStatus = async (
     throw new Error("Invalid status");
   }
 
-  await submission.updateSubmissionStatus(submission_id, status, feedback);
+  await submission.updateSubmissionStatus(
+    submission_id,
+    status,
+    feedback,
+    user.id,
+  );
 
   const updatedRow = await submission.getSubmissionById(submission_id);
   const updated = updatedRow[0];
@@ -136,13 +141,21 @@ exports.updateSubmissionStatus = async (
     title: updated.task_title,
     message: updated.message,
     status: updated.status,
-    feedback: feedback,
+    feedback: updated.feedback,
     file: updated.file_url || null,
     created_at: updated.created_at,
+    reviewed_at: updated.reviewed_at,
+
     submitted_by: {
       user_id: updated.user_id,
       name: updated.user_name,
       avatar: updated.user_avatar,
+    },
+
+    reviewed_by: {
+      user_id: updated.reviewer_id,
+      name: updated.reviewer_name,
+      avatar: updated.reviewer_avatar,
     },
   };
 };
