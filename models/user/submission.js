@@ -8,9 +8,102 @@ exports.createSubmission = async (task_id, user_id, message) => {
   return result.insertId;
 };
 
+exports.findPendingByTask = async (task_id) => {
+  const sql =
+    "SELECT * FROM task_submissions WHERE task_id = ? AND status = 'pending'";
+  const [rows] = await pool.query(sql, [task_id]);
+  return rows;
+};
+
 exports.addSubmissionFile = async (submission_id, file_url) => {
   const sql =
     "INSERT INTO submission_files (submission_id, file_url) VALUES (?, ?)";
 
   await pool.query(sql, [submission_id, file_url]);
+};
+
+exports.getSubmissionById = async (submission_id) => {
+  const sql = `
+    SELECT
+      s.id,
+      s.task_id,
+      s.message,
+      s.status,
+      s.created_at,
+
+      u.id AS user_id,
+      u.name AS user_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS user_avatar,
+
+      t.title AS task_title,
+      t.team_id,
+
+      tm.workspace_id,
+
+      f.file_url
+
+    FROM task_submissions s
+    LEFT JOIN users u ON u.id = s.submitted_by
+    LEFT JOIN tasks t ON t.id = s.task_id
+    LEFT JOIN teams tm ON tm.id = t.team_id
+    LEFT JOIN submission_files f ON f.submission_id = s.id
+
+    WHERE s.id = ? `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, submission_id]);
+
+  return rows;
+};
+
+exports.getSubmissionsByWorkspaceAndTeam = async (workspace_id, team_id) => {
+  const sql = `
+    SELECT
+      s.id,
+      s.task_id,
+      s.message,
+      s.status,
+      s.created_at,
+
+      u.id AS user_id,
+      u.name AS user_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS user_avatar,
+
+      t.title AS task_title,
+
+      tm.id AS team_id,
+      tm.title AS team_title,
+
+      w.id AS workspace_id,
+      w.name AS workspace_name,
+
+      f.file_url
+
+    FROM task_submissions s
+    LEFT JOIN users u ON u.id = s.submitted_by
+    LEFT JOIN tasks t ON t.id = s.task_id
+    LEFT JOIN teams tm ON tm.id = t.team_id
+    LEFT JOIN workspaces w ON w.id = tm.workspace_id
+    LEFT JOIN submission_files f ON f.submission_id = s.id
+
+    WHERE tm.id = ? AND tm.workspace_id = ?
+
+    ORDER BY s.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
+    team_id,
+    workspace_id,
+  ]);
+
+  return rows;
+};
+
+exports.updateSubmissionStatus = async (submission_id, status, feedback) => {
+  const sql = `
+    UPDATE task_submissions
+    SET status = ?, feedback = ?
+    WHERE id = ? `;
+
+  await pool.query(sql, [status, feedback, submission_id]);
 };

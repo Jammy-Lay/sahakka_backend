@@ -32,11 +32,14 @@ app.use("/api", task);
 const invite = require("./routes/user/invite");
 app.use("/api", invite);
 
+const submission = require("./routes/user/submission");
+app.use("/api", submission);
+
 app.use(require("./routes/demo"));
 app.use("/uploads", express.static("uploads"));
 
-const admin = require('./routes/admin/admin');
-app.use('/api/admin', admin);
+const admin = require("./routes/admin/admin");
+app.use("/api/admin", admin);
 
 const server = http.createServer(app);
 

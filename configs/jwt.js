@@ -1,4 +1,4 @@
 exports.jwtConfig = {
-  secret: "mySecret",
-  expireIn: "1d",
+  secret: process.env.JWT_SECRET,
+  expireIn: process.env.JWT_EXPIRE,
 };

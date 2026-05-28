@@ -79,7 +79,7 @@ exports.getTeamActivityById = async (req, res) => {
     const rows = await team.getTeamActivityById(team_id);
     return res.json({
       result: true,
-      message: "Get Task Activity Successfully",
+      message: "Get Team Activity Successfully",
       data: rows,
     });
   } catch (error) {
