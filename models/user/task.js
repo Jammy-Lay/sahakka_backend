@@ -120,10 +120,7 @@ exports.getTaskActivityById = async (task_id) => {
     ORDER BY ta.created_at DESC
   `;
 
-  const [rows] = await pool.query(sql, [
-    process.env.BASE_URL,
-    task_id,
-  ]);
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, task_id]);
 
   return rows;
 };
@@ -166,4 +163,9 @@ exports.updateTask = async (task_id, body) => {
     body.end_date || null,
     task_id,
   ]);
+};
+
+exports.updateStatus = async (status, task_id) => {
+  let sql = "UPDATE tasks SET status = ? WHERE id = ?";
+  await pool.query(sql, [status, task_id]);
 };
