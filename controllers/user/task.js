@@ -17,7 +17,7 @@ exports.getTasksByTeam = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
+    return res.status(400).json({
       result: false,
       message: error.message,
     });
