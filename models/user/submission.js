@@ -81,19 +81,12 @@ exports.getSubmissionsByWorkspaceAndTeam = async (workspace_id, team_id) => {
 
       t.title AS task_title,
 
-      tm.id AS team_id,
-      tm.title AS team_title,
-
-      w.id AS workspace_id,
-      w.name AS workspace_name,
-
       f.file_url
 
     FROM task_submissions s
     LEFT JOIN users u ON u.id = s.submitted_by
     LEFT JOIN tasks t ON t.id = s.task_id
     LEFT JOIN teams tm ON tm.id = t.team_id
-    LEFT JOIN workspaces w ON w.id = tm.workspace_id
     LEFT JOIN submission_files f ON f.submission_id = s.id
 
     WHERE tm.id = ? AND tm.workspace_id = ?

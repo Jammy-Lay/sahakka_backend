@@ -1,26 +1,10 @@
 const submission = require("../../models/user/submission");
 const task = require("../../models/user/task");
 const team = require("../../models/user/team");
+const workspace = require("../../models/user/workspace");
+const { sendSubmissionReviewEmail } = require("../mail/mailService");
 
 exports.submitTask = async (task_id, user, message, file) => {
-  const checkTask = await task.findTaskById(task_id);
-  if (checkTask.length === 0) throw new Error("Task not found");
-
-  const taskData = checkTask[0];
-
-  if (!taskData.assigned_to_id) {
-    throw new Error("Task is not assigned yet");
-  }
-
-  if (taskData.assigned_to_id !== user.id) {
-    throw new Error("You are not assigned to this task");
-  }
-
-  const pending = await submission.findPendingByTask(task_id);
-  if (pending.length > 0) {
-    throw new Error("Task already submitted, waiting for review");
-  }
-
   const submission_id = await submission.createSubmission(
     task_id,
     user.id,
@@ -33,6 +17,20 @@ exports.submitTask = async (task_id, user, message, file) => {
   }
 
   await task.updateStatus("submitted", task_id);
+
+  await task.createTaskActivity(
+    task_id,
+    user.id,
+    "submit",
+    "submitted task for review",
+  );
+
+  await team.createTeamActivity(
+    taskData.team_id,
+    user.id,
+    "submit",
+    `submitted task ${taskData.title} for review`,
+  );
 
   const row = await submission.getSubmissionById(submission_id);
   const data = row[0];
@@ -59,18 +57,8 @@ exports.getAllSubmissions = async (workspace_id, team_id) => {
     team_id,
   );
 
-  const data = rows.map((item) => ({
+  return rows.map((item) => ({
     submission_id: item.id,
-
-    workspace: {
-      workspace_id: item.workspace_id,
-      workspace_name: item.workspace_name,
-    },
-
-    team: {
-      team_id: item.team_id,
-      team_name: item.team_title,
-    },
 
     task: {
       task_id: item.task_id,
@@ -79,6 +67,7 @@ exports.getAllSubmissions = async (workspace_id, team_id) => {
 
     message: item.message,
     status: item.status,
+    file: item.file_url || null,
     created_at: item.created_at,
 
     submitted_by: {
@@ -86,11 +75,7 @@ exports.getAllSubmissions = async (workspace_id, team_id) => {
       name: item.user_name,
       avatar: item.user_avatar,
     },
-
-    file: item.file_url || null,
   }));
-
-  return data;
 };
 
 exports.updateSubmissionStatus = async (
@@ -132,25 +117,43 @@ exports.updateSubmissionStatus = async (
     user.id,
   );
 
+  await task.updateStatus(status, data.task_id);
+
+  await task.createTaskActivity(
+    data.task_id,
+    user.id,
+    "review",
+    status === "approved"
+      ? "approved the submission"
+      : "rejected the submission",
+  );
+
   const updatedRow = await submission.getSubmissionById(submission_id);
   const updated = updatedRow[0];
+
+  const submitter = await users.findById(updated.user_id);
+
+  const ws = await workspace.findById(data.workspace_id);
+  const tm = await team.findById(data.team_id);
+
+  await sendSubmissionReviewEmail(
+    submitter[0].email,
+    ws[0].name,
+    tm[0].title,
+    updated.task_title,
+    updated.reviewer_name,
+    updated.reviewer_avatar,
+    status,
+    feedback,
+  );
 
   return {
     submission_id: updated.id,
     task_id: updated.task_id,
     title: updated.task_title,
-    message: updated.message,
     status: updated.status,
     feedback: updated.feedback,
-    file: updated.file_url || null,
-    created_at: updated.created_at,
     reviewed_at: updated.reviewed_at,
-
-    submitted_by: {
-      user_id: updated.user_id,
-      name: updated.user_name,
-      avatar: updated.user_avatar,
-    },
 
     reviewed_by: {
       user_id: updated.reviewer_id,

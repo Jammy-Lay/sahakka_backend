@@ -1,4 +1,6 @@
 const submission = require("../../services/user/submission");
+const workspace = require("../../services/user/workspace");
+const team = require("../../services/user/team");
 
 exports.submitTask = async (req, res) => {
   try {
@@ -29,17 +31,27 @@ exports.getAllSubmissions = async (req, res) => {
   try {
     const { workspace_id, team_id } = req.params;
 
-    const result = await submission.getAllSubmissions(workspace_id, team_id);
+    const submissions = await submission.getAllSubmissions(
+      workspace_id,
+      team_id,
+    );
+
+    const rowWorkspace = await workspace.findWorkspace(workspace_id);
+    const rowTeam = await team.findTeam(team_id);
 
     return res.json({
       result: true,
-      message: "Get all submissions successfully",
-      data: result,
+      message: "Get Submissions Successfully",
+      data: {
+        workspace: rowWorkspace,
+        team: rowTeam,
+        submissions,
+      },
     });
-  } catch (err) {
+  } catch (error) {
     return res.status(400).json({
       result: false,
-      message: err.message,
+      message: error.message,
     });
   }
 };
@@ -55,7 +67,7 @@ exports.updateSubmissionStatus = async (req, res) => {
       submission_id,
       status,
       feedback,
-      req.user
+      req.user,
     );
 
     return res.json({
