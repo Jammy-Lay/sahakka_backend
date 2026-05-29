@@ -274,7 +274,7 @@ exports.getDashboardStats = async (req, res) => {
     }
 };
 
-exports.getTeamActivity = async (req, res) => {
+exports.getTeamActivityById = async (req, res) => {
     try {
 
         const { workspace_id, team_id } = req.params;
@@ -313,7 +313,7 @@ exports.getTeamActivity = async (req, res) => {
         }
 
         const rows =
-            await admin.getTeamActivity(team_id);
+            await admin.getTeamActivityById(team_id);
 
         return res.json({
             result: true,
@@ -332,6 +332,27 @@ exports.getTeamActivity = async (req, res) => {
 
     }
 
+};
+
+exports.getAllTeamActivity = async (req, res) => {
+    try {
+
+        const workspaces = await admin.getAllTeamActivity();
+
+        return res.status(200).json({
+            result: true,
+            message: "Get workspaces successfully",
+            data: workspaces
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            result: false,
+            message: error.message
+        });
+
+    }
 };
 
 exports.getTaskActivities = async (req, res) => {

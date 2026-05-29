@@ -266,6 +266,31 @@ exports.getTeamMembers = async (team_id) =>{
   return rows;
 }
 
+exports.getAllTeamActivity = async () => {
+  let sql = `
+    SELECT 
+      ta.id,
+      ta.team_id,
+      ta.user_id,
+      ta.action,
+      ta.message,
+      ta.created_at,
+
+      u.id AS created_by_id,
+      u.name AS created_by_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS created_by_avatar
+
+    FROM team_activities ta
+    JOIN users u ON u.id = ta.user_id
+    WHERE u.role = 'user'
+    ORDER BY ta.created_at DESC
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL]);
+
+  return rows;
+};
+
 exports.getTeamActivityById = async (team_id) => {
   let sql = `
     SELECT 
@@ -282,7 +307,7 @@ exports.getTeamActivityById = async (team_id) => {
 
     FROM team_activities ta
     JOIN users u ON u.id = ta.user_id
-    WHERE ta.team_id = ?
+    WHERE u.role = 'user' AND ta.team_id = ?
     ORDER BY ta.created_at DESC
   `;
 

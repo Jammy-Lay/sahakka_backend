@@ -296,9 +296,143 @@ const sendInviteByEmail = async (
   });
 };
 
+
+
+const sendActivateAccountMail = async (user) => {
+  await transporter.sendMail({
+    from: `"Task Management System" <${process.env.EMAIL_USER}>`,
+    to: user.email,
+    subject: "Your Account Has Been Activated",
+    html: `
+      <div style="
+        max-width:600px;
+        margin:auto;
+        font-family:Arial,sans-serif;
+        background:#f4f4f4;
+        padding:30px;
+      ">
+
+        <div style="
+          background:#ffffff;
+          border-radius:10px;
+          overflow:hidden;
+          box-shadow:0 2px 10px rgba(0,0,0,0.1);
+        ">
+
+          <div style="
+            background:#16a34a;
+            padding:20px;
+            text-align:center;
+            color:white;
+          ">
+            <h1>Account Activated</h1>
+          </div>
+
+          <div style="padding:30px; color:#333;">
+            <h2>Hello ${user.name},</h2>
+
+            <p>
+              Your account has been successfully activated by the administrator.
+            </p>
+
+            <p>
+              You can now login and access the system.
+            </p>
+
+            <div style="margin:30px 0; text-align:center;">
+              <a href="${process.env.BASE_URL}/api/login"
+                style="
+                  background:#16a34a;
+                  color:white;
+                  padding:12px 25px;
+                  text-decoration:none;
+                  border-radius:5px;
+                  display:inline-block;
+                ">
+                Login Now
+              </a>
+            </div>
+
+            <p>
+              Thank you,<br>
+              Task Management Team
+            </p>
+          </div>
+
+        </div>
+      </div>
+    `,
+  });
+};
+
+const sendBlockedAccountMail = async (user) => {
+  await transporter.sendMail({
+    from: `"Task Management System" <${process.env.EMAIL_USER}>`,
+    to: user.email,
+    subject: "Your Account Has Been Blocked",
+    html: `
+      <div style="
+        max-width:600px;
+        margin:auto;
+        font-family:Arial,sans-serif;
+        background:#f4f4f4;
+        padding:30px;
+      ">
+
+        <div style="
+          background:#ffffff;
+          border-radius:10px;
+          overflow:hidden;
+          box-shadow:0 2px 10px rgba(0,0,0,0.1);
+        ">
+
+          <div style="
+            background:#dc2626;
+            padding:20px;
+            text-align:center;
+            color:white;
+          ">
+            <h1>Account Blocked</h1>
+          </div>
+
+          <div style="padding:30px; color:#333;">
+            <h2>Hello ${user.name},</h2>
+
+            <p>
+              Your account has been blocked by the administrator.
+            </p>
+
+            <p>
+              If you believe this was a mistake, please contact support.
+            </p>
+
+            <div style="
+              background:#fef2f2;
+              padding:15px;
+              border-left:5px solid #dc2626;
+              margin-top:20px;
+            ">
+              Access to the system has been temporarily disabled.
+            </div>
+
+            <p style="margin-top:30px;">
+              Thank you,<br>
+              Task Management Team
+            </p>
+          </div>
+
+        </div>
+      </div>
+    `,
+  });
+};
+
+
 module.exports = {
   sendVerificationEmail,
   sendResetPasswordOTP,
   sendTaskAssignByEmail,
   sendInviteByEmail,
+  sendActivateAccountMail,
+  sendBlockedAccountMail
 };

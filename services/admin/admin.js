@@ -1,7 +1,9 @@
 const admin = require('../../models/admin/admin_management');
+const user = require('../../models/users')
 const activityTeam = require('../../models/user/team');
 const team = require('../../models/user/team');
 const workspace = require('../../models/user/workspace');
+const mail = require('../mail/mailService')
 
 //user
 
@@ -15,10 +17,16 @@ exports.getUserById = async (userId) => {
 
 exports.suspendUser = async (userId) => {
     let check_is_active = await admin.getUserById(userId);
+
+    await user.removeToken(userId);
+    
     if(check_is_active[0].is_active === 0){
       throw new Error('User has been block already')
     }
+  
+  let userEmail = await user.findById(userId);
   await admin.suspendUser(userId);
+  await mail.sendBlockedAccountMail(userEmail[0]);
 };
 
 exports.activateUser = async (userId) => {
@@ -26,7 +34,9 @@ exports.activateUser = async (userId) => {
     if(check_is_active[0].is_active === 1){
       throw new Error('User has been active already')
     }
-  await admin.activateUser(userId);
+    let userEmail = await user.findById(userId);
+    await admin.activateUser(userId);
+    await mail.sendActivateAccountMail(userEmail[0]);
 };
 
 //workspace
@@ -215,9 +225,47 @@ exports.getDashboardStats = async () => {
   return await admin.getDashboardStats();
 };
 
-exports.getTeamActivity = async (team_id) => {
+exports.getTeamActivityById = async (team_id) => {
 
-  return await admin.getTeamActivityById(team_id);
+  const rows = await admin.getTeamActivityById(team_id);
+
+  const data = rows.map((item) => ({
+    id: item.id,
+    team_id: item.team_id,
+    action: item.action,
+    message: item.message,
+    created_at: item.created_at,
+
+    created_by: {
+      user_id: item.created_by_id,
+      name: item.created_by_name,
+      avatar: item.created_by_avatar,
+    },
+  }));
+
+  return data;
+
+};
+
+exports.getAllTeamActivity = async () => {
+
+  const rows = await admin.getAllTeamActivity();
+
+  const data = rows.map((item) => ({
+    id: item.id,
+    team_id: item.team_id,
+    action: item.action,
+    message: item.message,
+    created_at: item.created_at,
+
+    created_by: {
+      user_id: item.created_by_id,
+      name: item.created_by_name,
+      avatar: item.created_by_avatar,
+    },
+  }));
+
+  return data;
 
 };
 
