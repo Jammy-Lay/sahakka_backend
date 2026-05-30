@@ -73,6 +73,46 @@ exports.deleteAvatar = async (userId) => {
     };
 };
 
+exports.changeAvatar = async (userId, file) => {
+
+    if (!file) {
+        throw new Error("Please upload avatar");
+    }
+
+    const user = await profileModel.getUserById(userId);
+
+    if (!user || user.length === 0) {
+        throw new Error("User not found");
+    }
+
+    const oldAvatar = user.avatar;
+
+    // Update database first
+    await profileModel.updateAvatar(
+        userId,
+        file.filename
+    );
+
+    // Remove old avatar after successful DB update
+    if (oldAvatar) {
+
+        const oldPath = path.join(
+            process.cwd(),
+            "uploads",
+            "avatars",
+            oldAvatar
+        );
+
+        if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath);
+        }
+    }
+
+    return {
+        message: "Avatar updated successfully",
+        avatar: file.filename
+    };
+};
 exports.changeName = async (user_id,name) =>{
     const user = await auth.findById(user_id);
     if (!user) {

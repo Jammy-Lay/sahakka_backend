@@ -51,6 +51,32 @@ exports.deleteAvatar = async (req, res) => {
     }
 };
 
+exports.changeAvatar = async (req, res) => {
+    try {
+
+        const userId = req.user.id;
+
+        const result = await profileService.changeAvatar(
+            userId,
+            req.file
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: result.message,
+            avatar: result.avatar,
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+};
+
 exports.changeName = async (req,res) =>{
     try {
         let result = await profileService.changeName(req.user.id, req.body.name);
