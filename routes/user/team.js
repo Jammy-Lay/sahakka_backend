@@ -40,4 +40,12 @@ router.get(
   team.getTeamActivityById,
 );
 
+router.delete(
+  "/workspace/:workspace_id/team/:team_id/member/:user_id",
+  isLogin,
+  checkAccess,
+  checkWorkspaceRole(["owner"]),
+  team.removeTeamMember,
+);
+
 module.exports = router;

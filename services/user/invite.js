@@ -54,7 +54,7 @@ exports.joinByToken = async (token, user) => {
 
   const checkWorkspaceMember = await workspace.checkWorkspaceMember(
     user.id,
-    workspace_id,
+    data.workspace_id,
   );
 
   if (checkWorkspaceMember.length === 0) {

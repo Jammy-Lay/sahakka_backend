@@ -1,4 +1,6 @@
 const team = require("../../models/user/team");
+const workspace = require("../../models/user/workspace");
+const users = require("../../models/users");
 
 exports.defaultTeam = async (body) => {
   let result = await team.defaultTeam(body);
@@ -6,7 +8,13 @@ exports.defaultTeam = async (body) => {
 };
 
 exports.createTeam = async (workspace_id, title, description) => {
-  let result = await team.createTeam(workspace_id, title, description);
+  const total = await team.countTeamByWorkspace(workspace_id);
+
+  if (total >= 5) {
+    throw new Error("Maximum 5 teams allowed in a workspace");
+  }
+
+  const result = await team.createTeam(workspace_id, title, description);
   return result;
 };
 
@@ -114,4 +122,47 @@ exports.findTeam = async (team_id) => {
     team_id: row.team_id,
     team_name: row.team_name,
   };
+};
+
+exports.removeTeamMember = async (
+  workspace_id,
+  team_id,
+  user_id,
+  removed_by,
+) => {
+  const member = await team.checkTeamMember(user_id, team_id);
+
+  if (member.length === 0) {
+    throw new Error("User is not in this team");
+  }
+
+  const workspaceMember = await workspace.checkWorkspaceMember(
+    user_id,
+    workspace_id,
+  );
+
+  if (workspaceMember.length > 0 && workspaceMember[0].role === "owner") {
+    throw new Error("Workspace owner cannot be removed");
+  }
+
+  const userInfo = await users.findById(user_id);
+
+  if (userInfo.length === 0) {
+    throw new Error("User not found");
+  }
+  
+  await team.removeTeamMember(team_id, user_id);
+
+  const otherTeams = await team.checkUserOtherTeams(workspace_id, user_id);
+
+  if (otherTeams.length === 0) {
+    await workspace.removeWorkspaceMember(workspace_id, user_id);
+  }
+
+  await team.createTeamActivity(
+    team_id,
+    removed_by,
+    "remove",
+    `removed ${userInfo[0].name} from the team`,
+  );
 };

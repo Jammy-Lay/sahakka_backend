@@ -7,10 +7,12 @@ const { checkAccess } = require("../../middlewares/checkAccess");
 const { checkWorkspaceRole } = require("../../middlewares/checkRole");
 const { uploadSubmission } = require("../../middlewares/upload");
 const { validateSubmitTask } = require("../../middlewares/validate");
+const { uploadLimiter } = require("../../middlewares/rateLimit");
 
 router.post(
   "/workspace/:workspace_id/team/:team_id/task/:task_id/submit",
   isLogin,
+  uploadLimiter,
   checkAccess,
   validateSubmitTask,
   uploadSubmission,

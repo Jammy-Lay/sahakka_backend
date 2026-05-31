@@ -1,12 +1,11 @@
-const admin = require('../../models/admin/admin_management');
-const user = require('../../models/users')
-const activityTeam = require('../../models/user/team');
-const team = require('../../models/user/team');
-const workspace = require('../../models/user/workspace');
-const mail = require('../mail/mailService')
+const admin = require("../../models/admin/admin_management");
+const user = require("../../models/users");
+const activityTeam = require("../../models/user/team");
+const team = require("../../models/user/team");
+const workspace = require("../../models/user/workspace");
+const mail = require("../mail/mailService");
 
 //user
-
 exports.getUsers = async () => {
   return await admin.getAllUsers();
 };
@@ -16,14 +15,14 @@ exports.getUserById = async (userId) => {
 };
 
 exports.suspendUser = async (userId) => {
-    let check_is_active = await admin.getUserById(userId);
+  let check_is_active = await admin.getUserById(userId);
 
-    await user.removeToken(userId);
-    
-    if(check_is_active[0].is_active === 0){
-      throw new Error('User has been block already')
-    }
-  
+  await user.removeToken(userId);
+
+  if (check_is_active[0].is_active === 0) {
+    throw new Error("User has been block already");
+  }
+
   let userEmail = await user.findById(userId);
   await admin.suspendUser(userId);
   await mail.sendBlockedAccountMail(userEmail[0]);
@@ -31,19 +30,19 @@ exports.suspendUser = async (userId) => {
 
 exports.activateUser = async (userId) => {
   let check_is_active = await admin.getUserById(userId);
-    if(check_is_active[0].is_active === 1){
-      throw new Error('User has been active already')
-    }
-    let userEmail = await user.findById(userId);
-    await admin.activateUser(userId);
-    await mail.sendActivateAccountMail(userEmail[0]);
+  if (check_is_active[0].is_active === 1) {
+    throw new Error("User has been active already");
+  }
+  let userEmail = await user.findById(userId);
+  await admin.activateUser(userId);
+  await mail.sendActivateAccountMail(userEmail[0]);
 };
 
 //workspace
 exports.getWorkspaces = async () => {
   const rows = await admin.getAllWorkspaces();
 
-    if (rows.length === 0) return [];
+  if (rows.length === 0) return [];
 
   const result = [];
 
@@ -91,7 +90,6 @@ exports.getWorkspaceDetails = async (workspaceId) => {
 
 //teams
 exports.getTeams = async () => {
-
   const rows = await admin.getAllTeams();
 
   if (rows.length === 0) return [];
@@ -99,10 +97,8 @@ exports.getTeams = async () => {
   const teamsMap = {};
 
   rows.forEach((row) => {
-
     // create team
     if (!teamsMap[row.team_id]) {
-
       teamsMap[row.team_id] = {
         team_id: row.team_id,
         title: row.title,
@@ -110,10 +106,10 @@ exports.getTeams = async () => {
 
         workspace: {
           workspace_id: row.workspace_id,
-          workspace_name: row.workspace_name
+          workspace_name: row.workspace_name,
         },
 
-        members: []
+        members: [],
       };
     }
 
@@ -123,17 +119,15 @@ exports.getTeams = async () => {
         user_id: row.user_id,
         name: row.name,
         role: row.role,
-        avatar: row.avatar
+        avatar: row.avatar,
       });
     }
-
   });
 
   return Object.values(teamsMap);
 };
 
 exports.getTeamById = async (team_id) => {
-
   const rows = await admin.getTeamById(team_id);
 
   if (rows.length === 0) return [];
@@ -141,10 +135,8 @@ exports.getTeamById = async (team_id) => {
   const teamsMap = {};
 
   rows.forEach((row) => {
-
     // create team
     if (!teamsMap[row.team_id]) {
-
       teamsMap[row.team_id] = {
         team_id: row.team_id,
         title: row.title,
@@ -152,10 +144,10 @@ exports.getTeamById = async (team_id) => {
 
         workspace: {
           workspace_id: row.workspace_id,
-          workspace_name: row.workspace_name
+          workspace_name: row.workspace_name,
         },
 
-        members: []
+        members: [],
       };
     }
 
@@ -165,17 +157,15 @@ exports.getTeamById = async (team_id) => {
         user_id: row.user_id,
         name: row.name,
         role: row.role,
-        avatar: row.avatar
+        avatar: row.avatar,
       });
     }
-
   });
 
   return Object.values(teamsMap);
 };
 
 exports.getTeamMembers = async (team_id) => {
-
   const rows = await admin.getTeamMembers(team_id);
 
   if (rows.length === 0) return [];
@@ -183,15 +173,13 @@ exports.getTeamMembers = async (team_id) => {
   const teamsMap = {};
 
   rows.forEach((row) => {
-
     // create team
     if (!teamsMap[row.team_id]) {
-
       teamsMap[row.team_id] = {
         team_id: row.team_id,
         title: row.title,
         description: row.description,
-        members: []
+        members: [],
       };
     }
 
@@ -201,10 +189,9 @@ exports.getTeamMembers = async (team_id) => {
         user_id: row.user_id,
         name: row.name,
         role: row.role,
-        avatar: row.avatar
+        avatar: row.avatar,
       });
     }
-
   });
 
   return Object.values(teamsMap);
@@ -220,13 +207,11 @@ exports.getTaskAnalytics = async () => {
 };
 
 //dashboard
-
 exports.getDashboardStats = async () => {
   return await admin.getDashboardStats();
 };
 
 exports.getTeamActivityById = async (team_id) => {
-
   const rows = await admin.getTeamActivityById(team_id);
 
   const data = rows.map((item) => ({
@@ -244,11 +229,9 @@ exports.getTeamActivityById = async (team_id) => {
   }));
 
   return data;
-
 };
 
 exports.getAllTeamActivity = async () => {
-
   const rows = await admin.getAllTeamActivity();
 
   const data = rows.map((item) => ({
@@ -266,34 +249,17 @@ exports.getAllTeamActivity = async () => {
   }));
 
   return data;
-
 };
 
-exports.checkTeamInWorkspace = async (
-  team_id,
-  workspace_id
-) => {
-
-  return await team.checkTeamInWorkspace(
-    team_id,
-    workspace_id
-  );
-
-};
-exports.checkWorkspaceMember = async (
-  workspace_id,
-  user_id
-) => {
-
-  return await admin.checkWorkspaceMember(
-    workspace_id,
-    user_id
-  );
-
+exports.checkTeamInWorkspace = async (team_id, workspace_id) => {
+  return await team.checkTeamInWorkspace(team_id, workspace_id);
 };
 
+exports.checkWorkspaceMember = async (workspace_id, user_id) => {
+  return await admin.checkWorkspaceMember(workspace_id, user_id);
+};
 
 // task
 exports.getTaskActivities = async (task_id) => {
-    return await admin.getTaskActivityById(task_id);
+  return await admin.getTaskActivityById(task_id);
 };

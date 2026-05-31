@@ -2,8 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const http = require("http");
 require("dotenv").config();
-
+const helmet = require("helmet");
 const app = express();
+
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
@@ -13,6 +15,12 @@ app.get("/", (req, res) => {
     message: "Server is running",
   });
 });
+
+const admin = require("./routes/admin/admin");
+app.use("/api/admin", admin);
+
+const { apiLimiter } = require("./middlewares/rateLimit");
+app.use("/api", apiLimiter);
 
 const auth = require("./routes/auth");
 app.use("/api", auth);
@@ -35,11 +43,11 @@ app.use("/api", invite);
 const submission = require("./routes/user/submission");
 app.use("/api", submission);
 
+const document = require("./routes/user/document");
+app.use("/api", document);
+
 app.use(require("./routes/demo"));
 app.use("/uploads", express.static("uploads"));
-
-const admin = require("./routes/admin/admin");
-app.use("/api/admin", admin);
 
 const server = http.createServer(app);
 
