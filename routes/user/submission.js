@@ -21,6 +21,7 @@ router.get(
   "/workspace/:workspace_id/team/:team_id/submissions",
   isLogin,
   checkAccess,
+  checkWorkspaceRole("owner"),
   submission.getAllSubmissions,
 );
 

@@ -296,7 +296,69 @@ const sendInviteByEmail = async (
   });
 };
 
+const sendSubmissionReviewEmail = async (
+  to,
+  workspaceName,
+  teamName,
+  taskTitle,
+  reviewerName,
+  reviewerAvatar,
+  status,
+  feedback
+) => {
+  const isApproved = status === "approved";
 
+  await transporter.sendMail({
+    from: `My App <noreply@myapp.com>`,
+    to,
+    subject: `${reviewerName} ${isApproved ? "approved" : "rejected"} your submission`,
+    html: `
+      <div style="background:#f5f5f5; padding:20px; font-family:Arial;">
+        <div style="max-width:600px; margin:auto; background:#fff; padding:20px; border-radius:8px;">
+          
+          <p style="font-size:14px; color:#555;">
+            You have a submission update on <strong>MyApp</strong>
+          </p>
+
+          <p style="font-size:13px; color:#777;">
+            Workspace: <strong>${workspaceName}</strong><br/>
+            Team: <strong>${teamName}</strong>
+          </p>
+
+          <h2 style="margin:16px 0; font-size:18px;">
+            ${taskTitle}
+          </h2>
+
+          <div style="display:flex; align-items:center; margin-top:10px;">
+            <img
+              src="${reviewerAvatar}"
+              width="40"
+              height="40"
+              style="border-radius:50%; margin-right:10px;"
+            />
+            <span style="font-size:14px;">
+              <strong>${reviewerName}</strong> 
+              ${isApproved ? "approved" : "rejected"} your submission
+            </span>
+          </div>
+
+          <div style="margin-top:15px; padding:10px; background:#f9fafb; border-radius:6px;">
+            <strong>Feedback:</strong>
+            <p style="margin:5px 0;">${feedback || "No feedback provided"}</p>
+          </div>
+
+          <div style="margin-top:20px;">
+            <a href="http://localhost:5173/tasks"
+              style="background:${isApproved ? "#16a34a" : "#dc2626"}; color:#fff; padding:10px 16px; text-decoration:none; border-radius:5px;">
+              View Task
+            </a>
+          </div>
+
+        </div>
+      </div>
+    `,
+  });
+};
 
 const sendActivateAccountMail = async (user) => {
   await transporter.sendMail({
@@ -433,6 +495,7 @@ module.exports = {
   sendResetPasswordOTP,
   sendTaskAssignByEmail,
   sendInviteByEmail,
+  sendSubmissionReviewEmail,
   sendActivateAccountMail,
   sendBlockedAccountMail
 };

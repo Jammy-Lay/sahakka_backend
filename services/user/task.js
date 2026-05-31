@@ -75,7 +75,8 @@ exports.createTask = async (
     user_id,
   );
 
-  await task.createTaskActivity(task_id, user_id, "create", `created the task`);
+  await task.createTaskActivity(task_id, user_id, "create", "created the task");
+
   await team.createTeamActivity(
     team_id,
     user_id,
@@ -86,27 +87,22 @@ exports.createTask = async (
   if (assigned_to != null) {
     const isSelfAssign = assigned_to === user_id;
 
-    await task.createTaskActivity(
-      task_id,
-      user_id,
-      "assign",
-      isSelfAssign
-        ? "self-assigned the task"
-        : `assigned task to ${assigned_to}`,
-    );
+    let messageTask = "";
+    let messageTeam = "";
 
-    await team.createTeamActivity(
-      team_id,
-      user_id,
-      "assign",
-      isSelfAssign
-        ? `self-assigned task ${body.title}`
-        : `assigned task ${body.title} to ${assigned_to}`,
-    );
+    await task.updateStatus("in_progress", task_id);
 
-    if (!isSelfAssign) {
+    if (isSelfAssign) {
+      messageTask = "self-assigned the task";
+      messageTeam = `self-assigned task ${body.title}`;
+    } else {
       const assignedUser = await users.findById(assigned_to);
       const assigner = await users.findById(user_id);
+
+      const assignedName = assignedUser[0].name;
+
+      messageTask = `assigned task to ${assignedName}`;
+      messageTeam = `assigned task ${body.title} to ${assignedName}`;
 
       const data = await workspace.findWorkspaceWithTeam(workspace_id, team_id);
 
@@ -119,6 +115,10 @@ exports.createTask = async (
         assigner[0].avatar,
       );
     }
+
+    await task.createTaskActivity(task_id, user_id, "assign", messageTask);
+
+    await team.createTeamActivity(team_id, user_id, "assign", messageTeam);
   }
 
   return task_id;
@@ -162,18 +162,24 @@ exports.updateTask = async (
   });
 
   if (assigned_to !== current.assigned_to_id && assigned_to != null) {
+    const isSelfAssign = assigned_to === user_id;
+
     let messageTask = "";
     let messageTeam = "";
 
-    if (assigned_to === user_id) {
-      messageTask = `self-assigned the task`;
-      messageTeam = `self-assigned ${current.title}`;
-    } else {
-      messageTask = `assigned task to ${assigned_to}`;
-      messageTeam = `assigned ${current.title} to ${assigned_to}`;
+    await task.updateStatus("in_progress", task_id);
 
+    if (isSelfAssign) {
+      messageTask = "self-assigned the task";
+      messageTeam = `self-assigned task ${current.title}`;
+    } else {
       const assignedUser = await users.findById(assigned_to);
       const assigner = await users.findById(user_id);
+
+      const assignedName = assignedUser[0].name;
+
+      messageTask = `assigned task to ${assignedName}`;
+      messageTeam = `assigned task ${current.title} to ${assignedName}`;
 
       const data = await workspace.findWorkspaceWithTeam(
         workspace_id,
