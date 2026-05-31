@@ -1,0 +1,122 @@
+const document = require("../../services/user/document");
+
+exports.createDocument = async (req, res) => {
+  try {
+    const { team_id } = req.params;
+
+    const result = await document.createDocument(
+      team_id,
+      req.body,
+      req.user.id,
+    );
+
+    const row = await document.getDocumentById(result);
+
+    return res.json({
+      result: true,
+      message: "Document created successfully",
+      data: row,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getAllDocuments = async (req, res) => {
+  try {
+    const { workspace_id, team_id } = req.params;
+
+    const rows = await document.getAllDocuments(workspace_id, team_id);
+
+    return res.json({
+      result: true,
+      message: "Get all document successfully",
+      data: rows,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getDocumentById = async (req, res) => {
+  try {
+    const { document_id } = req.params;
+
+    const row = await document.getDocumentById(document_id);
+
+    return res.json({
+      result: true,
+      message: "Get document successfully",
+      data: row,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.updateDocumentTitle = async (req, res) => {
+  try {
+    const { document_id } = req.params;
+
+    await document.updateDocumentTitle(document_id, req.body);
+    const row = await document.getDocumentById(document_id);
+
+    return res.json({
+      result: true,
+      message: "Title updated successfully",
+      data: row,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.updateDocumentContent = async (req, res) => {
+  try {
+    const { document_id } = req.params;
+
+    await document.updateDocumentContent(document_id, req.body);
+    const row = await document.getDocumentById(document_id);
+
+    return res.json({
+      result: true,
+      message: "Content updated successfully",
+      data: row,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.deleteDocument = async (req, res) => {
+  try {
+    const { document_id } = req.params;
+
+    await document.deleteDocument(document_id);
+
+    return res.json({
+      result: true,
+      message: "Document deleted successfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};

@@ -1,20 +1,32 @@
+const xss = require("xss");
+
 exports.validate = (schema) => (req, res, next) => {
-  const { error, value } = schema.validate(req.body, {
+  const sanitizedBody = {};
+
+  for (const key in req.body) {
+    sanitizedBody[key] =
+      typeof req.body[key] === "string"
+        ? xss(req.body[key].trim())
+        : req.body[key];
+  }
+
+  const { error, value } = schema.validate(sanitizedBody, {
     abortEarly: false,
+    stripUnknown: true,
   });
 
   if (error) {
-    return res.json({
+    return res.status(400).json({
       result: false,
       message: "Invalid Field",
       details: error.details.map((d) => d.message),
     });
   }
 
-  req.validDate = value;
-  next();
-
+  req.validData = value;
   // console.log(value);
+
+  next();
 };
 
 const task = require("../models/user/task");

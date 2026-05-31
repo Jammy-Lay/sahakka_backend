@@ -169,3 +169,17 @@ exports.updateStatus = async (status, task_id) => {
   let sql = "UPDATE tasks SET status = ? WHERE id = ?";
   await pool.query(sql, [status, task_id]);
 };
+
+exports.createDefaultTask = async (team_id, user_id) => {
+  let sql =
+    "INSERT INTO tasks (team_id, title, description, created_by) VALUES (?, ?, ?, ?)";
+
+  const [result] = await pool.query(sql, [
+    team_id,
+    "Welcome to Sahakka",
+    "Create your first task and invite your teammates.",
+    user_id,
+  ]);
+
+  return result.insertId;
+};

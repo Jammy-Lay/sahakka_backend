@@ -34,8 +34,7 @@ exports.findWorkspaceWithTeam = async (workspace_id, team_id) => {
 
     FROM workspaces w
     LEFT JOIN teams t ON t.workspace_id = w.id
-    WHERE w.id = ? AND t.id = ?
-  `;
+    WHERE w.id = ? AND t.id = ? `;
 
   const [row] = await pool.query(sql, [workspace_id, team_id]);
 
@@ -97,3 +96,20 @@ exports.updateWorkspace = async (name, workspace_id) => {
   let sql = "UPDATE workspaces SET name = ? WHERE id = ?";
   await pool.query(sql, [name, workspace_id]);
 };
+
+exports.countWorkspaceByOwner = async (user_id) => {
+  const [rows] = await pool.query(
+    "SELECT COUNT(*) AS total FROM workspaces WHERE owner_id = ?",
+    [user_id],
+  );
+
+  return rows[0].total;
+};
+
+exports.removeWorkspaceMember = async (workspace_id, user_id) => {
+  let sql =
+    "DELETE FROM workspace_members WHERE workspace_id = ? AND user_id = ?";
+
+  await pool.query(sql, [workspace_id, user_id]);
+};
+

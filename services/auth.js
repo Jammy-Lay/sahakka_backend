@@ -10,7 +10,7 @@ const {
 const users = require("../models/users");
 const workspace = require("../models/user/workspace");
 const team = require("../models/user/team");
-const { error } = require("console");
+const task = require("../models/user/task");
 
 exports.register = async (body) => {
   let checkEmail = await users.findByEmail(body.email);
@@ -52,7 +52,6 @@ exports.login = async (body) => {
     throw new Error("Email and Password are invalid");
   }
 
-
   const token = jwt.sign(
     {
       id: userInfo[0].id,
@@ -63,7 +62,6 @@ exports.login = async (body) => {
     jwtConfig.secret,
     { expiresIn: jwtConfig.expireIn },
   );
-
 
   if (!userInfo[0].is_verified) {
     throw new Error("Email not verify");
@@ -135,6 +133,7 @@ exports.verifyEmail = async (token) => {
   const team_id = await team.defaultTeam(dataTeam);
   await team.addTeamMember(team_id, owner_id);
   await team.addTeamSection(team_id);
+  await task.createDefaultTask(team_id, owner_id);
 };
 
 exports.resendVerificationEmail = async (email) => {
@@ -166,7 +165,7 @@ exports.resendVerificationEmail = async (email) => {
 
 exports.forgotPassword = async (email) => {
   let userInfo = await users.findByEmail(email);
-  if(!userInfo[0].is_active){
+  if (!userInfo[0].is_active) {
     throw new Error("Your account has been blocked by admin");
   }
   if (!userInfo || userInfo.length === 0) {

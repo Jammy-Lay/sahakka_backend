@@ -278,3 +278,7 @@ exports.createTaskActivity = async (task_id, user_id, action, message) => {
   const row = await task.createTaskActivity(task_id, user_id, action, message);
   return row;
 };
+
+exports.createDefaultTask = async (team_id, user_id) => {
+  await task.createDefaultTask(team_id, user_id);
+};

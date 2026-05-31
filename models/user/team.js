@@ -76,8 +76,7 @@ exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
       )
     )
 
-    ORDER BY t.created_at DESC
-  `;
+    ORDER BY t.created_at DESC `;
 
   const [rows] = await pool.query(sql, [
     process.env.BASE_URL,
@@ -129,8 +128,7 @@ exports.getTeamActivityById = async (team_id) => {
     FROM team_activities ta
     JOIN users u ON u.id = ta.user_id
     WHERE ta.team_id = ?
-    ORDER BY ta.created_at DESC
-  `;
+    ORDER BY ta.created_at DESC `;
 
   const [rows] = await pool.query(sql, [process.env.BASE_URL, team_id]);
 
@@ -149,4 +147,27 @@ exports.findById = async (team_id) => {
   let sql = "SELECT id AS team_id, title as team_name FROM teams WHERE id = ?";
   const [row] = await pool.query(sql, [team_id]);
   return row[0];
+};
+
+exports.countTeamByWorkspace = async (workspace_id) => {
+  const [rows] = await pool.query(
+    "SELECT COUNT(*) AS total FROM teams WHERE workspace_id = ?",
+    [workspace_id],
+  );
+
+  return rows[0].total;
+};
+
+exports.removeTeamMember = async (team_id, user_id) => {
+  let sql = "DELETE FROM team_members WHERE team_id = ? AND user_id = ?";
+  await pool.query(sql, [team_id, user_id]);
+};
+
+exports.checkUserOtherTeams = async (workspace_id, user_id) => {
+  let sql =
+    "SELECT tm.id FROM team_members tm JOIN teams t ON t.id = tm.team_id WHERE t.workspace_id = ? AND tm.user_id = ?";
+
+  const [rows] = await pool.query(sql, [workspace_id, user_id]);
+
+  return rows;
 };

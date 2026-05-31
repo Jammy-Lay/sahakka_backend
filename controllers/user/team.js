@@ -130,3 +130,28 @@ exports.updateTeam = async (req, res) => {
     });
   }
 };
+
+exports.removeTeamMember = async (req, res) => {
+  try {
+    const { workspace_id, team_id, user_id } = req.params;
+
+    await team.removeTeamMember(
+      workspace_id,
+      team_id,
+      user_id,
+      req.user.id,
+    );
+
+    return res.json({
+      result: true,
+      message: "Member removed successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};

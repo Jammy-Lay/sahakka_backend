@@ -2,7 +2,7 @@ const auth = require("../services/auth");
 
 exports.register = async (req, res) => {
   try {
-    let result = await auth.register(req.validDate);
+    let result = await auth.register(req.validData);
 
     return res.json({
       result: true,
@@ -21,7 +21,7 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const row = await auth.login(req.validDate);
+    const row = await auth.login(req.validData);
     return res.json({
       result: true,
       message: "Login Successfully",
