@@ -108,12 +108,12 @@ exports.resendVerificationEmail = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
-    let result = await auth.forgotPassword(req.body.email)
+    let result = await auth.forgotPassword(req.body.email);
 
     res.json({
       message: "Request received",
       data: req.body,
-      message: result.message
+      message: result.message,
     });
   } catch (error) {
     res.status(400).json({
@@ -125,12 +125,12 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resendOtp = async (req, res) => {
   try {
-    let result = await auth.resendOtp(req.body.email)
+    let result = await auth.resendOtp(req.body.email);
 
     res.json({
       message: "Request received",
       data: req.body,
-      message: result.message
+      message: result.message,
     });
   } catch (error) {
     res.status(400).json({
@@ -138,11 +138,11 @@ exports.resendOtp = async (req, res) => {
       message: error.message || "Internal Server Error",
     });
   }
-}
+};
 
 exports.verifyOtp = async (req, res) => {
   try {
-    let result = await auth.verifyOtp(req.body.email, req.body.otp)
+    let result = await auth.verifyOtp(req.body.email, req.body.otp);
 
     res.json({
       message: "Verify Successfully",
@@ -153,11 +153,15 @@ exports.verifyOtp = async (req, res) => {
       message: error.message || "Internal Server Error",
     });
   }
-}
+};
 
-exports.resetPassword = async (req,res) => {
+exports.resetPassword = async (req, res) => {
   try {
-    let result = await auth.resetPassword(req.body.email,req.body.new_password,req.body.comfirm_password)
+    let result = await auth.resetPassword(
+      req.body.email,
+      req.body.new_password,
+      req.body.confirm_password,
+    );
 
     res.json({
       message: result.message,
@@ -169,7 +173,7 @@ exports.resetPassword = async (req,res) => {
       message: error.message || "Internal Server Error",
     });
   }
-}
+};
 
 exports.changePassword = async (req, res) => {
   try {
@@ -179,18 +183,17 @@ exports.changePassword = async (req, res) => {
       email,
       currentPassword,
       newPassword,
-      confirmPassword
+      confirmPassword,
     );
 
     return res.json({
       result: true,
-      message: result.message
+      message: result.message,
     });
-
   } catch (error) {
     return res.status(400).json({
       result: false,
-      message: error.message
+      message: error.message,
     });
   }
 };

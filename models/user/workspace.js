@@ -113,3 +113,9 @@ exports.removeWorkspaceMember = async (workspace_id, user_id) => {
   await pool.query(sql, [workspace_id, user_id]);
 };
 
+exports.updateMemberRole = async (workspace_id, user_id, role) => {
+  let sql =
+    "UPDATE workspace_members SET role = ? WHERE workspace_id = ? AND user_id = ?";
+
+  await pool.query(sql, [role, workspace_id, user_id]);
+};

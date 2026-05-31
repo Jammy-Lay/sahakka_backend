@@ -102,3 +102,29 @@ exports.updateWorkspace = async (req, res) => {
     });
   }
 };
+
+exports.updateMemberRole = async (req, res) => {
+  try {
+    const { workspace_id, team_id, user_id } = req.params;
+    const { role } = req.body;
+
+    const result = await workspace.updateMemberRole(
+      workspace_id,
+      user_id,
+      role,
+    );
+
+    return res.json({
+      result: true,
+      message: "Role updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};

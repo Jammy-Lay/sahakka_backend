@@ -1,4 +1,5 @@
 const workspace = require("../../models/user/workspace");
+const users = require("../../models/users");
 
 exports.createWorkspace = async (name, owner_id) => {
   const total = await workspace.countWorkspaceByOwner(owner_id);
@@ -94,4 +95,41 @@ exports.deleteWorkspace = async (workspace_id) => {
 
 exports.updateWorkspace = async (name, workspace_id) => {
   await workspace.updateWorkspace(name, workspace_id);
+};
+
+exports.updateMemberRole = async (workspace_id, user_id, role) => {
+  if (!["member", "moderator"].includes(role)) {
+    throw new Error("Invalid role");
+  }
+
+  const member = await workspace.checkWorkspaceMember(user_id, workspace_id);
+
+  if (member.length === 0) {
+    throw new Error("Member not found");
+  }
+
+  if (member[0].role === "owner") {
+    throw new Error("Workspace owner role cannot be changed");
+  }
+
+  if (role === "moderator" && member[0].role === "moderator") {
+    throw new Error("User is already a moderator");
+  }
+
+  if (role === "member" && member[0].role === "member") {
+    throw new Error("User is already a member");
+  }
+
+  const userInfo = await users.findById(user_id);
+
+  if (userInfo.length === 0) {
+    throw new Error("User not found");
+  }
+
+  await workspace.updateMemberRole(workspace_id, user_id, role);
+
+  return {
+    name: userInfo[0].name,
+    role,
+  };
 };
