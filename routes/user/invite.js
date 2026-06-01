@@ -6,6 +6,12 @@ const { isLogin } = require("../../middlewares/auth");
 const { checkAccess } = require("../../middlewares/checkAccess");
 const { checkWorkspaceRole } = require("../../middlewares/checkRole");
 
+const { validate } = require('../../middlewares/validate');
+const {
+inviteByEmailSchema,
+joinByTokenSchema
+} = require('../../validators/user')
+
 router.post(
   "/workspace/:workspace_id/team/:team_id/invite",
   isLogin,
@@ -14,13 +20,19 @@ router.post(
   invite.createTokenInvite,
 );
 
-router.post("/invite/join", isLogin, invite.joinByToken);
+router.post(
+  "/invite/join",
+  isLogin,
+  validate(joinByTokenSchema),
+  invite.joinByToken
+);
 
 router.post(
   "/workspace/:workspace_id/team/:team_id/invite/email",
   isLogin,
   checkAccess,
   checkWorkspaceRole(["owner"]),
+  validate(inviteByEmailSchema),
   invite.inviteByEmail,
 );
 

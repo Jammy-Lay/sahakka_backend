@@ -4,7 +4,7 @@ const sendVerificationEmail = async (to, token) => {
   const verificationLink = `${process.env.BASE_URL}/api/verify-email?token=${token}`;
 
   await transporter.sendMail({
-    from: `My App <noreply@myapp.com>`, // Professional "From" header
+    from: `Sahakka Dev <noreply@myapp.com>`, // Professional "From" header
     to,
     subject: "Confirm your email address",
     html: `
@@ -55,7 +55,7 @@ const sendVerificationEmail = async (to, token) => {
     <body>
       <div class="container">
         <div class="header">
-          <h2>Welcome to MyApp!</h2>
+          <h2>Welcome to Sahakka Dev!</h2>
         </div>
         <p>Hi there,</p>
         <p>Thanks for signing up! Please confirm your email address to activate your account and get started.</p>
@@ -67,7 +67,7 @@ const sendVerificationEmail = async (to, token) => {
         <p>This link will <strong>expire in 1 hour</strong>. If you did not create an account, no further action is required.</p>
         
         <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} MyApp Inc. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Sahakka Dev Inc. All rights reserved.</p>
           <p class="link-alt">If the button doesn't work, copy and paste this link into your browser:<br>
           ${verificationLink}</p>
         </div>
@@ -80,7 +80,7 @@ const sendVerificationEmail = async (to, token) => {
 
 const sendResetPasswordOTP = async (to, otp) => {
   await transporter.sendMail({
-    from: `My App <noreply@myapp.com>`,
+    from: `Sahakka Dev <noreply@myapp.com>`,
     to,
     subject: "Password Reset OTP",
 
@@ -169,7 +169,7 @@ const sendResetPasswordOTP = async (to, otp) => {
         <div class="footer">
           <p>
             &copy; ${new Date().getFullYear()}
-            MyApp Inc. All rights reserved.
+            Sahakka Dev Inc. All rights reserved.
           </p>
         </div>
 
@@ -189,7 +189,7 @@ const sendTaskAssignByEmail = async (
   assignerAvatar,
 ) => {
   await transporter.sendMail({
-    from: `My App <noreply@myapp.com>`,
+    from: `Sahakka Dev <noreply@myapp.com>`,
     to,
     subject: `${assignerName} assigned the task to you : ${taskTitle}`,
     html: `
@@ -235,7 +235,7 @@ const sendTaskAssignByEmail = async (
           <hr style="margin:20px 0; border:none; border-top:1px solid #eee;" />
 
           <p style="font-size:12px; color:#999;">
-            This is an automated notification from MyApp.
+            This is an automated notification from Sahakka Dev.
           </p>
 
         </div>
@@ -254,7 +254,7 @@ const sendInviteByEmail = async (
   const inviteLink = `${process.env.BASE_URL}/api/invite/accept?token=${token}`;
 
   await transporter.sendMail({
-    from: `My App <noreply@myapp.com>`,
+    from: `Sahakka Dev <noreply@myapp.com>`,
     to,
     subject: `${inviterName} invited you to join team ${workspaceName}`,
     html: `
@@ -309,7 +309,7 @@ const sendSubmissionReviewEmail = async (
   const isApproved = status === "approved";
 
   await transporter.sendMail({
-    from: `My App <noreply@myapp.com>`,
+    from: `Sahakka Dev <noreply@myapp.com>`,
     to,
     subject: `${reviewerName} ${isApproved ? "approved" : "rejected"} your submission`,
     html: `

@@ -9,6 +9,11 @@ const authMiddleware = require("../../middlewares/auth");
 
 const { uploadLimiter } = require("../../middlewares/rateLimit");
 
+const { validate } = require('../../middlewares/validate');
+const {
+changeNameSchema,
+} = require('../../validators/user')
+
 // upload avatar
 router.post(
   "/upload-avatar",
@@ -39,6 +44,7 @@ router.put(
 router.put(
   "/change-name",
   authMiddleware.isLogin,
+  validate(changeNameSchema),
   profileController.changeName,
 );
 
