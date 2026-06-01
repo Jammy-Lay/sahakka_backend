@@ -6,7 +6,20 @@ const { isLogin } = require("../../middlewares/auth");
 const { checkWorkspaceRole } = require("../../middlewares/checkRole");
 const { checkAccess } = require("../../middlewares/checkAccess");
 
-router.post("/create-workspace", isLogin, workspace.createWorkspace);
+const { validate } = require('../../middlewares/validate');
+const {
+createWorkspaceSchema,
+updateWorkspaceSchema,
+workspaceIdSchema
+} = require('../../validators/workspaces')
+
+
+router.post(
+  "/create-workspace", 
+  isLogin,
+  validate(createWorkspaceSchema),
+  workspace.createWorkspace
+);
 
 router.delete(
   "/workspace/:workspace_id",
@@ -19,6 +32,7 @@ router.put(
   "/workspace/:workspace_id",
   isLogin,
   checkWorkspaceRole(["owner"]),
+  validate(updateWorkspaceSchema),
   workspace.updateWorkspace,
 );
 
@@ -29,6 +43,7 @@ router.put(
   isLogin,
   checkAccess,
   checkWorkspaceRole(["owner"]),
+  validate(workspaceIdSchema),
   workspace.updateMemberRole,
 );
 
