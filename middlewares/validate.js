@@ -65,3 +65,19 @@ exports.validateSubmitTask = async (req, res, next) => {
     });
   }
 };
+
+exports.validateParams = (schema) => (req, res, next) => {
+  const { error, value } = schema.validate(req.params, {
+    convert: true, // IMPORTANT
+  });
+
+  if (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.details[0].message,
+    });
+  }
+
+  req.params = value; // overwrite with validated data
+  next();
+};

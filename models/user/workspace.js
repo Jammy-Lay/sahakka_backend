@@ -119,3 +119,16 @@ exports.updateMemberRole = async (workspace_id, user_id, role) => {
 
   await pool.query(sql, [role, workspace_id, user_id]);
 };
+
+exports.findWorkspaceByName = async (name) => {
+  const [rows] = await pool.query(
+    `
+      SELECT id
+      FROM workspaces
+      WHERE name = ?
+    `,
+    [name]
+  );
+
+  return rows;
+};
