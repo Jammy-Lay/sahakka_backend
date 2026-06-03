@@ -43,7 +43,6 @@ router.put(
   isLogin,
   checkAccess,
   checkWorkspaceRole(["owner"]),
-  validate(workspaceIdSchema),
   workspace.updateMemberRole,
 );
 

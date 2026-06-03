@@ -6,14 +6,14 @@ const { isLogin } = require("../../middlewares/auth");
 const { checkWorkspaceRole } = require("../../middlewares/checkRole");
 const { checkAccess } = require("../../middlewares/checkAccess");
 
-const { validate,validateParams } = require('../../middlewares/validate');
+const { validate, validateParams } = require("../../middlewares/validate");
 const {
-createTeamSchema,
-updateTeamSchema,
-teamIdSchema,
-} = require('../../validators/team');
+  createTeamSchema,
+  updateTeamSchema,
+  teamIdSchema,
+} = require("../../validators/team");
 
-const {workspaceIdSchema} = require('../../validators/workspaces')
+const { workspaceIdSchema } = require("../../validators/workspaces");
 
 router.post(
   "/workspace/:workspace_id/team",
@@ -21,7 +21,7 @@ router.post(
   checkWorkspaceRole(["owner"]),
   validateParams(workspaceIdSchema),
   validate(createTeamSchema),
-  team.createTeam
+  team.createTeam,
 );
 
 router.delete(
@@ -29,7 +29,6 @@ router.delete(
   isLogin,
   checkAccess,
   checkWorkspaceRole(["owner"]),
-  validate(teamIdSchema),
   team.deleteTeam,
 );
 
@@ -38,7 +37,7 @@ router.put(
   isLogin,
   checkWorkspaceRole(["owner", "admin"]),
   validate(updateTeamSchema),
-  team.updateTeam
+  team.updateTeam,
 );
 
 router.get("/workspace/:workspace_id/teams", isLogin, team.getTeamsByWorkspace);
@@ -57,7 +56,6 @@ router.delete(
   isLogin,
   checkAccess,
   checkWorkspaceRole(["owner"]),
-  validate(teamIdSchema),
   team.removeTeamMember,
 );
 
