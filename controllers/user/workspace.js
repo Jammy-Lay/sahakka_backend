@@ -2,11 +2,10 @@ const workspace = require("../../services/user/workspace");
 const team = require("../../services/user/team");
 
 exports.createWorkspace = async (req, res) => {
-  // console.log(req.valiData); return;
   try {
-    let name = req.valiData;
+    let name = req.validData;
     let owner_id = req.user.id;
-    const workspace_id = await workspace.createWorkspace(req.body.name, owner_id);
+    const workspace_id = await workspace.createWorkspace(name, owner_id);
 
     let dataWorkspace = {
       workspace_id: Number(workspace_id),
@@ -87,7 +86,7 @@ exports.deleteWorkspace = async (req, res) => {
 exports.updateWorkspace = async (req, res) => {
   try {
     const { workspace_id } = req.params;
-    await workspace.updateWorkspace(req.validData.name,workspace_id);
+    await workspace.updateWorkspace(req.validData.name, workspace_id);
     const row = await workspace.findById(workspace_id, req.user);
 
     return res.json({
@@ -105,7 +104,6 @@ exports.updateWorkspace = async (req, res) => {
 };
 
 exports.updateMemberRole = async (req, res) => {
-  console.log(req.valiData); return;
   try {
     const { workspace_id, team_id, user_id } = req.params;
     const { role } = req.body;

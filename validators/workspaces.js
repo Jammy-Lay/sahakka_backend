@@ -13,19 +13,6 @@ exports.createWorkspaceSchema = Joi.object({
         }),
 });
 
-exports.workspaceIdSchema = Joi.object({
-    workspace_id: Joi.number()
-        .integer()
-        .positive()
-        .required()
-        .messages({
-            "number.base": "Workspace ID must be a number",
-            "number.integer": "Workspace ID must be an integer",
-            "number.positive": "Workspace ID must be positive",
-            "any.required": "Workspace ID is required",
-        }),
-});
-
 exports.updateWorkspaceSchema = Joi.object({
     name: Joi.string()
         .trim()

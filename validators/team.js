@@ -20,19 +20,6 @@ exports.createTeamSchema = Joi.object({
         })
 });
 
-exports.teamIdSchema = Joi.object({
-    team_id: Joi.number()
-        .integer()
-        .positive()
-        .required()
-        .messages({
-            "number.base": "Team ID must be a number",
-            "number.integer": "Team ID must be an integer",
-            "number.positive": "Team ID must be positive",
-            "any.required": "Team ID is required",
-        }),
-});
-
 exports.updateTeamSchema = Joi.object({
   title: Joi.string()
     .min(3)
