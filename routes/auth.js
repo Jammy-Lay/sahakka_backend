@@ -10,6 +10,8 @@ const {
   forgotPasswordSchema,
   verifyOtpSchema,
   resetPasswordSchema,
+  changePasswordSchema,
+  resendEmailSchema
 } = require("../validators/user");
 const { authLimiter } = require("../middlewares/rateLimit");
 
@@ -31,7 +33,11 @@ router.post(
 router.get("/getMe", isLogin, auth.getMe);
 router.delete("/logout", isLogin, auth.logout);
 router.get("/verify-email", auth.verifyEmail);
-router.put("/resend", auth.resendVerificationEmail);
+router.put(
+  "/resend",
+  validate(resendEmailSchema),
+  auth.resendVerificationEmail
+);
 
 router.post(
   "/forgot-password",
@@ -52,6 +58,11 @@ router.post(
   auth.resetPassword
 );
 
-router.post("/change-password", auth.changePassword);
+router.post(
+  "/change-password",
+  isLogin,
+  validate(changePasswordSchema),
+  auth.changePassword
+);
 
 module.exports = router;

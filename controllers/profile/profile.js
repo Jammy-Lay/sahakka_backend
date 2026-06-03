@@ -79,7 +79,7 @@ exports.changeAvatar = async (req, res) => {
 
 exports.changeName = async (req,res) =>{
     try {
-        let result = await profileService.changeName(req.user.id, req.body.name);
+        let result = await profileService.changeName(req.user.id, req.validData.name);
 
         res.status(200).json({
         message: result.message,

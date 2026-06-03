@@ -91,7 +91,7 @@ exports.verifyEmail = async (req, res) => {
 
 exports.resendVerificationEmail = async (req, res) => {
   try {
-    await auth.resendVerificationEmail(req.body.email);
+    await auth.resendVerificationEmail(req.validData.email);
     return res.json({
       result: true,
       message: "Resend Link Successfully",
@@ -108,7 +108,7 @@ exports.resendVerificationEmail = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
-    let result = await auth.forgotPassword(req.body.email);
+    let result = await auth.forgotPassword(req.validData.email);
 
     res.json({
       message: "Request received",
@@ -142,7 +142,7 @@ exports.resendOtp = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
   try {
-    let result = await auth.verifyOtp(req.body.email, req.body.otp);
+    let result = await auth.verifyOtp(req.validData.email, req.validData.otp);
 
     res.json({
       message: "Verify Successfully",
@@ -158,9 +158,9 @@ exports.verifyOtp = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     let result = await auth.resetPassword(
-      req.body.email,
-      req.body.new_password,
-      req.body.confirm_password,
+      req.validData.email,
+      req.validData.new_password,
+      req.validData.confirm_password,
     );
 
     res.json({
@@ -177,7 +177,8 @@ exports.resetPassword = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   try {
-    const { email, currentPassword, newPassword, confirmPassword } = req.body;
+    const {currentPassword, newPassword, confirmPassword } = req.validData;
+    const email = req.user.email;
 
     const result = await auth.changePassword(
       email,
