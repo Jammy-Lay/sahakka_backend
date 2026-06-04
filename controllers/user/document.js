@@ -87,7 +87,7 @@ exports.updateDocumentContent = async (req, res) => {
   try {
     const { document_id } = req.params;
 
-    await document.updateDocumentContent(document_id, req.body);
+    await document.updateDocumentContent(document_id, req.validData);
     const row = await document.getDocumentById(document_id);
 
     return res.json({
