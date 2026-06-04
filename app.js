@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 });
 
 const admin = require("./routes/admin/admin");
-app.use("/api/admin", admin);
+app.use("/api/sahakka-admin", admin);
 
 const { apiLimiter } = require("./middlewares/rateLimit");
 app.use("/api", apiLimiter);

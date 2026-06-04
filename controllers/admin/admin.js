@@ -12,7 +12,7 @@ exports.dashboard = async (req, res) => {
             data: stats
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -30,7 +30,7 @@ exports.getUsers = async (req, res) => {
             data: users
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -58,7 +58,7 @@ exports.getUserById = async (req, res) => {
 
     } catch (error) {
 
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -77,7 +77,7 @@ exports.suspendUser = async (req, res) => {
             message: 'User suspended successfully'
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(409).json({
             result: false,
             message: error.message
         });
@@ -95,7 +95,7 @@ exports.activateUser = async (req, res) => {
             message: 'User activated successfully'
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(409).json({
             result: false,
             message: error.message
         });
@@ -117,7 +117,7 @@ exports.getWorkspaces = async (req, res) => {
 
     } catch (error) {
 
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -136,7 +136,7 @@ exports.getWorkspaceDetails = async (req, res) => {
             data: workspace
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -154,7 +154,7 @@ exports.getTasks = async (req, res) => {
             data: tasks
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -170,7 +170,7 @@ exports.getTaskAnalytics = async (req, res) => {
             data: analytics
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -190,7 +190,7 @@ exports.getTeams = async (req, res) => {
 
     } catch (error) {
 
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -211,7 +211,7 @@ exports.getTeamById = async (req, res) => {
 
     } catch (error) {
 
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -232,7 +232,7 @@ exports.getTeamMembers = async (req, res) => {
 
     } catch (error) {
 
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -249,7 +249,7 @@ exports.getDashboardStats = async (req, res) => {
             data: analytics
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -307,7 +307,7 @@ exports.getTeamActivityById = async (req, res) => {
 
         console.log(error);
 
-        return res.status(400).json({
+        return res.status(404).json({
             result: false,
             message: error.message,
         });
@@ -329,7 +329,7 @@ exports.getAllTeamActivity = async (req, res) => {
 
     } catch (error) {
 
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
@@ -360,7 +360,7 @@ exports.getTaskActivities = async (req, res) => {
 
         console.log(error);
 
-        return res.status(500).json({
+        return res.status(404).json({
             result: false,
             message: error.message
         });
