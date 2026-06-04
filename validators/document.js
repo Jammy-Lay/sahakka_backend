@@ -18,3 +18,12 @@ exports.updateDocumentTitleSchema = Joi.object({
   }),
 });
 
+exports.updateDocumentContentSchema = Joi.object({
+  content: Joi.string()
+    .allow("")
+    .required()
+    .messages({
+      "any.required": "Content is required",
+      "string.base": "Content must be a string",
+    }),
+});

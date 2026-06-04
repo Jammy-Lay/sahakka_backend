@@ -9,6 +9,7 @@ const { validate } = require("../../middlewares/validate");
 const {
   createDocumentSchema,
   updateDocumentTitleSchema,
+  updateDocumentContentSchema,
 } = require("../../validators/document");
 
 router.post(
@@ -45,6 +46,7 @@ router.put(
   "/workspace/:workspace_id/team/:team_id/document/:document_id/content",
   isLogin,
   checkAccess,
+  validate(updateDocumentContentSchema),
   document.updateDocumentContent,
 );
 
