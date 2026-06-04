@@ -199,3 +199,29 @@ exports.changeNameSchema = Joi.object({
       "any.required": "Name is required",
     }),
 });
+
+exports.inviteByEmailSchema = Joi.object({
+  email: Joi.string()
+    .trim()
+    .lowercase()
+    .pattern(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
+      "string.empty": "Email is required",
+    }),
+});
+
+exports.joinByTokenSchema = Joi.object({
+token: Joi.string()
+  .trim()
+  .length(8)
+  .pattern(/^[a-zA-Z0-9]+$/)
+  .required()
+  .messages({
+    "string.empty": "OTP is required",
+    "string.length": "OTP must be exactly 8 characters",
+    "string.pattern.base": "OTP must contain only letters and numbers",
+    "any.required": "OTP is required",
+  }),
+});

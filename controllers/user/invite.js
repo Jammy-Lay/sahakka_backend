@@ -20,7 +20,7 @@ exports.createTokenInvite = async (req, res) => {
 
 exports.joinByToken = async (req, res) => {
   try {
-    const result = await invite.joinByToken(req.body.token, req.user);
+    const result = await invite.joinByToken(req.validData.token, req.user);
 
     return res.json({
       result: true,

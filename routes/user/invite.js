@@ -23,6 +23,7 @@ router.post(
 router.post(
   "/invite/join",
   isLogin,
+  validate(joinByTokenSchema),
   invite.joinByToken
 );
 
@@ -31,6 +32,7 @@ router.post(
   isLogin,
   checkAccess,
   checkWorkspaceRole(["owner"]),
+  validate(inviteByEmailSchema),
   invite.inviteByEmail,
 );
 
