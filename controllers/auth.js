@@ -125,7 +125,7 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resendOtp = async (req, res) => {
   try {
-    let result = await auth.resendOtp(req.body.email);
+    let result = await auth.resendOtp(req.validData.email);
 
     res.json({
       message: "Request received",

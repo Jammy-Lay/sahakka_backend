@@ -48,7 +48,11 @@ router.post(
   auth.forgotPassword,
 );
 
-router.post("/resend-otp", auth.resendOtp);
+router.post(
+  "/resend-otp",
+  validate(forgotPasswordSchema),
+  auth.resendOtp
+);
 router.post("/verify-otp", validate(verifyOtpSchema), auth.verifyOtp);
 
 router.post(
