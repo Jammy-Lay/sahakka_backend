@@ -106,7 +106,7 @@ exports.updateWorkspace = async (req, res) => {
 exports.updateMemberRole = async (req, res) => {
   try {
     const { workspace_id, team_id, user_id } = req.params;
-    const { role } = req.body;
+    const { role } = req.validData;
 
     const result = await workspace.updateMemberRole(
       workspace_id,

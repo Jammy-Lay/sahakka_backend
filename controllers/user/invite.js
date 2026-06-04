@@ -38,7 +38,7 @@ exports.joinByToken = async (req, res) => {
 exports.inviteByEmail = async (req, res) => {
   try {
     const { workspace_id, team_id } = req.params;
-    const { email } = req.body;
+    const { email } = req.validData;
 
     const result = await invite.inviteByEmail(
       workspace_id,

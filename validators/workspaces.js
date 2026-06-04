@@ -26,3 +26,14 @@ exports.updateWorkspaceSchema = Joi.object({
             "any.required": "Workspace name is required",
         }),
 });
+
+exports.updateWorkspaceRoleSchema = Joi.object({
+  role: Joi.string()
+    .valid("member", "moderator")
+    .required()
+    .messages({
+      "any.only": "Role must be member or moderator",
+      "any.required": "Role is required",
+      "string.empty": "Role is required",
+    }),
+});

@@ -10,7 +10,7 @@ const { validate } = require("../../middlewares/validate");
 const {
   createWorkspaceSchema,
   updateWorkspaceSchema,
-  workspaceIdSchema,
+  updateWorkspaceRoleSchema,
 } = require("../../validators/workspaces");
 
 router.post(
@@ -42,6 +42,7 @@ router.put(
   isLogin,
   checkAccess,
   checkWorkspaceRole(["owner"]),
+  validate(updateWorkspaceRoleSchema),
   workspace.updateMemberRole,
 );
 

@@ -219,9 +219,9 @@ token: Joi.string()
   .pattern(/^[a-zA-Z0-9]+$/)
   .required()
   .messages({
-    "string.empty": "OTP is required",
-    "string.length": "OTP must be exactly 8 characters",
-    "string.pattern.base": "OTP must contain only letters and numbers",
-    "any.required": "OTP is required",
+    "string.empty": "Token is required",
+    "string.length": "Token must be exactly 8 characters",
+    "string.pattern.base": "Token must contain only letters and numbers",
+    "any.required": "Token is required",
   }),
 });
