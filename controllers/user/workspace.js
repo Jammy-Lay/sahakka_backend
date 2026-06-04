@@ -3,7 +3,7 @@ const team = require("../../services/user/team");
 
 exports.createWorkspace = async (req, res) => {
   try {
-    let name = req.validData;
+    let name = req.validData.name;
     let owner_id = req.user.id;
     const workspace_id = await workspace.createWorkspace(name, owner_id);
 
