@@ -263,10 +263,14 @@ exports.getAllTeamActivity = async () => {
     SELECT 
       ta.id,
       ta.team_id,
+      t.title,
       ta.user_id,
       ta.action,
       ta.message,
       ta.created_at,
+
+      w.id AS workspace_id,
+      w.name AS workspace_name,
 
       u.id AS created_by_id,
       u.name AS created_by_name,
@@ -274,6 +278,8 @@ exports.getAllTeamActivity = async () => {
 
     FROM team_activities ta
     JOIN users u ON u.id = ta.user_id
+    JOIN teams t ON t.id = ta.team_id
+    JOIN workspaces w ON w.id = t.workspace_id
     WHERE u.role = 'user'
     ORDER BY ta.created_at DESC
   `;
@@ -288,10 +294,14 @@ exports.getTeamActivityById = async (team_id) => {
     SELECT 
       ta.id,
       ta.team_id,
+      t.title,
       ta.user_id,
       ta.action,
       ta.message,
       ta.created_at,
+
+      w.id AS workspace_id,
+      w.name AS workspace_name,
 
       u.id AS created_by_id,
       u.name AS created_by_name,
@@ -299,6 +309,9 @@ exports.getTeamActivityById = async (team_id) => {
 
     FROM team_activities ta
     JOIN users u ON u.id = ta.user_id
+    JOIN teams t ON t.id = ta.team_id
+    JOIN workspaces w ON w.id = t.workspace_id
+
     WHERE u.role = 'user' AND ta.team_id = ?
     ORDER BY ta.created_at DESC
   `;

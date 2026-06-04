@@ -2,46 +2,83 @@ const Joi = require("joi");
 
 exports.registerUserSchema = Joi.object({
   name: Joi.string().min(3).required(),
-  email: Joi.string().email().min(3).required(),
+  
+  email: Joi.string()
+    .trim()
+    .lowercase()
+    .pattern(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
+      "string.empty": "Email is required",
+    }),
   password: Joi.string()
+    .trim()
+    .min(8)
     .pattern(
       new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])(?=.{8,})",
-      ),
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
+      )
     )
     .required()
     .messages({
+      "string.min":
+        "Password must be at least 8 characters (spaces not counted at start/end)",
       "string.pattern.base":
-        "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character",
+        "Password must contain uppercase, lowercase, number, special character, and can include spaces in the middle only",
+      "string.empty": "Password is required",
     }),
 });
 
 exports.loginUserSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().required(),
+  email: Joi.string()
+    .trim()
+    .lowercase()
+    .pattern(/^[a-zA-Z0-9._%+-]+@(gmail\.com|sahakka\.com)$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
+      "string.empty": "Email is required",
+    }),
+
+  password: Joi.string()
+    .trim()
+    .min(8)
+    .pattern(
+      new RegExp(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
+      )
+    )
+    .required()
+    .messages({
+      "string.min": "Password must be at least 8 characters",
+      "string.pattern.base":
+        "Invalid password format",
+      "string.empty": "Password is required",
+    }),
 });
 
 exports.forgotPasswordSchema = Joi.object({
   email: Joi.string()
     .trim()
-    .email()
+    .lowercase()
+    .pattern(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)
     .required()
     .messages({
+      "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
       "string.empty": "Email is required",
-      "string.email": "Please provide a valid email address",
-      "any.required": "Email is required",
     }),
 });
 
 exports.verifyOtpSchema = Joi.object({
   email: Joi.string()
     .trim()
-    .email()
+    .lowercase()
+    .pattern(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)
     .required()
     .messages({
+      "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
       "string.empty": "Email is required",
-      "string.email": "Please provide a valid email address",
-      "any.required": "Email is required",
     }),
 
   otp: Joi.string()
@@ -59,23 +96,29 @@ exports.verifyOtpSchema = Joi.object({
 exports.resetPasswordSchema = Joi.object({
   email: Joi.string()
     .trim()
-    .email()
+    .lowercase()
+    .pattern(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)
     .required()
     .messages({
+      "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
       "string.empty": "Email is required",
-      "string.email": "Please provide a valid email address",
-      "any.required": "Email is required",
     }),
 
   new_password: Joi.string()
+    .trim()
     .min(8)
-    .max(30)
+    .pattern(
+      new RegExp(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
+      )
+    )
     .required()
     .messages({
-      "string.empty": "New password is required",
-      "string.min": "New password must be at least 8 characters",
-      "string.max": "New password cannot exceed 30 characters",
-      "any.required": "New password is required",
+      "string.min":
+        "Password must be at least 8 characters (spaces not counted at start/end)",
+      "string.pattern.base":
+        "Password must contain uppercase, lowercase, number, special character, and can include spaces in the middle only",
+      "string.empty": "Password is required",
     }),
 
   confirm_password: Joi.string()
@@ -89,26 +132,37 @@ exports.resetPasswordSchema = Joi.object({
 
 exports.changePasswordSchema = Joi.object({
   currentPassword: Joi.string()
+    .trim()
     .min(8)
-    .max(50)
+    .pattern(
+      new RegExp(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
+      )
+    )
     .required()
     .messages({
-      "string.empty": "Current password is required",
-      "string.min": "Current password must be at least 8 characters",
-      "any.required": "Current password is required",
+      "string.min":
+        "Password must be at least 8 characters (spaces not counted at start/end)",
+      "string.pattern.base":
+        "Password must contain uppercase, lowercase, number, special character, and can include spaces in the middle only",
+      "string.empty": "Password is required",
     }),
 
   newPassword: Joi.string()
+    .trim()
     .min(8)
-    .max(50)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)
+    .pattern(
+      new RegExp(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
+      )
+    )
     .required()
     .messages({
-      "string.empty": "New password is required",
-      "string.min": "New password must be at least 8 characters",
+      "string.min":
+        "Password must be at least 8 characters (spaces not counted at start/end)",
       "string.pattern.base":
-        "New password must contain uppercase, lowercase and number",
-      "any.required": "New password is required",
+        "Password must contain uppercase, lowercase, number, special character, and can include spaces in the middle only",
+      "string.empty": "Password is required",
     }),
 
   confirmPassword: Joi.any()
@@ -123,12 +177,12 @@ exports.changePasswordSchema = Joi.object({
 exports.resendEmailSchema = Joi.object({
   email: Joi.string()
     .trim()
-    .email()
+    .lowercase()
+    .pattern(/^[a-zA-Z0-9._%+-]+@gmail\.com$/)
     .required()
     .messages({
+      "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
       "string.empty": "Email is required",
-      "string.email": "Please provide a valid email address",
-      "any.required": "Email is required",
     }),
 });
 

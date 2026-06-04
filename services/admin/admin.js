@@ -17,6 +17,10 @@ exports.getUserById = async (userId) => {
 exports.suspendUser = async (userId) => {
   let check_is_active = await admin.getUserById(userId);
 
+  if(check_is_active.length === 0){
+    throw new Error("User has been block already");
+  }
+
   await user.removeToken(userId);
 
   if (check_is_active[0].is_active === 0) {
@@ -30,6 +34,9 @@ exports.suspendUser = async (userId) => {
 
 exports.activateUser = async (userId) => {
   let check_is_active = await admin.getUserById(userId);
+  if(check_is_active.length === 0){
+    throw new Error("User has been active already");
+  }
   if (check_is_active[0].is_active === 1) {
     throw new Error("User has been active already");
   }
@@ -217,6 +224,12 @@ exports.getTeamActivityById = async (team_id) => {
   const data = rows.map((item) => ({
     id: item.id,
     team_id: item.team_id,
+
+    workspace_in : {
+      workspace_id: item.workspace_id,
+      workspace_name: item.workspace_name,
+    },
+
     action: item.action,
     message: item.message,
     created_at: item.created_at,
@@ -237,6 +250,13 @@ exports.getAllTeamActivity = async () => {
   const data = rows.map((item) => ({
     id: item.id,
     team_id: item.team_id,
+    team_title : item.title,
+
+    workspace_in : {
+      workspace_id: item.workspace_id,
+      workspace_name: item.workspace_name,
+    },
+
     action: item.action,
     message: item.message,
     created_at: item.created_at,
