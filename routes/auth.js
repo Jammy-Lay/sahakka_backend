@@ -4,27 +4,30 @@ const router = express.Router();
 const auth = require("../controllers/auth");
 const { isLogin, checkActiveUser } = require("../middlewares/auth");
 const { validate } = require("../middlewares/validate");
-const { 
-  registerUserSchema, 
-  loginUserSchema, 
+const {
+  registerUserSchema,
+  loginUserSchema,
   forgotPasswordSchema,
   verifyOtpSchema,
   resetPasswordSchema,
   changePasswordSchema,
-  resendEmailSchema
+  resendEmailSchema,
 } = require("../validators/user");
-const { authLimiter } = require("../middlewares/rateLimit");
+const {
+  authLoginLimiter,
+  authRegisterLimiter,
+} = require("../middlewares/rateLimit");
 
 router.post(
   "/register",
-  authLimiter,
+  authRegisterLimiter,
   validate(registerUserSchema),
   auth.register,
 );
 
 router.post(
   "/login",
-  authLimiter,
+  authLoginLimiter,
   validate(loginUserSchema),
   checkActiveUser,
   auth.login,
@@ -36,33 +39,29 @@ router.get("/verify-email", auth.verifyEmail);
 router.put(
   "/resend",
   validate(resendEmailSchema),
-  auth.resendVerificationEmail
+  auth.resendVerificationEmail,
 );
 
 router.post(
   "/forgot-password",
   validate(forgotPasswordSchema),
-  auth.forgotPassword
+  auth.forgotPassword,
 );
 
 router.post("/resend-otp", auth.resendOtp);
-router.post(
-  "/verify-otp", 
-  validate(verifyOtpSchema),
-  auth.verifyOtp
-);
+router.post("/verify-otp", validate(verifyOtpSchema), auth.verifyOtp);
 
 router.post(
   "/reset-password",
   validate(resetPasswordSchema),
-  auth.resetPassword
+  auth.resetPassword,
 );
 
 router.post(
   "/change-password",
   isLogin,
   validate(changePasswordSchema),
-  auth.changePassword
+  auth.changePassword,
 );
 
 module.exports = router;

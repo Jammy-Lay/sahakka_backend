@@ -108,7 +108,13 @@ exports.createTeamActivity = async (team_id, user_id, action, message) => {
   return row;
 };
 
-exports.deleteTeam = async (team_id) => {
+exports.deleteTeam = async (team_id, workspace_id) => {
+  const total = await team.countTeamByWorkspace(workspace_id);
+
+  if (total === 1) {
+    throw new Error("Cannot delete the last team");
+  }
+
   await team.deleteTeam(team_id);
 };
 
@@ -150,7 +156,7 @@ exports.removeTeamMember = async (
   if (userInfo.length === 0) {
     throw new Error("User not found");
   }
-  
+
   await team.removeTeamMember(team_id, user_id);
 
   const otherTeams = await team.checkUserOtherTeams(workspace_id, user_id);
@@ -165,4 +171,23 @@ exports.removeTeamMember = async (
     "remove",
     `removed ${userInfo[0].name} from the team`,
   );
+};
+
+exports.getTeamMembers = async (workspace_id, team_id) => {
+  const checkTeam = await team.checkTeamInWorkspace(team_id, workspace_id);
+
+  if (checkTeam.length === 0) {
+    throw new Error("Team not found in workspace");
+  }
+
+  const rows = await team.getTeamMembers(workspace_id, team_id);
+
+  return rows.map((item) => ({
+    user_id: item.user_id,
+    name: item.name,
+    email: item.email,
+    avatar: item.avatar,
+    role: item.role,
+    joined_at: item.created_at,
+  }));
 };

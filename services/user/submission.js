@@ -106,10 +106,6 @@ exports.updateSubmissionStatus = async (
     throw new Error("Submission already reviewed");
   }
 
-  if (!["approved", "rejected"].includes(status)) {
-    throw new Error("Invalid status");
-  }
-
   await submission.updateSubmissionStatus(
     submission_id,
     status,

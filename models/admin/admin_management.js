@@ -36,14 +36,6 @@ exports.activateUser = async (userId) => {
   `, [userId]);
 };
 
-exports.deleteUser = async (userId) => {
-    await pool.query(`
-    DELETE FROM users
-    WHERE id = ?
-  `, [userId]);
-};
-
-
 // workspaces
 exports.getAllWorkspaces = async () => {
   const sql = `

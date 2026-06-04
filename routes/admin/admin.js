@@ -31,8 +31,6 @@ router.patch(
   admin.activateUser,
 );
 
-router.delete("/users/:id", isLogin, checkRole("admin"), admin.deleteUser);
-
 //workspace
 
 router.get("/workspaces", isLogin, checkRole("admin"), admin.getWorkspaces);

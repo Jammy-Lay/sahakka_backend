@@ -6,7 +6,7 @@ const { isLogin } = require("../../middlewares/auth");
 const { checkWorkspaceRole } = require("../../middlewares/checkRole");
 const { checkAccess } = require("../../middlewares/checkAccess");
 
-const { validate, validateParams } = require("../../middlewares/validate");
+const { validate } = require("../../middlewares/validate");
 const {
   createTeamSchema,
   updateTeamSchema,
@@ -19,7 +19,6 @@ router.post(
   "/workspace/:workspace_id/team",
   isLogin,
   checkWorkspaceRole(["owner"]),
-  validateParams(workspaceIdSchema),
   validate(createTeamSchema),
   team.createTeam,
 );
@@ -57,6 +56,13 @@ router.delete(
   checkAccess,
   checkWorkspaceRole(["owner"]),
   team.removeTeamMember,
+);
+
+router.get(
+  "/workspace/:workspace_id/team/:team_id/members",
+  isLogin,
+  checkAccess,
+  team.getTeamMembers,
 );
 
 module.exports = router;

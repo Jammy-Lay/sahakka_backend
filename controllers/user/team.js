@@ -8,7 +8,7 @@ exports.createTeam = async (req, res) => {
     const team_id = await team.createTeam(
       workspace_id,
       req.validData.title,
-      req.validData.description
+      req.validData.description,
     );
     await team.addTeamMember(team_id, req.user.id);
     await team.addTeamSection(team_id);
@@ -93,8 +93,8 @@ exports.getTeamActivityById = async (req, res) => {
 
 exports.deleteTeam = async (req, res) => {
   try {
-    const { team_id } = req.params;
-    await team.deleteTeam(team_id);
+    const { team_id, workspace_id } = req.params;
+    await team.deleteTeam(team_id, workspace_id);
     return res.json({
       result: true,
       message: "Delete Team Successfully",
@@ -111,22 +111,22 @@ exports.deleteTeam = async (req, res) => {
 exports.updateTeam = async (req, res) => {
   try {
     const { workspace_id, team_id } = req.params;
-    
+
     await team.updateTeam(
       req.validData.title,
       req.validData.description,
-      team_id
+      team_id,
     );
 
     const row = await workspace.findWorkspaceWithTeam(
       workspace_id,
       team_id,
-      req.user
+      req.user,
     );
 
     return res.json({
       result: true,
-      message: "Update Team Successfully", 
+      message: "Update Team Successfully",
       data: row,
     });
   } catch (error) {
@@ -142,12 +142,7 @@ exports.removeTeamMember = async (req, res) => {
   try {
     const { workspace_id, team_id, user_id } = req.params;
 
-    await team.removeTeamMember(
-      workspace_id,
-      team_id,
-      user_id,
-      req.user.id,
-    );
+    await team.removeTeamMember(workspace_id, team_id, user_id, req.user.id);
 
     return res.json({
       result: true,
@@ -158,6 +153,25 @@ exports.removeTeamMember = async (req, res) => {
 
     return res.status(400).json({
       result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getTeamMembers = async (req, res) => {
+  try {
+    const { workspace_id, team_id } = req.params;
+
+    const rows = await team.getTeamMembers(workspace_id, team_id);
+
+    return res.json({
+      result: true,
+      message: "Get Team member Successfully",
+      data: rows,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
       message: error.message,
     });
   }

@@ -6,7 +6,7 @@ exports.createDocument = async (req, res) => {
 
     const result = await document.createDocument(
       team_id,
-      req.body,
+      req.validData,
       req.user.id,
     );
 
@@ -67,7 +67,7 @@ exports.updateDocumentTitle = async (req, res) => {
   try {
     const { document_id } = req.params;
 
-    await document.updateDocumentTitle(document_id, req.body);
+    await document.updateDocumentTitle(document_id, req.validData);
     const row = await document.getDocumentById(document_id);
 
     return res.json({
