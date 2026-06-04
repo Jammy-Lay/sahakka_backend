@@ -68,7 +68,7 @@ exports.getMyWorkspace = async (req, res) => {
 exports.deleteWorkspace = async (req, res) => {
   try {
     const { workspace_id } = req.params;
-    await workspace.deleteWorkspace(workspace_id);
+    await workspace.deleteWorkspace(workspace_id, req.user.id);
 
     return res.json({
       result: true,
@@ -122,6 +122,25 @@ exports.updateMemberRole = async (req, res) => {
   } catch (error) {
     console.error(error);
 
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getWorkspaceMembers = async (req, res) => {
+  try {
+    const { workspace_id } = req.params;
+
+    const rows = await workspace.getWorkspaceMembers(workspace_id);
+
+    return res.json({
+      result: true,
+      message: "Get Workspace member Successfully",
+      data: rows,
+    });
+  } catch (error) {
     return res.status(400).json({
       result: false,
       message: error.message,

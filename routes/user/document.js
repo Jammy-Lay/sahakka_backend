@@ -5,11 +5,17 @@ const document = require("../../controllers/user/document");
 const { isLogin } = require("../../middlewares/auth");
 const { checkAccess } = require("../../middlewares/checkAccess");
 const { checkWorkspaceRole } = require("../../middlewares/checkRole");
+const { validate } = require("../../middlewares/validate");
+const {
+  createDocumentSchema,
+  updateDocumentTitleSchema,
+} = require("../../validators/document");
 
 router.post(
   "/workspace/:workspace_id/team/:team_id/document",
   isLogin,
   checkAccess,
+  validate(createDocumentSchema),
   document.createDocument,
 );
 
@@ -31,6 +37,7 @@ router.put(
   "/workspace/:workspace_id/team/:team_id/document/:document_id/title",
   isLogin,
   checkAccess,
+  validate(updateDocumentTitleSchema),
   document.updateDocumentTitle,
 );
 

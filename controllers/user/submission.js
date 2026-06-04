@@ -9,7 +9,7 @@ exports.submitTask = async (req, res) => {
     const result = await submission.submitTask(
       task_id,
       req.user,
-      req.body.message,
+      req.validData.message,
       req.file,
     );
 
@@ -59,7 +59,7 @@ exports.getAllSubmissions = async (req, res) => {
 exports.updateSubmissionStatus = async (req, res) => {
   try {
     const { workspace_id, team_id, submission_id } = req.params;
-    const { status, feedback } = req.body;
+    const { status, feedback } = req.validData;
 
     const result = await submission.updateSubmissionStatus(
       workspace_id,

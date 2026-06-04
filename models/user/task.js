@@ -1,6 +1,6 @@
 const pool = require("../../configs/db");
 
-exports.getTasksByTeam = async (team_id, workspace_id) => {
+exports.getTasksByTeam = async (team_id, workspace_id, status = null) => {
   let sql = `
     SELECT
       t.id,
@@ -23,22 +23,35 @@ exports.getTasksByTeam = async (team_id, workspace_id) => {
       CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar
 
     FROM tasks t
-    INNER JOIN teams tm ON tm.id = t.team_id
 
-    LEFT JOIN users u1 ON u1.id = t.created_by
-    LEFT JOIN users u2 ON u2.id = t.assigned_to
+    INNER JOIN teams tm
+      ON tm.id = t.team_id
 
-    WHERE t.team_id = ? AND tm.workspace_id = ?
+    LEFT JOIN users u1
+      ON u1.id = t.created_by
 
-    ORDER BY t.created_at DESC
-  `;
+    LEFT JOIN users u2
+      ON u2.id = t.assigned_to
 
-  const [rows] = await pool.query(sql, [
+    WHERE
+      t.team_id = ?
+      AND tm.workspace_id = ? `;
+
+  const params = [
     process.env.BASE_URL,
     process.env.BASE_URL,
     team_id,
     workspace_id,
-  ]);
+  ];
+
+  if (status) {
+    sql += ` AND t.status = ? `;
+    params.push(status);
+  }
+
+  sql += ` ORDER BY t.created_at DESC `;
+
+  const [rows] = await pool.query(sql, params);
 
   return rows;
 };
@@ -182,4 +195,96 @@ exports.createDefaultTask = async (team_id, user_id) => {
   ]);
 
   return result.insertId;
+};
+
+exports.deleteTask = async (task_id) => {
+  let sql = "DELETE FROM tasks WHERE id = ?";
+  await pool.query(sql, [task_id]);
+};
+
+exports.getMyTaskSummary = async (workspace_id, team_id, user_id) => {
+  const sql = `
+    SELECT
+      COUNT(*) AS total_tasks,
+
+      COALESCE(SUM(status = 'todo'), 0) AS todo,
+      COALESCE(SUM(status = 'in_progress'), 0) AS in_progress,
+      COALESCE(SUM(status = 'submitted'), 0) AS submitted,
+      COALESCE(SUM(status = 'approved'), 0) AS approved,
+      COALESCE(SUM(status = 'rejected'), 0) AS rejected,
+
+      COALESCE(SUM(priority = 'urgent'), 0) AS urgent,
+      COALESCE(SUM(priority = 'high'), 0) AS high,
+      COALESCE(SUM(priority = 'medium'), 0) AS medium,
+      COALESCE(SUM(priority = 'low'), 0) AS low
+
+    FROM tasks t
+    JOIN teams tm ON tm.id = t.team_id
+
+    WHERE
+      tm.workspace_id = ?
+      AND t.team_id = ?
+      AND t.assigned_to = ? `;
+
+  const [rows] = await pool.query(sql, [workspace_id, team_id, user_id]);
+
+  return rows[0];
+};
+
+exports.getMyTasks = async (workspace_id, team_id, user_id, status = null) => {
+  let sql = `
+    SELECT
+      t.id,
+      t.team_id,
+      t.title,
+      t.description,
+      t.type,
+      t.status,
+      t.priority,
+      t.created_at,
+      t.start_date,
+      t.end_date,
+
+      u1.id AS created_by_id,
+      u1.name AS created_by_name,
+      CONCAT(?, '/uploads/avatars/', u1.avatar) AS created_by_avatar,
+
+      u2.id AS assigned_to_id,
+      u2.name AS assigned_to_name,
+      CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar
+
+    FROM tasks t
+
+    JOIN teams tm
+      ON tm.id = t.team_id
+
+    LEFT JOIN users u1
+      ON u1.id = t.created_by
+
+    LEFT JOIN users u2
+      ON u2.id = t.assigned_to
+
+    WHERE
+      tm.workspace_id = ?
+      AND t.team_id = ?
+      AND t.assigned_to = ? `;
+
+  const params = [
+    process.env.BASE_URL,
+    process.env.BASE_URL,
+    workspace_id,
+    team_id,
+    user_id,
+  ];
+
+  if (status) {
+    sql += ` AND t.status = ? `;
+    params.push(status);
+  }
+
+  sql += ` ORDER BY t.created_at DESC `;
+
+  const [rows] = await pool.query(sql, params);
+
+  return rows;
 };

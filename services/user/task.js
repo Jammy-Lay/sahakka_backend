@@ -4,10 +4,14 @@ const users = require("../../models/users");
 const workspace = require("../../models/user/workspace");
 const { sendTaskAssignByEmail } = require("../mail/mailService");
 
-exports.getTasksByTeam = async (team_id, workspace_id) => {
-  const rows = await task.getTasksByTeam(team_id, workspace_id);
+exports.getTasksByTeam = async (team_id, workspace_id, status) => {
+  const rows = await task.getTasksByTeam(team_id, workspace_id, status);
 
-  const data = rows.map((item) => ({
+  if (rows.length === 0) {
+    return [];
+  }
+
+  return rows.map((item) => ({
     id: item.id,
     team_id: item.team_id,
     title: item.title,
@@ -31,8 +35,6 @@ exports.getTasksByTeam = async (team_id, workspace_id) => {
       avatar: item.assigned_to_avatar,
     },
   }));
-
-  return data;
 };
 
 exports.createTask = async (
@@ -89,8 +91,6 @@ exports.createTask = async (
 
     let messageTask = "";
     let messageTeam = "";
-
-    await task.updateStatus("in_progress", task_id);
 
     if (isSelfAssign) {
       messageTask = "self-assigned the task";
@@ -156,6 +156,18 @@ exports.updateTask = async (
     }
   }
 
+  if (!["bug", "feature", "task", "improvement"].includes(body.type)) {
+    throw new Error("Invalid type");
+  }
+
+  if (!["todo", "in_progress"].includes(body.status)) {
+    throw new Error("Invalid status");
+  }
+
+  if (!["urgent", "high", "medium", "low"].includes(body.priority)) {
+    throw new Error("Invalid priority");
+  }
+
   await task.updateTask(task_id, {
     ...body,
     assigned_to,
@@ -166,8 +178,6 @@ exports.updateTask = async (
 
     let messageTask = "";
     let messageTeam = "";
-
-    await task.updateStatus("in_progress", task_id);
 
     if (isSelfAssign) {
       messageTask = "self-assigned the task";
@@ -281,4 +291,87 @@ exports.createTaskActivity = async (task_id, user_id, action, message) => {
 
 exports.createDefaultTask = async (team_id, user_id) => {
   await task.createDefaultTask(team_id, user_id);
+};
+
+exports.deleteTask = async (workspace_id, team_id, task_id, user_id) => {
+  const row = await task.findTaskById(task_id);
+
+  if (row.length === 0) {
+    throw new Error("Task not found");
+  }
+
+  const current = row[0];
+
+  const checkTaskInTeam = await task.checkTaskInTeam(task_id, team_id);
+
+  if (checkTaskInTeam.length === 0) {
+    throw new Error("Task is not in this team");
+  }
+
+  await team.createTeamActivity(
+    team_id,
+    user_id,
+    "delete",
+    `deleted task ${current.title}`,
+  );
+
+  await task.deleteTask(task_id);
+
+  return true;
+};
+
+exports.getMyTaskSummary = async (workspace_id, team_id, user_id) => {
+  const data = await task.getMyTaskSummary(workspace_id, team_id, user_id);
+
+  return {
+    total_tasks: data.total_tasks,
+
+    status: {
+      todo: data.todo,
+      in_progress: data.in_progress,
+      submitted: data.submitted,
+      approved: data.approved,
+      rejected: data.rejected,
+    },
+
+    priority: {
+      urgent: data.urgent,
+      high: data.high,
+      medium: data.medium,
+      low: data.low,
+    },
+  };
+};
+
+exports.getMyTasks = async (workspace_id, team_id, user_id, status) => {
+  const rows = await task.getMyTasks(workspace_id, team_id, user_id, status);
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  return rows.map((item) => ({
+    id: item.id,
+    team_id: item.team_id,
+    title: item.title,
+    description: item.description,
+    type: item.type,
+    status: item.status,
+    priority: item.priority,
+    created_at: item.created_at,
+    start_date: item.start_date,
+    end_date: item.end_date,
+
+    created_by: {
+      user_id: item.created_by_id,
+      name: item.created_by_name,
+      avatar: item.created_by_avatar,
+    },
+
+    assigned_to: {
+      user_id: item.assigned_to_id,
+      name: item.assigned_to_name,
+      avatar: item.assigned_to_avatar,
+    },
+  }));
 };

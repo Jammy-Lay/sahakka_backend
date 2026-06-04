@@ -89,7 +89,12 @@ exports.getMyWorkspace = async (user_id) => {
   return result;
 };
 
-exports.deleteWorkspace = async (workspace_id) => {
+exports.deleteWorkspace = async (workspace_id, owner_id) => {
+  const total = await workspace.countWorkspaceByOwner(owner_id);
+
+  if (total === 1) {
+    throw new Error("Cannot delete the last workspace");
+  }
   await workspace.deleteWorkspace(workspace_id);
 };
 
@@ -132,4 +137,17 @@ exports.updateMemberRole = async (workspace_id, user_id, role) => {
     name: userInfo[0].name,
     role,
   };
+};
+
+exports.getWorkspaceMembers = async (workspace_id) => {
+  const rows = await workspace.getWorkspaceMembers(workspace_id);
+
+  return rows.map((item) => ({
+    user_id: item.user_id,
+    name: item.name,
+    email: item.email,
+    avatar: item.avatar,
+    role: item.role,
+    joined_at: item.created_at,
+  }));
 };

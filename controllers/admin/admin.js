@@ -102,24 +102,6 @@ exports.activateUser = async (req, res) => {
     }
 };
 
-exports.deleteUser = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        await admin.deleteUser(id);
-
-        return res.status(200).json({
-            result: true,
-            message: 'User deleted successfully'
-        });
-    } catch (error) {
-        return res.status(500).json({
-            result: false,
-            message: error.message
-        });
-    }
-};
-
 // workspace
 
 exports.getWorkspaces = async (req, res) => {

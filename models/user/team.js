@@ -171,3 +171,47 @@ exports.checkUserOtherTeams = async (workspace_id, user_id) => {
 
   return rows;
 };
+
+exports.getTeamMembers = async (workspace_id, team_id) => {
+  let sql = `
+    SELECT
+      tm.user_id,
+      tm.created_at,
+
+      u.name,
+      u.email,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar,
+
+      wm.role
+
+    FROM team_members tm
+
+    JOIN users u
+      ON u.id = tm.user_id
+
+    JOIN teams t
+      ON t.id = tm.team_id
+
+    LEFT JOIN workspace_members wm
+      ON wm.user_id = tm.user_id
+      AND wm.workspace_id = t.workspace_id
+
+    WHERE tm.team_id = ?
+      AND t.workspace_id = ?
+
+    ORDER BY
+      CASE
+        WHEN wm.role = "owner" THEN 1
+        WHEN wm.role = "moderator" THEN 2
+        ELSE 3
+      END,
+      u.name ASC `;
+
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
+    team_id,
+    workspace_id,
+  ]);
+
+  return rows;
+};

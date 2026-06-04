@@ -6,8 +6,12 @@ const { isLogin } = require("../../middlewares/auth");
 const { checkAccess } = require("../../middlewares/checkAccess");
 const { checkWorkspaceRole } = require("../../middlewares/checkRole");
 const { uploadSubmission } = require("../../middlewares/upload");
-const { validateSubmitTask } = require("../../middlewares/validate");
+const { validateSubmitTask, validate } = require("../../middlewares/validate");
 const { uploadLimiter } = require("../../middlewares/rateLimit");
+const {
+  submitTaskSchema,
+  updateSubmissionStatusSchema,
+} = require("../../validators/submission");
 
 router.post(
   "/workspace/:workspace_id/team/:team_id/task/:task_id/submit",
@@ -15,6 +19,7 @@ router.post(
   uploadLimiter,
   checkAccess,
   validateSubmitTask,
+  validate(submitTaskSchema),
   uploadSubmission,
   submission.submitTask,
 );
@@ -32,6 +37,7 @@ router.put(
   isLogin,
   checkAccess,
   checkWorkspaceRole("owner"),
+  validate(updateSubmissionStatusSchema),
   submission.updateSubmissionStatus,
 );
 

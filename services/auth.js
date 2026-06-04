@@ -112,7 +112,7 @@ exports.verifyEmail = async (token) => {
 
   let owner_id = userInfo[0].id;
   const workspace_id = await workspace.createWorkspace(
-    "My Workspace",
+    `${userInfo[0].name}'s Workspace`,
     owner_id,
   );
 

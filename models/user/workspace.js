@@ -120,15 +120,40 @@ exports.updateMemberRole = async (workspace_id, user_id, role) => {
   await pool.query(sql, [role, workspace_id, user_id]);
 };
 
-exports.findWorkspaceByName = async (name) => {
-  const [rows] = await pool.query(
-    `
-      SELECT id
-      FROM workspaces
-      WHERE name = ?
-    `,
-    [name]
-  );
+exports.getWorkspaceMembers = async (workspace_id) => {
+  let sql = `
+    SELECT
+      wm.user_id,
+      wm.role,
+      wm.created_at,
 
+      u.name,
+      u.email,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar
+
+    FROM workspace_members wm
+
+    JOIN users u
+      ON u.id = wm.user_id
+
+    WHERE wm.workspace_id = ?
+
+    ORDER BY
+      CASE
+        WHEN wm.role = "owner" THEN 1
+        WHEN wm.role = "moderator" THEN 2
+        ELSE 3
+      END,
+      u.name ASC `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, workspace_id]);
+
+  return rows;
+};
+
+exports.findWorkspaceByName = async (name) => {
+  const [rows] = await pool.query("SELECT id FROM workspaces WHERE name = ?", [
+    name,
+  ]);
   return rows;
 };
