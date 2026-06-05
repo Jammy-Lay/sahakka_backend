@@ -1,5 +1,6 @@
 const workspace = require("../../models/user/workspace");
 const users = require("../../models/users");
+const team = require("../../models/user/team");
 
 exports.createWorkspace = async (name, owner_id) => {
   const total = await workspace.countWorkspaceByOwner(owner_id);
@@ -150,4 +151,27 @@ exports.getWorkspaceMembers = async (workspace_id) => {
     role: item.role,
     joined_at: item.created_at,
   }));
+};
+
+exports.removeWorkspaceMember = async (workspace_id, user_id, removed_by) => {
+  const member = await workspace.checkWorkspaceMember(user_id, workspace_id);
+
+  if (member.length === 0) {
+    throw new Error("Member not found");
+  }
+
+  if (member[0].role === "owner") {
+    throw new Error("Workspace owner cannot be removed");
+  }
+
+  const userInfo = await users.findById(user_id);
+
+  if (userInfo.length === 0) {
+    throw new Error("User not found");
+  }
+
+  await team.removeUserFromAllTeams(workspace_id, user_id);
+
+  await workspace.removeWorkspaceMember(workspace_id, user_id);
+
 };

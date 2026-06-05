@@ -147,3 +147,21 @@ exports.getWorkspaceMembers = async (req, res) => {
     });
   }
 };
+
+exports.removeWorkspaceMember = async (req, res) => {
+  try {
+    const { workspace_id, user_id } = req.params;
+
+    await workspace.removeWorkspaceMember(workspace_id, user_id, req.user.id);
+
+    return res.json({
+      result: true,
+      message: "Member removed successfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};

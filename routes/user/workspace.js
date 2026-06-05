@@ -54,4 +54,12 @@ router.get(
   workspace.getWorkspaceMembers,
 );
 
+router.delete(
+  "/workspace/:workspace_id/member/:user_id",
+  isLogin,
+  checkAccess,
+  checkWorkspaceRole(["owner"]),
+  workspace.removeWorkspaceMember,
+);
+
 module.exports = router;
