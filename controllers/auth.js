@@ -12,9 +12,9 @@ exports.register = async (req, res) => {
   } catch (err) {
     console.error(err);
 
-    return res.status(err.status || 500).json({
+    return res.status(err.status || 409).json({
       result: false,
-      message: err.message || "Internal Server Error",
+      message: err.message || "Something went wrong. Please try again later.",
     });
   }
 };
@@ -118,7 +118,7 @@ exports.forgotPassword = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       result: false,
-      message: error.message || "Internal Server Error",
+      message: error.message || "Something went wrong. Please try again later.",
     });
   }
 };
@@ -135,7 +135,7 @@ exports.resendOtp = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       result: false,
-      message: error.message || "Internal Server Error",
+      message: error.message || "Something went wrong. Please try again later.",
     });
   }
 };
@@ -150,7 +150,7 @@ exports.verifyOtp = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       result: false,
-      message: error.message || "Internal Server Error",
+      message: error.message || "Something went wrong. Please try again later.",
     });
   }
 };
@@ -170,7 +170,7 @@ exports.resetPassword = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       result: false,
-      message: error.message || "Internal Server Error",
+      message: error.message || "Something went wrong. Please try again later.",
     });
   }
 };

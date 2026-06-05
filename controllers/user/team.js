@@ -26,7 +26,7 @@ exports.createTeam = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
+    return res.status(404).json({
       result: false,
       message: error.message,
     });
@@ -45,7 +45,7 @@ exports.getSectionsByTeam = async (req, res) => {
       data: rows,
     });
   } catch (err) {
-    return res.status(500).json({
+    return res.status(400).json({
       result: false,
       message: err.message,
     });
