@@ -215,3 +215,10 @@ exports.getTeamMembers = async (workspace_id, team_id) => {
 
   return rows;
 };
+
+exports.removeUserFromAllTeams = async (workspace_id, user_id) => {
+  const sql =
+    "DELETE tm FROM team_members tm JOIN teams t ON t.id = tm.team_id WHERE t.workspace_id = ? AND tm.user_id = ?";
+
+  await pool.query(sql, [workspace_id, user_id]);
+};

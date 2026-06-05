@@ -78,7 +78,7 @@ exports.updateTask = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.json({
+    return res.status(400).json({
       result: false,
       message: error.message,
     });

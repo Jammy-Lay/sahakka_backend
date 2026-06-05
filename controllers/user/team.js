@@ -26,7 +26,7 @@ exports.createTeam = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(404).json({
+    return res.status(400).json({
       result: false,
       message: error.message,
     });
