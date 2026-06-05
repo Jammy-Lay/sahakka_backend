@@ -165,11 +165,13 @@ exports.resendVerificationEmail = async (email) => {
 
 exports.forgotPassword = async (email) => {
   let userInfo = await users.findByEmail(email);
-  if (!userInfo[0].is_active) {
-    throw new Error("Your account has been blocked by admin");
-  }
+  
   if (!userInfo || userInfo.length === 0) {
     throw new Error("OTP has been sent");
+  }
+
+  if (!userInfo[0].is_active) {
+    throw new Error("Your account has been blocked by admin");
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000);
