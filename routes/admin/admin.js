@@ -44,7 +44,7 @@ router.get(
 
 //teams
 router.get("/teams", isLogin, checkRole("admin"), admin.getTeams);
-router.get("/teams/:team_id", isLogin, checkRole("admin"), admin.getTeamById);
+router.get("/workspace/:workspace_id/teams/:team_id", isLogin, checkRole("admin"), admin.getTeamById);
 
 router.get(
   "/teams_members/:team_id",

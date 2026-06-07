@@ -187,8 +187,8 @@ exports.getTeams = async (req, res) => {
 
 exports.getTeamById = async (req, res) => {
   try {
-    const { team_id } = req.params;
-    const teams = await admin.getTeamById(team_id);
+    const { workspace_id,team_id } = req.params;
+    const teams = await admin.getTeamById(workspace_id, team_id);
 
     return res.status(200).json({
       result: true,
