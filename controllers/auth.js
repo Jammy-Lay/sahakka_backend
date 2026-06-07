@@ -75,17 +75,22 @@ exports.logout = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
   try {
     await auth.verifyEmail(req.query.token);
-    return res.json({
-      result: true,
-      message: "Verify Email Successfully",
-    });
+    return res.redirect(
+      `${process.env.Frontend_URL}/verify-email?status=success`,
+    );
   } catch (err) {
     console.log(err);
 
-    return res.status(400).json({
-      result: false,
-      message: err.message,
-    });
+    const messages = {
+      "Invalid Token": "invalid",
+      "Email already verify": "already_verified",
+      "Token is expired": "expired",
+    };
+
+    const status = messages[err.message] || "error";
+    return res.redirect(
+      `${process.env.Frontend_URL}/verify-email?status=${status}`,
+    );
   }
 };
 
@@ -177,7 +182,7 @@ exports.resetPassword = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   try {
-    const {currentPassword, newPassword, confirmPassword } = req.validData;
+    const { currentPassword, newPassword, confirmPassword } = req.validData;
     const email = req.user.email;
 
     const result = await auth.changePassword(

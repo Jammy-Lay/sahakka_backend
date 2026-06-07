@@ -2,85 +2,125 @@ const transporter = require("../../configs/mailer");
 
 const sendVerificationEmail = async (to, token) => {
   const verificationLink = `${process.env.BASE_URL}/api/verify-email?token=${token}`;
-
   await transporter.sendMail({
-    from: `Sahakka Dev <noreply@myapp.com>`, // Professional "From" header
+    from: `Sahakka <noreply@Sahakka.com>`, // Professional "From" header
     to,
     subject: "Confirm your email address",
     html: `
     <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        .container {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-          border: 1px solid #e1e1e1;
-          border-radius: 10px;
+<html >
+<head>
+    <style>
+        @media screen and (max-width: 600px) {
+            .email-card {
+                width: 100% !important;
+                border-radius: 16px !important;
+            }
+            .inner-content {
+                padding: 32px 24px !important;
+            }
+            .cta-button {
+                display: block !important;
+                text-align: center !important;
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+            .fallback-link {
+                word-break: break-all !important;
+            }
         }
-        .header {
-          text-align: center;
-          padding-bottom: 20px;
-        }
-        .button-container {
-          text-align: center;
-          margin: 30px 0;
-        }
-        .button {
-          background-color: #4F46E5;
-          color: white !important;
-          padding: 12px 24px;
-          text-decoration: none;
-          border-radius: 5px;
-          font-weight: bold;
-          display: inline-block;
-        }
-        .footer {
-          font-size: 12px;
-          color: #888;
-          text-align: center;
-          margin-top: 30px;
-        }
-        .link-alt {
-          word-break: break-all;
-          font-size: 11px;
-          color: #999;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h2>Welcome to Sahakka Dev!</h2>
-        </div>
-        <p>Hi there,</p>
-        <p>Thanks for signing up! Please confirm your email address to activate your account and get started.</p>
-        
-        <div class="button-container">
-          <a href="${verificationLink}" class="button">Verify Email Address</a>
-        </div>
-        
-        <p>This link will <strong>expire in 1 hour</strong>. If you did not create an account, no further action is required.</p>
-        
-        <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} Sahakka Dev Inc. All rights reserved.</p>
-          <p class="link-alt">If the button doesn't work, copy and paste this link into your browser:<br>
-          ${verificationLink}</p>
-        </div>
-      </div>
-    </body>
-    </html>
-    `,
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F2F5F9; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+
+    <!-- Outer Layout Wrapper -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; padding: 50px 0;">
+        <tr>
+            <td align="center">
+                
+                <!-- Main Glassmorphism-Inspired Card -->
+                <table border="0" cellpadding="0" cellspacing="0" width="560" class="email-card" style="background-color: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.02); overflow: hidden;">
+                    <tr>
+                        <td class="inner-content" style="padding: 44px 48px; text-align: left;">
+                            
+                            <!-- Official Logo Header Block -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+                                <tr>
+                                    <td align="center">
+                                        <img src="${process.env.BASE_URL}/uploads/images/image.png" alt="Logo" width="64" height="64" style="display: block; border: 0; width: 64px; height: 64px; border-radius: 16px;">
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Application Branding Header -->
+                            <h1 style="margin: 0 0 32px 0; font-size: 24px; font-weight: 700; color: #0f172a; text-align: center; letter-spacing: -0.5px;">
+                                Welcome to Sahakka!
+                            </h1>
+                            
+                            <!-- Greeting and Context -->
+                            <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
+                                Hi there,
+                            </p>
+                            <p style="margin: 0 0 32px 0; font-size: 15px; color: #475569; line-height: 1.6;">
+                                Thanks for signing up! Please confirm your email address to activate your account and get started.
+                            </p>
+
+
+                            <!-- Call to Action Button Container -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 32px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${verificationLink}" target="_blank" class="cta-button" style="display: inline-block; padding: 14px 32px; font-size: 15px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 10px; background-color: #171717; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); transition: all 0.2s ease;">
+                                            Verify Email Address
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Expiration Alert Notice -->
+                            <p style="margin: 0 0 32px 0; font-size: 14px; color: #64748b; text-align: center; line-height: 1.5;">
+                                This link will <strong style="color: #0f172a; font-weight: 600;">expire in 1 hour</strong>. If you did not create an account, no further action is required.
+                            </p>
+
+                            <!-- Structural Divider Line -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top: 1px solid #f1f5f9; margin-bottom: 24px;">
+                                <tr><td></td></tr>
+                            </table>
+
+                            <!-- Plain Text Fallback Route Support -->
+                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8; text-align: center; line-height: 1.5;">
+                                If the button doesn't work, copy and paste this link into your browser:
+                            </p>
+                            <p style="margin: 0; font-size: 12px; text-align: center; line-height: 1.6; word-break: break-all;">
+                                <a class="fallback-link" href="${verificationLink}" style="color: #4f46e5; text-decoration: none; font-family: monospace;">${verificationLink}</a>
+                            </p>
+
+                        </td>
+                    </tr>
+                </table>
+                <!-- /Main Glassmorphism-Inspired Card -->
+
+                <!-- Footer Copyright Brand Label -->
+                <table border="0" cellpadding="0" cellspacing="0" width="560" class="email-card" style="text-align: center; margin-top: 28px;">
+                    <tr>
+                        <td style="font-size: 12px; color: #94a3b8; font-weight: 400; letter-spacing: 0.2px;">
+                            &copy; 2026 MyApp Inc. &bull; All rights reserved.
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html> `,
   });
 };
 
 const sendResetPasswordOTP = async (to, otp) => {
   await transporter.sendMail({
-    from: `Sahakka Dev <noreply@myapp.com>`,
+    from: `Sahakka Dev <noreply@Sahakka.com>`,
     to,
     subject: "Password Reset OTP",
 
@@ -304,7 +344,7 @@ const sendSubmissionReviewEmail = async (
   reviewerName,
   reviewerAvatar,
   status,
-  feedback
+  feedback,
 ) => {
   const isApproved = status === "approved";
 
@@ -489,7 +529,6 @@ const sendBlockedAccountMail = async (user) => {
   });
 };
 
-
 module.exports = {
   sendVerificationEmail,
   sendResetPasswordOTP,
@@ -497,5 +536,5 @@ module.exports = {
   sendInviteByEmail,
   sendSubmissionReviewEmail,
   sendActivateAccountMail,
-  sendBlockedAccountMail
+  sendBlockedAccountMail,
 };
