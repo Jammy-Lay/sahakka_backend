@@ -2,26 +2,26 @@ const pool = require("../../configs/db");
 
 // user management
 exports.getAllUsers = async () => {
-    const [rows] = await pool.query(`
+  const [rows] = await pool.query(`
     SELECT id, name, email, role, is_active, is_verified, created_at
     FROM users WHERE role = 'user'
     ORDER BY created_at DESC
   `);
 
-    return rows;
+  return rows;
 };
 exports.getUserById = async (user_id) => {
-    const [rows] = await pool.query(`
+  const [rows] = await pool.query(`
     SELECT id, name, email, role, is_active, is_verified, created_at
     FROM users WHERE id = ? AND role = 'user'
     ORDER BY created_at DESC;
-  `,[user_id]);
+  `, [user_id]);
 
-    return rows;
+  return rows;
 };
 
 exports.suspendUser = async (userId) => {
-    await pool.query(`
+  await pool.query(`
     UPDATE users
     SET is_active = 0
     WHERE id = ?
@@ -29,7 +29,7 @@ exports.suspendUser = async (userId) => {
 };
 
 exports.activateUser = async (userId) => {
-    await pool.query(`
+  await pool.query(`
     UPDATE users
     SET is_active = 1
     WHERE id = ?
@@ -92,7 +92,7 @@ exports.getWorkspaceDetails = async (workspaceId) => {
     ORDER BY w.created_at DESC
   `;
 
-  const [rows] = await pool.query(sql, [process.env.BASE_URL,workspaceId]);
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, workspaceId]);
 
   return rows;
 };
@@ -138,9 +138,15 @@ exports.getDashboardStats = async () => {
     FROM tasks
   `);
 
+  const [[teams]] = await pool.query(`
+    SELECT COUNT(*) AS total_teams
+    FROM teams
+  `);
+
   return {
     total_users: users.total_users,
     total_workspaces: workspaces.total_workspaces,
+    total_teams: teams.total_teams,
     total_tasks: tasks.total_tasks
   };
 };
@@ -218,13 +224,13 @@ exports.getTeamById = async (team_id) => {
     ORDER BY t.created_at DESC
   `;
 
-  const [rows] = await pool.query(sql, [process.env.BASE_URL,team_id]);
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, team_id]);
 
   return rows;
 };
 
-exports.getTeamMembers = async (team_id) =>{
-    const sql = `
+exports.getTeamMembers = async (team_id) => {
+  const sql = `
     SELECT
       t.id AS team_id,
       t.title,
@@ -253,7 +259,7 @@ exports.getTeamMembers = async (team_id) =>{
     ORDER BY t.created_at DESC
   `;
 
-  const [rows] = await pool.query(sql, [process.env.BASE_URL,team_id]);
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, team_id]);
 
   return rows;
 }
@@ -288,13 +294,14 @@ exports.getAllTeamActivity = async () => {
 
   return rows;
 };
+exports.getTeamActivityById = async (workspace_id, team_id, user_id) => {
 
-exports.getTeamActivityById = async (team_id) => {
   let sql = `
     SELECT 
       ta.id,
       ta.team_id,
       t.title,
+
       ta.user_id,
       ta.action,
       ta.message,
@@ -308,25 +315,51 @@ exports.getTeamActivityById = async (team_id) => {
       CONCAT(?, '/uploads/avatars/', u.avatar) AS created_by_avatar
 
     FROM team_activities ta
-    JOIN users u ON u.id = ta.user_id
-    JOIN teams t ON t.id = ta.team_id
-    JOIN workspaces w ON w.id = t.workspace_id
-
-    WHERE u.role = 'user' AND ta.team_id = ?
+    JOIN users u 
+      ON u.id = ta.user_id
+    JOIN teams t 
+      ON t.id = ta.team_id
+    JOIN workspaces w 
+      ON w.id = t.workspace_id
+    WHERE 
+      ta.team_id = ?
+      AND t.workspace_id = ?
+    AND (
+      EXISTS (
+        SELECT 1 
+        FROM workspace_members wm
+        WHERE wm.user_id = ?
+        AND wm.workspace_id = ?
+        AND wm.role = 'owner'
+      )
+      OR EXISTS (
+        SELECT 1
+        FROM team_members tm
+        WHERE tm.team_id = ta.team_id
+        AND tm.user_id = ?
+      )
+    )
     ORDER BY ta.created_at DESC
   `;
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
+    team_id,
+    workspace_id,
+    user_id,
+    workspace_id,
+    user_id
+  ]);
 
-  const [rows] = await pool.query(sql, [process.env.BASE_URL, team_id]);
 
   return rows;
 };
 
-  exports.checkWorkspaceMember = async (
-    workspace_id,
-    user_id
-  ) => {
+exports.checkWorkspaceMember = async (
+  workspace_id,
+  user_id
+) => {
 
-    const [rows] = await pool.query(`
+  const [rows] = await pool.query(`
       SELECT *
       FROM workspace_members
       WHERE workspace_id = ?
@@ -334,11 +367,11 @@ exports.getTeamActivityById = async (team_id) => {
       LIMIT 1
     `, [workspace_id, user_id]);
 
-    return rows[0];
+  return rows[0];
 
-  };
+};
 
-  
+
 exports.checkTeamInWorkspace = async (
   team_id,
   workspace_id

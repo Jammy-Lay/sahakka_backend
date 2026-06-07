@@ -218,8 +218,8 @@ exports.getDashboardStats = async () => {
   return await admin.getDashboardStats();
 };
 
-exports.getTeamActivityById = async (team_id) => {
-  const rows = await admin.getTeamActivityById(team_id);
+exports.getTeamActivityById = async (workspace_id, team_id) => {
+  const rows = await admin.getTeamActivityById(workspace_id, team_id);
 
   const data = rows.map((item) => ({
     id: item.id,
