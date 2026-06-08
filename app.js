@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
+const path = require("path");
 require("dotenv").config();
 const helmet = require("helmet");
 const app = express();
@@ -52,7 +53,14 @@ const document = require("./routes/user/document");
 app.use("/api", document);
 
 app.use(require("./routes/demo"));
-app.use("/uploads", express.static("uploads"));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res) => {
+      res.set("Cross-Origin-Resource-Policy", "cross-origin");
+    },
+  }),
+);
 
 const server = http.createServer(app);
 
