@@ -60,6 +60,24 @@ exports.changeAvatar = async (userId, file) => {
   if (!file) {
     throw new Error("Please upload avatar");
   }
+    // Allow only png and jpg/jpeg
+  const allowedTypes = ["image/png", "image/jpeg"];
+
+  if (!allowedTypes.includes(file.mimetype)) {
+    // remove invalid uploaded file
+    const filePath = path.join(
+      process.cwd(),
+      "uploads",
+      "avatars",
+      file.filename
+    );
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    throw new Error("Only PNG and JPG/JPEG images are allowed");
+  }
 
   const user = await profileModel.getUserById(userId);
 
