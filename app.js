@@ -12,7 +12,7 @@ app.set("trust proxy", 1);
 
 app.use(
   helmet({
-    crossOriginResourcePolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }, 
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -22,8 +22,6 @@ app.use(
           "blob:",
           FRONTEND_URL,
           BASE_URL,
-          "http://localhost:3000",
-          "http://localhost:5173",
         ],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
