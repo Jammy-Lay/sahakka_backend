@@ -5,14 +5,41 @@ const path = require("path");
 require("dotenv").config();
 const helmet = require("helmet");
 const app = express();
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 app.set("trust proxy", 1);
+
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          FRONTEND_URL,
+          BASE_URL,
+          "http://localhost:3000",
+          "http://localhost:5173",
+        ],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        connectSrc: ["'self'", FRONTEND_URL, BASE_URL],
+      },
+    },
   }),
 );
-app.use(cors());
+
+app.use(
+  cors({
+    origin: [FRONTEND_URL, BASE_URL],
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -22,11 +49,22 @@ app.get("/", (req, res) => {
   });
 });
 
-const admin = require("./routes/admin/admin");
-app.use("/api/sahakka-admin", admin);
-
 const { apiLimiter } = require("./middlewares/rateLimit");
 app.use("/api", apiLimiter);
+
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res) => {
+      res.set("Cross-Origin-Resource-Policy", "cross-origin");
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Credentials", "true");
+    },
+  }),
+);
+
+const admin = require("./routes/admin/admin");
+app.use("/api/sahakka-admin", admin);
 
 const auth = require("./routes/auth");
 app.use("/api", auth);
@@ -53,14 +91,6 @@ const document = require("./routes/user/document");
 app.use("/api", document);
 
 app.use(require("./routes/demo"));
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "uploads"), {
-    setHeaders: (res) => {
-      res.set("Cross-Origin-Resource-Policy", "cross-origin");
-    },
-  }),
-);
 
 const server = http.createServer(app);
 
