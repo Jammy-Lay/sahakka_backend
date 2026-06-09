@@ -222,3 +222,40 @@ exports.removeUserFromAllTeams = async (workspace_id, user_id) => {
 
   await pool.query(sql, [workspace_id, user_id]);
 };
+
+exports.getTeamById = async (workspace_id, team_id) => {
+  const sql = `
+    SELECT
+      t.id AS team_id,
+      t.title,
+      t.description,
+
+      u.id AS user_id,
+      u.name AS user_name,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar,
+
+      wm.role AS workspace_role
+
+    FROM teams t
+
+    LEFT JOIN team_members tm
+      ON tm.team_id = t.id
+
+    LEFT JOIN users u
+      ON u.id = tm.user_id
+
+    LEFT JOIN workspace_members wm
+      ON wm.user_id = u.id
+      AND wm.workspace_id = t.workspace_id
+
+    WHERE t.workspace_id = ?
+      AND t.id = ? `;
+
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
+    workspace_id,
+    team_id,
+  ]);
+
+  return rows;
+};

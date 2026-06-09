@@ -65,4 +65,11 @@ router.get(
   team.getTeamMembers,
 );
 
+router.get(
+  "/workspace/:workspace_id/team/:team_id",
+  isLogin,
+  checkAccess,
+  team.getTeamById,
+);
+
 module.exports = router;

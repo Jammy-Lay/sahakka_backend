@@ -132,7 +132,10 @@ exports.updateTask = async (
   user_id,
 ) => {
   const row = await task.findTaskById(task_id);
-  if (row.length === 0) throw new Error("Task not found");
+
+  if (row.length === 0) {
+    throw new Error("Task not found");
+  }
 
   const current = row[0];
 
@@ -146,26 +149,32 @@ exports.updateTask = async (
     if ("assigned_to" in body && body.assigned_to !== user_id) {
       throw new Error("You are not allowed to assign task to other users");
     }
+
     assigned_to = user_id;
   }
 
   if (assigned_to != null) {
-    const check = await team.checkTeamMember(assigned_to, current.team_id);
-    if (check.length === 0) {
+    const checkMember = await team.checkTeamMember(
+      assigned_to,
+      current.team_id,
+    );
+
+    if (checkMember.length === 0) {
       throw new Error("User is not in this team");
     }
-  }
 
-  if (!["bug", "feature", "task", "improvement"].includes(body.type)) {
-    throw new Error("Invalid type");
-  }
+    const targetMember = await workspace.checkWorkspaceMember(
+      assigned_to,
+      workspace_id,
+    );
 
-  if (!["todo", "in_progress"].includes(body.status)) {
-    throw new Error("Invalid status");
-  }
-
-  if (!["urgent", "high", "medium", "low"].includes(body.priority)) {
-    throw new Error("Invalid priority");
+    if (
+      workspaceRole === "moderator" &&
+      targetMember.length > 0 &&
+      targetMember[0].role === "owner"
+    ) {
+      throw new Error("Moderator cannot assign tasks to workspace owner");
+    }
   }
 
   await task.updateTask(task_id, {
