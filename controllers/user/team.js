@@ -176,3 +176,22 @@ exports.getTeamMembers = async (req, res) => {
     });
   }
 };
+
+exports.getTeamById = async (req, res) => {
+  try {
+    const { workspace_id, team_id } = req.params;
+
+    const row = await team.getTeamById(workspace_id, team_id);
+
+    return res.json({
+      result: true,
+      message: "Get Team Successfully",
+      data: row,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};

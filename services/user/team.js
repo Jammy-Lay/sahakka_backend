@@ -191,3 +191,33 @@ exports.getTeamMembers = async (workspace_id, team_id) => {
     joined_at: item.created_at,
   }));
 };
+
+exports.getTeamById = async (workspace_id, team_id) => {
+  const rows = await team.getTeamById(workspace_id, team_id);
+
+  if (rows.length === 0) {
+    throw new Error("Team not found");
+  }
+
+  const data = rows[0];
+
+  const result = {
+    team_id: data.team_id,
+    title: data.title,
+    description: data.description,
+    members: [],
+  };
+
+  for (const row of rows) {
+    if (row.user_id) {
+      result.members.push({
+        user_id: row.user_id,
+        name: row.user_name,
+        role: row.workspace_role,
+        avatar: row.avatar,
+      });
+    }
+  }
+
+  return result;
+};
