@@ -11,21 +11,18 @@ const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 app.set("trust proxy", 1);
 
 app.use(
-  cors({
-    origin: [FRONTEND_URL, BASE_URL],
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  }),
-);
-
-app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginResourcePolicy: { policy: "cross-origin" }, 
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "blob:", FRONTEND_URL, BASE_URL],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          FRONTEND_URL,
+          BASE_URL,
+        ],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", FRONTEND_URL, BASE_URL],
@@ -34,10 +31,20 @@ app.use(
   }),
 );
 
+app.use(
+  cors({
+    origin: [FRONTEND_URL, BASE_URL],
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({ result: true, message: "Server is running" });
+  res.json({
+    result: true,
+    message: "Server is running",
+  });
 });
 
 const { apiLimiter } = require("./middlewares/rateLimit");
@@ -88,6 +95,6 @@ const server = http.createServer(app);
 const { initSocket } = require("./configs/socket");
 initSocket(server);
 
-server.listen(3001, () => {
+server.listen(3000, () => {
   console.log("Server running on 3000");
 });
