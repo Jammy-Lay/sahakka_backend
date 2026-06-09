@@ -1,7 +1,7 @@
 const transporter = require("../../configs/mailer");
 
 const sendVerificationEmail = async (to, token) => {
-  const verificationLink = `${process.env.BASE_URL}/api/verify-email?token=${token}`;
+  const verificationLink = `${process.env.BASE_URL}/sahakka-api/v2/verify-email?token=${token}`;
   await transporter.sendMail({
     from: `Sahakka <noreply@Sahakka.com>`, // Professional "From" header
     to,
@@ -291,7 +291,7 @@ const sendInviteByEmail = async (
   inviterName,
   token,
 ) => {
-  const inviteLink = `${process.env.BASE_URL}/api/invite/accept?token=${token}`;
+  const inviteLink = `${process.env.BASE_URL}/sahakka-api/v2/invite/accept?token=${token}`;
 
   await transporter.sendMail({
     from: `Sahakka Dev <noreply@myapp.com>`,
