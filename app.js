@@ -48,7 +48,7 @@ app.get("/", (req, res) => {
 });
 
 const { apiLimiter } = require("./middlewares/rateLimit");
-app.use("/api", apiLimiter);
+app.use("/sahakka-api/v2", apiLimiter);
 
 app.use(
   "/uploads",
@@ -62,31 +62,31 @@ app.use(
 );
 
 const admin = require("./routes/admin/admin");
-app.use("/api/sahakka-admin", admin);
+app.use("/sahakka-api/v2/sahakka-admin", admin);
 
 const auth = require("./routes/auth");
-app.use("/api", auth);
+app.use("/sahakka-api/v2", auth);
 
 const profile = require("./routes/profile/profile");
-app.use("/api", profile);
+app.use("/sahakka-api/v2", profile);
 
 const workspace = require("./routes/user/workspace");
-app.use("/api", workspace);
+app.use("/sahakka-api/v2", workspace);
 
 const team = require("./routes/user/team");
-app.use("/api", team);
+app.use("/sahakka-api/v2", team);
 
 const task = require("./routes/user/task");
-app.use("/api", task);
+app.use("/sahakka-api/v2", task);
 
 const invite = require("./routes/user/invite");
-app.use("/api", invite);
+app.use("/sahakka-api/v2", invite);
 
 const submission = require("./routes/user/submission");
-app.use("/api", submission);
+app.use("/sahakka-api/v2", submission);
 
 const document = require("./routes/user/document");
-app.use("/api", document);
+app.use("/sahakka-api/v2", document);
 
 app.use(require("./routes/demo"));
 
