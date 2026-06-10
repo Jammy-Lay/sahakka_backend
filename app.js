@@ -33,10 +33,16 @@ app.use(
 
 app.use(
   cors({
-    origin: [FRONTEND_URL, BASE_URL],
+    origin: [
+      "http://localhost:5173",
+      "https://sahakka.tzy.linkpc.net",
+    ],
     credentials: true,
-  }),
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
 );
+
 
 app.use(express.json());
 
