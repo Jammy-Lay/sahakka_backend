@@ -60,4 +60,11 @@ router.get(
   task.getMyTasks,
 );
 
+router.get(
+  "/workspace/:workspace_id/team/:team_id/task/:task_id",
+  isLogin,
+  checkAccess,
+  task.getTaskById,
+);
+
 module.exports = router;
