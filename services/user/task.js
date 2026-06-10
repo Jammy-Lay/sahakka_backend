@@ -29,6 +29,12 @@ exports.getTasksByTeam = async (team_id, workspace_id, status) => {
       avatar: item.created_by_avatar,
     },
 
+    assigned_by: {
+      user_id: item.assigned_by_id,
+      name: item.assigned_by_name,
+      avatar: item.assigned_by_avatar,
+    },
+
     assigned_to: {
       user_id: item.assigned_to_id,
       name: item.assigned_to_name,
@@ -58,11 +64,13 @@ exports.createTask = async (
     if (body.assigned_to && body.assigned_to !== user_id) {
       throw new Error("You are not allowed to assign task to other users");
     }
+
     assigned_to = user_id;
   }
 
   if (assigned_to != null) {
     const check = await team.checkTeamMember(assigned_to, team_id);
+
     if (check.length === 0) {
       throw new Error("User is not in this team");
     }
@@ -73,6 +81,7 @@ exports.createTask = async (
     {
       ...body,
       assigned_to,
+      assigned_by: assigned_to ? user_id : null,
     },
     user_id,
   );
@@ -140,10 +149,14 @@ exports.updateTask = async (
   const current = row[0];
 
   let assigned_to = current.assigned_to_id;
+  let assigned_by = current.assigned_by_id;
 
   if (workspaceRole === "owner" || workspaceRole === "moderator") {
     if ("assigned_to" in body) {
       assigned_to = body.assigned_to;
+
+      // save who performed the assignment
+      assigned_by = assigned_to ? user_id : null;
     }
   } else {
     if ("assigned_to" in body && body.assigned_to !== user_id) {
@@ -151,6 +164,7 @@ exports.updateTask = async (
     }
 
     assigned_to = user_id;
+    assigned_by = user_id;
   }
 
   if (assigned_to != null) {
@@ -180,6 +194,7 @@ exports.updateTask = async (
   await task.updateTask(task_id, {
     ...body,
     assigned_to,
+    assigned_by,
   });
 
   if (assigned_to !== current.assigned_to_id && assigned_to != null) {
@@ -383,4 +398,45 @@ exports.getMyTasks = async (workspace_id, team_id, user_id, status) => {
       avatar: item.assigned_to_avatar,
     },
   }));
+};
+
+exports.getTaskById = async (workspace_id, team_id, task_id) => {
+  const rows = await task.getTaskById(workspace_id, team_id, task_id);
+
+  if (rows.length === 0) {
+    throw new Error("Task not found");
+  }
+
+  const item = rows[0];
+
+  return {
+    id: item.id,
+    team_id: item.team_id,
+    title: item.title,
+    description: item.description,
+    type: item.type,
+    status: item.status,
+    priority: item.priority,
+    created_at: item.created_at,
+    start_date: item.start_date,
+    end_date: item.end_date,
+
+    created_by: {
+      user_id: item.created_by_id,
+      name: item.created_by_name,
+      avatar: item.created_by_avatar,
+    },
+
+    assigned_to: {
+      user_id: item.assigned_to_id,
+      name: item.assigned_to_name,
+      avatar: item.assigned_to_avatar,
+    },
+
+    assigned_by: {
+      user_id: item.assigned_by_id,
+      name: item.assigned_by_name,
+      avatar: item.assigned_by_avatar,
+    },
+  };
 };

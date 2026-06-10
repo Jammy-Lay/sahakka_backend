@@ -163,3 +163,26 @@ exports.getMyTasks = async (req, res) => {
     });
   }
 };
+
+exports.getTaskById = async (req, res) => {
+  try {
+    const { workspace_id, team_id, task_id } = req.params;
+
+    const data = await task.getTaskById(
+      workspace_id,
+      team_id,
+      task_id,
+    );
+
+    return res.json({
+      result: true,
+      message: "Get Task Successfully",
+      data,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      result: false,
+      message: error.message,
+    });
+  }
+};

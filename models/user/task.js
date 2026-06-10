@@ -20,7 +20,11 @@ exports.getTasksByTeam = async (team_id, workspace_id, status = null) => {
 
       u2.id AS assigned_to_id,
       u2.name AS assigned_to_name,
-      CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar
+      CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar,
+
+      u3.id AS assigned_by_id,
+      u3.name AS assigned_by_name,
+      CONCAT(?, '/uploads/avatars/', u3.avatar) AS assigned_by_avatar
 
     FROM tasks t
 
@@ -33,11 +37,15 @@ exports.getTasksByTeam = async (team_id, workspace_id, status = null) => {
     LEFT JOIN users u2
       ON u2.id = t.assigned_to
 
+    LEFT JOIN users u3
+      ON u3.id = t.assigned_by
+
     WHERE
       t.team_id = ?
       AND tm.workspace_id = ? `;
 
   const params = [
+    process.env.BASE_URL,
     process.env.BASE_URL,
     process.env.BASE_URL,
     team_id,
@@ -57,8 +65,22 @@ exports.getTasksByTeam = async (team_id, workspace_id, status = null) => {
 };
 
 exports.createTask = async (team_id, body, user_id) => {
-  let sql =
-    "INSERT INTO tasks(team_id, title, description, type, status, priority, created_by, assigned_to, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  let sql = `
+    INSERT INTO tasks(
+      team_id,
+      title,
+      description,
+      type,
+      status,
+      priority,
+      created_by,
+      assigned_to,
+      assigned_by,
+      start_date,
+      end_date
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
   let [result] = await pool.query(sql, [
     team_id,
@@ -69,11 +91,41 @@ exports.createTask = async (team_id, body, user_id) => {
     body.priority || "medium",
     user_id,
     body.assigned_to || null,
+    body.assigned_to ? user_id : null,
     body.start_date || null,
     body.end_date || null,
   ]);
 
   return result.insertId;
+};
+
+exports.updateTask = async (task_id, body) => {
+  let sql = `
+    UPDATE tasks SET
+      title = ?,
+      description = ?,
+      type = ?,
+      status = ?,
+      priority = ?,
+      assigned_to = ?,
+      assigned_by = ?,
+      start_date = ?,
+      end_date = ?
+    WHERE id = ?
+  `;
+
+  await pool.query(sql, [
+    body.title,
+    body.description || null,
+    body.type || "task",
+    body.status || "todo",
+    body.priority || "medium",
+    body.assigned_to || null,
+    body.assigned_by || null,
+    body.start_date || null,
+    body.end_date || null,
+    task_id,
+  ]);
 };
 
 exports.findTaskById = async (task_id) => {
@@ -150,32 +202,6 @@ exports.createTaskActivity = async (task_id, user_id, action, message) => {
 
   const result = await pool.query(sql, [task_id, user_id, action, message]);
   return result.insertId;
-};
-
-exports.updateTask = async (task_id, body) => {
-  let sql = `
-    UPDATE tasks SET
-      title = ?,
-      description = ?,
-      type = ?,
-      status = ?,
-      priority = ?,
-      assigned_to = ?,
-      start_date = ?,
-      end_date = ?
-    WHERE id = ? `;
-
-  await pool.query(sql, [
-    body.title,
-    body.description || null,
-    body.type || "task",
-    body.status || "todo",
-    body.priority || "medium",
-    body.assigned_to || null,
-    body.start_date || null,
-    body.end_date || null,
-    task_id,
-  ]);
 };
 
 exports.updateStatus = async (status, task_id) => {
@@ -285,6 +311,66 @@ exports.getMyTasks = async (workspace_id, team_id, user_id, status = null) => {
   sql += ` ORDER BY t.created_at DESC `;
 
   const [rows] = await pool.query(sql, params);
+
+  return rows;
+};
+
+exports.getTaskById = async (workspace_id, team_id, task_id) => {
+  const sql = `
+    SELECT
+      t.id,
+      t.team_id,
+      t.title,
+      t.description,
+      t.type,
+      t.status,
+      t.priority,
+      t.created_at,
+      t.start_date,
+      t.end_date,
+
+      u1.id AS created_by_id,
+      u1.name AS created_by_name,
+      CONCAT(?, '/uploads/avatars/', u1.avatar) AS created_by_avatar,
+
+      u2.id AS assigned_to_id,
+      u2.name AS assigned_to_name,
+      CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar,
+
+      u3.id AS assigned_by_id,
+      u3.name AS assigned_by_name,
+      CONCAT(?, '/uploads/avatars/', u3.avatar) AS assigned_by_avatar
+
+    FROM tasks t
+
+    JOIN teams tm
+      ON tm.id = t.team_id
+
+    LEFT JOIN users u1
+      ON u1.id = t.created_by
+
+    LEFT JOIN users u2
+      ON u2.id = t.assigned_to
+
+    LEFT JOIN users u3
+      ON u3.id = t.assigned_by
+
+    WHERE
+      t.id = ?
+      AND t.team_id = ?
+      AND tm.workspace_id = ?
+
+    LIMIT 1
+  `;
+
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
+    process.env.BASE_URL,
+    process.env.BASE_URL,
+    task_id,
+    team_id,
+    workspace_id,
+  ]);
 
   return rows;
 };
