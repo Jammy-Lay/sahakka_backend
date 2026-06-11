@@ -4,25 +4,30 @@ const http = require("http");
 const path = require("path");
 require("dotenv").config();
 const helmet = require("helmet");
+
 const app = express();
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 app.set("trust proxy", 1);
 
+app.options(
+  /.*/,
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
 app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }, 
+    crossOriginResourcePolicy: { policy: "cross-origin" },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: [
-          "'self'",
-          "data:",
-          "blob:",
-          FRONTEND_URL,
-          BASE_URL,
-        ],
+        imgSrc: ["'self'", "data:", "blob:", FRONTEND_URL, BASE_URL],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: ["'self'", FRONTEND_URL, BASE_URL],
@@ -33,11 +38,11 @@ app.use(
 
 app.use(
   cors({
-    origin: "*",
+    origin: FRONTEND_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use(express.json());
@@ -57,7 +62,7 @@ app.use(
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res) => {
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
-      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Allow-Origin", FRONTEND_URL);
       res.set("Access-Control-Allow-Credentials", "true");
     },
   }),
