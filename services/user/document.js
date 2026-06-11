@@ -1,8 +1,23 @@
-const xss = require("xss");
 const document = require("../../models/user/document");
 
 exports.getAllDocuments = async (workspace_id, team_id) => {
-  await document.getAllDocuments(workspace_id, team_id);
+  const rows = await document.getAllDocuments(workspace_id, team_id);
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  return rows.map((item) => ({
+    document_id: item.id,
+    title: item.title,
+    created_at: item.created_at,
+
+    created_by: {
+      user_id: item.user_id,
+      name: item.created_by,
+      avatar: item.avatar,
+    },
+  }));
 };
 
 exports.getDocumentById = async (document_id) => {
@@ -29,7 +44,28 @@ exports.getDocumentById = async (document_id) => {
 };
 
 exports.createDocument = async (team_id, body, user_id) => {
-  await document.createDocument(team_id, body.title, user_id);
+  const document_id = await document.createDocument(
+    team_id,
+    body.title,
+    user_id,
+  );
+
+  const rows = await document.getDocumentById(document_id);
+
+  const data = rows[0];
+
+  return {
+    document_id: data.id,
+    title: data.title,
+    content: data.content || "",
+    created_at: data.created_at,
+
+    created_by: {
+      user_id: data.user_id,
+      name: data.created_by,
+      avatar: data.avatar,
+    },
+  };
 };
 
 exports.updateDocumentTitle = async (document_id, body) => {
