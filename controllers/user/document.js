@@ -4,23 +4,21 @@ exports.createDocument = async (req, res) => {
   try {
     const { team_id } = req.params;
 
-    const result = await document.createDocument(
+    const data = await document.createDocument(
       team_id,
       req.validData,
       req.user.id,
     );
 
-    const row = await document.getDocumentById(result);
-
     return res.json({
       result: true,
       message: "Document created successfully",
-      data: row,
+      data,
     });
-  } catch (error) {
+  } catch (err) {
     return res.status(400).json({
       result: false,
-      message: error.message,
+      message: err.message,
     });
   }
 };
