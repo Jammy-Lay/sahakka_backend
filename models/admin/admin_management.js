@@ -11,29 +11,38 @@ exports.getAllUsers = async () => {
   return rows;
 };
 exports.getUserById = async (user_id) => {
-  const [rows] = await pool.query(`
+  const [rows] = await pool.query(
+    `
     SELECT id, name, email, role, is_active, is_verified, created_at
     FROM users WHERE id = ? AND role = 'user'
     ORDER BY created_at DESC;
-  `, [user_id]);
+  `,
+    [user_id],
+  );
 
   return rows;
 };
 
 exports.suspendUser = async (userId) => {
-  await pool.query(`
+  await pool.query(
+    `
     UPDATE users
     SET is_active = 0
     WHERE id = ?
-  `, [userId]);
+  `,
+    [userId],
+  );
 };
 
 exports.activateUser = async (userId) => {
-  await pool.query(`
+  await pool.query(
+    `
     UPDATE users
     SET is_active = 1
     WHERE id = ?
-  `, [userId]);
+  `,
+    [userId],
+  );
 };
 
 // workspaces
@@ -101,12 +110,32 @@ exports.getWorkspaceDetails = async (workspaceId) => {
 exports.getAllTasks = async () => {
   const [rows] = await pool.query(`
     SELECT
-      t.*,
-      u.name AS assigned_user
+        t.id,
+        t.title,
+        t.description,
+        t.type,
+        t.status,
+        t.priority,
+        t.start_date,
+        t.end_date,
+        t.created_at,
+
+        tm.id AS team_id,
+        tm.title AS team_name,
+        tm.description AS team_description,
+
+        u.id AS assigned_user_id,
+        u.name AS assigned_user,
+        u.avatar AS avatar
+
     FROM tasks t
-    LEFT JOIN users u ON t.assigned_to = u.id
-    ORDER BY t.created_at DESC
-  `);
+    LEFT JOIN teams tm 
+        ON tm.id = t.team_id
+
+    LEFT JOIN users u 
+        ON u.id = t.assigned_to
+    ORDER BY t.created_at DESC;
+      `);
 
   return rows;
 };
@@ -147,7 +176,7 @@ exports.getDashboardStats = async () => {
     total_users: users.total_users,
     total_workspaces: workspaces.total_workspaces,
     total_teams: teams.total_teams,
-    total_tasks: tasks.total_tasks
+    total_tasks: tasks.total_tasks,
   };
 };
 
@@ -262,7 +291,7 @@ exports.getTeamMembers = async (team_id) => {
   const [rows] = await pool.query(sql, [process.env.BASE_URL, team_id]);
 
   return rows;
-}
+};
 
 exports.getAllTeamActivity = async () => {
   let sql = `
@@ -295,7 +324,6 @@ exports.getAllTeamActivity = async () => {
   return rows;
 };
 exports.getTeamActivityById = async (workspace_id, team_id, user_id) => {
-
   let sql = `
     SELECT 
       ta.id,
@@ -347,51 +375,43 @@ exports.getTeamActivityById = async (workspace_id, team_id, user_id) => {
     workspace_id,
     user_id,
     workspace_id,
-    user_id
+    user_id,
   ]);
-
 
   return rows;
 };
 
-exports.checkWorkspaceMember = async (
-  workspace_id,
-  user_id
-) => {
-
-  const [rows] = await pool.query(`
+exports.checkWorkspaceMember = async (workspace_id, user_id) => {
+  const [rows] = await pool.query(
+    `
       SELECT *
       FROM workspace_members
       WHERE workspace_id = ?
       AND user_id = ?
       LIMIT 1
-    `, [workspace_id, user_id]);
+    `,
+    [workspace_id, user_id],
+  );
 
   return rows[0];
-
 };
 
-
-exports.checkTeamInWorkspace = async (
-  team_id,
-  workspace_id
-) => {
-
-  const [rows] = await pool.query(`
+exports.checkTeamInWorkspace = async (team_id, workspace_id) => {
+  const [rows] = await pool.query(
+    `
     SELECT *
     FROM teams
     WHERE id = ?
     AND workspace_id = ?
     LIMIT 1
-  `, [team_id, workspace_id]);
+  `,
+    [team_id, workspace_id],
+  );
 
   return rows[0];
-
 };
 
-
 exports.getTaskActivityById = async (task_id) => {
-
   const sql = `
     SELECT 
       ta.id,
@@ -415,10 +435,7 @@ exports.getTaskActivityById = async (task_id) => {
     ORDER BY ta.created_at DESC
   `;
 
-  const [rows] = await pool.query(sql, [
-    process.env.BASE_URL,
-    task_id
-  ]);
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, task_id]);
 
   return rows;
 };

@@ -12,8 +12,8 @@ exports.apiLimiter = rateLimit({
 });
 
 exports.authLoginLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 100,
+  windowMs: 100 * 60 * 1000,
+  max: 10,
   message: {
     result: false,
     message: "Too many login attempts",
