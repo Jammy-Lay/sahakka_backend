@@ -22,7 +22,7 @@ exports.authLoginLimiter = rateLimit({
 
 exports.authRegisterLimiter = rateLimit({
   windowMs: 5 * 60 * 60 * 1000, // 5h
-  max: 55,
+  max: 5,
   message: {
     result: false,
     message: "Too many login attempts",
