@@ -206,7 +206,38 @@ exports.getTeamMembers = async (team_id) => {
 
 //task
 exports.getTasks = async () => {
-  return await admin.getAllTasks();
+  const tasks = await admin.getAllTasks();
+
+  return tasks.map(task => ({
+    id: task.id,
+    title: task.title,
+    description: task.description,
+    type: task.type,
+    status: task.status,
+    priority: task.priority,
+
+    team: {
+      id: task.team_id,
+      name: task.team_name,
+      description: task.team_description,
+    },
+
+    assignedUser: task.assigned_user_id
+      ? {
+          id: task.assigned_user_id,
+          name: task.assigned_user,
+          avatar:task.avatar
+            ? `${process.env.BASE_URL}/uploads/avatars/${task.avatar}` : "/uploads/avatars/default-avatar.png"
+        }
+      : null,
+
+    dates: {
+      start: task.start_date,
+      end: task.end_date,
+    },
+
+    createdAt: task.created_at,
+  }));
 };
 
 exports.getTaskAnalytics = async () => {
