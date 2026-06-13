@@ -100,36 +100,36 @@ exports.createTask = async (team_id, body, user_id) => {
 };
 
 exports.updateTask = async (task_id, body) => {
-  let sql = `
+  const sql = `
     UPDATE tasks SET
-      title = ?,
-      description = ?,
-      type = ?,
-      status = ?,
-      priority = ?,
-      assigned_to = ?,
-      assigned_by = ?,
-      start_date = ?,
-      end_date = ?
-    WHERE id = ?
+      title=?,
+      description=?,
+      type=?,
+      status=?,
+      priority=?,
+      assigned_to=?,
+      assigned_by=?,
+      start_date=?,
+      end_date=?
+    WHERE id=?
   `;
 
   await pool.query(sql, [
     body.title,
-    body.description || null,
-    body.type || "task",
-    body.status || "todo",
-    body.priority || "medium",
-    body.assigned_to || null,
-    body.assigned_by || null,
-    body.start_date || null,
-    body.end_date || null,
+    body.description,
+    body.type,
+    body.status,
+    body.priority,
+    body.assigned_to,
+    body.assigned_by,
+    body.start_date,
+    body.end_date,
     task_id,
   ]);
 };
 
 exports.findTaskById = async (task_id) => {
-  let sql = `
+  const sql = `
     SELECT
       t.id,
       t.team_id,
@@ -148,21 +148,34 @@ exports.findTaskById = async (task_id) => {
 
       u2.id AS assigned_to_id,
       u2.name AS assigned_to_name,
-      CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar
+      CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar,
+
+      u3.id AS assigned_by_id,
+      u3.name AS assigned_by_name,
+      CONCAT(?, '/uploads/avatars/', u3.avatar) AS assigned_by_avatar
 
     FROM tasks t
-    LEFT JOIN users u1 ON u1.id = t.created_by
-    LEFT JOIN users u2 ON u2.id = t.assigned_to
 
-    WHERE t.id = ? `;
+    LEFT JOIN users u1
+      ON u1.id = t.created_by
 
-  const [row] = await pool.query(sql, [
+    LEFT JOIN users u2
+      ON u2.id = t.assigned_to
+
+    LEFT JOIN users u3
+      ON u3.id = t.assigned_by
+
+    WHERE t.id = ?
+  `;
+
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
     process.env.BASE_URL,
     process.env.BASE_URL,
     task_id,
   ]);
 
-  return row;
+  return rows;
 };
 
 exports.getTaskActivityById = async (task_id) => {

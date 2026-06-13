@@ -165,3 +165,21 @@ exports.removeWorkspaceMember = async (req, res) => {
     });
   }
 };
+
+exports.leaveWorkspace = async (req, res) => {
+  try {
+    const { workspace_id } = req.params;
+
+    await workspace.leaveWorkspace(workspace_id, req.user.id);
+
+    return res.json({
+      result: true,
+      message: "Left workspace successfully",
+    });
+  } catch (err) {
+    return res.status(400).json({
+      result: false,
+      message: err.message,
+    });
+  }
+};
