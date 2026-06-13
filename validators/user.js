@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 exports.registerUserSchema = Joi.object({
   name: Joi.string().min(3).required(),
-  
+
   email: Joi.string()
     .trim()
     .lowercase()
@@ -17,8 +17,8 @@ exports.registerUserSchema = Joi.object({
     .min(8)
     .pattern(
       new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
-      )
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$",
+      ),
     )
     .required()
     .messages({
@@ -40,22 +40,7 @@ exports.loginUserSchema = Joi.object({
       "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
       "string.empty": "Email is required",
     }),
-
-  password: Joi.string()
-    .trim()
-    .min(8)
-    .pattern(
-      new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
-      )
-    )
-    .required()
-    .messages({
-      "string.min": "Password must be at least 8 characters",
-      "string.pattern.base":
-        "Invalid password format",
-      "string.empty": "Password is required",
-    }),
+  password: Joi.required(),
 });
 
 exports.forgotPasswordSchema = Joi.object({
@@ -109,8 +94,8 @@ exports.resetPasswordSchema = Joi.object({
     .min(8)
     .pattern(
       new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
-      )
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$",
+      ),
     )
     .required()
     .messages({
@@ -136,8 +121,8 @@ exports.changePasswordSchema = Joi.object({
     .min(8)
     .pattern(
       new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
-      )
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$",
+      ),
     )
     .required()
     .messages({
@@ -153,8 +138,8 @@ exports.changePasswordSchema = Joi.object({
     .min(8)
     .pattern(
       new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$"
-      )
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])[A-Za-z0-9!@#\\$%\\^&\\* ]+$",
+      ),
     )
     .required()
     .messages({
@@ -165,13 +150,10 @@ exports.changePasswordSchema = Joi.object({
       "string.empty": "Password is required",
     }),
 
-  confirmPassword: Joi.any()
-    .valid(Joi.ref("newPassword"))
-    .required()
-    .messages({
-      "any.only": "Confirm password does not match",
-      "any.required": "Confirm password is required",
-    }),
+  confirmPassword: Joi.any().valid(Joi.ref("newPassword")).required().messages({
+    "any.only": "Confirm password does not match",
+    "any.required": "Confirm password is required",
+  }),
 });
 
 exports.resendEmailSchema = Joi.object({
@@ -187,17 +169,12 @@ exports.resendEmailSchema = Joi.object({
 });
 
 exports.changeNameSchema = Joi.object({
-  name: Joi.string()
-    .trim()
-    .min(3)
-    .max(50)
-    .required()
-    .messages({
-      "string.empty": "Name is required",
-      "string.min": "Name must be at least 3 characters",
-      "string.max": "Name cannot exceed 50 characters",
-      "any.required": "Name is required",
-    }),
+  name: Joi.string().trim().min(3).max(50).required().messages({
+    "string.empty": "Name is required",
+    "string.min": "Name must be at least 3 characters",
+    "string.max": "Name cannot exceed 50 characters",
+    "any.required": "Name is required",
+  }),
 });
 
 exports.inviteByEmailSchema = Joi.object({
@@ -213,15 +190,15 @@ exports.inviteByEmailSchema = Joi.object({
 });
 
 exports.joinByTokenSchema = Joi.object({
-token: Joi.string()
-  .trim()
-  .length(8)
-  .pattern(/^[a-zA-Z0-9]+$/)
-  .required()
-  .messages({
-    "string.empty": "Token is required",
-    "string.length": "Token must be exactly 8 characters",
-    "string.pattern.base": "Token must contain only letters and numbers",
-    "any.required": "Token is required",
-  }),
+  token: Joi.string()
+    .trim()
+    .length(8)
+    .pattern(/^[a-zA-Z0-9]+$/)
+    .required()
+    .messages({
+      "string.empty": "Token is required",
+      "string.length": "Token must be exactly 8 characters",
+      "string.pattern.base": "Token must contain only letters and numbers",
+      "any.required": "Token is required",
+    }),
 });

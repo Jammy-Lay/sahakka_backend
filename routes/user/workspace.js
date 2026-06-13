@@ -62,4 +62,11 @@ router.delete(
   workspace.removeWorkspaceMember,
 );
 
+router.delete(
+  "/workspace/:workspace_id/member/:user_id",
+  isLogin,
+  checkAccess,
+  workspace.leaveWorkspace,
+);
+
 module.exports = router;

@@ -2,7 +2,7 @@ const rateLimit = require("express-rate-limit");
 
 exports.apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 mins
-  max: 100, // 300 requests
+  max: 3000, // 300 requests
   message: {
     result: false,
     message: "Too many requests, please try again later",

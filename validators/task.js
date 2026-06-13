@@ -8,7 +8,9 @@ exports.createTaskSchema = Joi.object({
     "any.required": "Task title is required",
   }),
 
-  description: Joi.string().allow("").optional(),
+  description: Joi.string()
+    .allow("", null)
+    .optional(),
 
   type: Joi.string()
     .valid("bug", "feature", "task", "improvement")
@@ -18,7 +20,13 @@ exports.createTaskSchema = Joi.object({
     }),
 
   status: Joi.string()
-    .valid("todo", "in_progress", "submitted", "approved", "rejected")
+    .valid(
+      "todo",
+      "in_progress",
+      "submitted",
+      "approved",
+      "rejected"
+    )
     .optional()
     .messages({
       "any.only": "Invalid task status",
@@ -31,29 +39,60 @@ exports.createTaskSchema = Joi.object({
       "any.only": "Invalid task priority",
     }),
 
-  assigned_to: Joi.number().integer().positive().optional(),
+  assigned_to: Joi.number()
+    .integer()
+    .positive()
+    .allow(null)
+    .optional(),
 
-  start_date: Joi.date().optional(),
+  start_date: Joi.date()
+    .allow(null)
+    .optional(),
 
-  end_date: Joi.date().optional(),
+  end_date: Joi.date()
+    .allow(null)
+    .optional(),
 });
 
 exports.updateTaskSchema = Joi.object({
-  title: Joi.string().min(3).max(255).optional(),
-
-  description: Joi.string().allow("").optional(),
-
-  type: Joi.string().valid("bug", "feature", "task", "improvement").optional(),
-
-  status: Joi.string()
-    .valid("todo", "in_progress", "submitted", "approved", "rejected")
+  title: Joi.string()
+    .min(3)
+    .max(255)
     .optional(),
 
-  priority: Joi.string().valid("urgent", "high", "medium", "low").optional(),
+  description: Joi.string()
+    .allow("", null)
+    .optional(),
 
-  assigned_to: Joi.number().integer().positive().optional().allow(null),
+  type: Joi.string()
+    .valid("bug", "feature", "task", "improvement")
+    .optional(),
 
-  start_date: Joi.date().optional().allow(null),
+  status: Joi.string()
+    .valid(
+      "todo",
+      "in_progress",
+      "submitted",
+      "approved",
+      "rejected"
+    )
+    .optional(),
 
-  end_date: Joi.date().optional().allow(null),
+  priority: Joi.string()
+    .valid("urgent", "high", "medium", "low")
+    .optional(),
+
+  assigned_to: Joi.number()
+    .integer()
+    .positive()
+    .allow(null)
+    .optional(),
+
+  start_date: Joi.date()
+    .allow(null)
+    .optional(),
+
+  end_date: Joi.date()
+    .allow(null)
+    .optional(),
 });
