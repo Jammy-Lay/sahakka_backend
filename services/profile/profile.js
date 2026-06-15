@@ -31,49 +31,53 @@ exports.uploadAvatar = async (userId, file) => {
 
 exports.deleteAvatar = async (userId) => {
   const user = await profileModel.getUserById(userId);
-  if (user.avatar === "default-avatar.png") {
-    throw new Error("User already using default avatar");
-  }
 
   if (!user) {
     throw new Error("User not found");
   }
 
-  // delete uploaded avatar
-  if (user.avatar !== "default-avatar.png") {
-    const avatarPath = path.join(__dirname, "../uploads/avatars", user.avatar);
+  const oldAvatar = user.avatar ? user.avatar.split("/").pop() : null;
+
+  // already default
+  if (oldAvatar === "default-avatar.png") {
+    throw new Error("User already using default avatar");
+  }
+
+  // delete uploaded avatar from server
+  if (oldAvatar) {
+    const avatarPath = path.join(
+      process.cwd(),
+      "uploads",
+      "avatars",
+      oldAvatar,
+    );
 
     if (fs.existsSync(avatarPath)) {
       fs.unlinkSync(avatarPath);
     }
   }
 
-  // back to default
+  // update database back to default
   await profileModel.updateAvatar(userId, "default-avatar.png");
 
   return {
     message: "Avatar deleted successfully",
+    avatar: `${process.env.BASE_URL}/uploads/avatars/default-avatar.png`,
   };
 };
 
 exports.changeAvatar = async (userId, file) => {
-  if (!file) {
-    throw new Error("Please upload avatar");
-  }
-    // Allow only png and jpg/jpeg
+  if (!file) throw new Error("Please upload avatar");
+
+  const uploadPath = path.join(process.cwd(), "uploads", "avatars");
+
   const allowedTypes = ["image/png", "image/jpeg"];
 
   if (!allowedTypes.includes(file.mimetype)) {
-    // remove invalid uploaded file
-    const filePath = path.join(
-      process.cwd(),
-      "uploads",
-      "avatars",
-      file.filename
-    );
+    const newFilePath = path.join(uploadPath, file.filename);
 
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    if (fs.existsSync(newFilePath)) {
+      fs.unlinkSync(newFilePath);
     }
 
     throw new Error("Only PNG and JPG/JPEG images are allowed");
@@ -82,26 +86,44 @@ exports.changeAvatar = async (userId, file) => {
   const user = await profileModel.getUserById(userId);
 
   if (!user || user.length === 0) {
+    const newFilePath = path.join(uploadPath, file.filename);
+
+    if (fs.existsSync(newFilePath)) {
+      fs.unlinkSync(newFilePath);
+    }
+
     throw new Error("User not found");
   }
 
-  const oldAvatar = user.avatar;
+  // get old avatar name
+  const oldAvatar = user.avatar ? user.avatar.split("/").pop() : null;
 
-  // Update database first
-  await profileModel.updateAvatar(userId, file.filename);
+  try {
+    // update database with new avatar
+    await profileModel.updateAvatar(userId, file.filename);
 
-  // Remove old avatar after successful DB update
-  if (oldAvatar) {
-    const oldPath = path.join(process.cwd(), "uploads", "avatars", oldAvatar);
+    // delete old avatar only if NOT default
+    if (oldAvatar && oldAvatar !== "default-avatar.png") {
+      const oldAvatarPath = path.join(uploadPath, oldAvatar);
 
-    if (fs.existsSync(oldPath)) {
-      fs.unlinkSync(oldPath);
+      if (fs.existsSync(oldAvatarPath)) {
+        fs.unlinkSync(oldAvatarPath);
+      }
     }
+  } catch (error) {
+    // remove uploaded file if database failed
+    const newFilePath = path.join(uploadPath, file.filename);
+
+    if (fs.existsSync(newFilePath)) {
+      fs.unlinkSync(newFilePath);
+    }
+
+    throw new Error("Failed to update avatar");
   }
 
   return {
     message: "Avatar updated successfully",
-    avatar: file.filename,
+    avatar: `${process.env.BASE_URL}/uploads/avatars/${file.filename}`,
   };
 };
 exports.changeName = async (user_id, name) => {
