@@ -50,42 +50,65 @@ exports.createTask = async (
   workspace_id,
   user_id,
 ) => {
-  if (body.start_date && body.end_date) {
-    if (body.start_date > body.end_date) {
-      throw new Error("Start date cannot be after end date");
-    }
+  // validate date
+  if (
+    body.start_date != null &&
+    body.end_date != null &&
+    new Date(body.start_date) > new Date(body.end_date)
+  ) {
+    throw new Error("Start date cannot be after end date");
   }
 
   let assigned_to = null;
+  let assigned_by = null;
 
+  // role permission
   if (workspaceRole === "owner" || workspaceRole === "moderator") {
-    assigned_to = body.assigned_to || null;
+    assigned_to = body.assigned_to ?? null;
+    assigned_by = assigned_to ? user_id : null;
   } else {
-    if (body.assigned_to && body.assigned_to !== user_id) {
+    if (body.assigned_to != null && body.assigned_to !== user_id) {
       throw new Error("You are not allowed to assign task to other users");
     }
 
     assigned_to = user_id;
+    assigned_by = user_id;
   }
 
+  // validate assigned user
   if (assigned_to != null) {
-    const check = await team.checkTeamMember(assigned_to, team_id);
+    const member = await team.checkTeamMember(assigned_to, team_id);
 
-    if (check.length === 0) {
+    if (member.length === 0) {
       throw new Error("User is not in this team");
+    }
+
+    const target = await workspace.checkWorkspaceMember(
+      assigned_to,
+      workspace_id,
+    );
+
+    if (
+      workspaceRole === "moderator" &&
+      target.length > 0 &&
+      target[0].role === "owner"
+    ) {
+      throw new Error("Moderator cannot assign tasks to owner");
     }
   }
 
+  // create task
   const task_id = await task.createTask(
     team_id,
     {
       ...body,
       assigned_to,
-      assigned_by: assigned_to ? user_id : null,
+      assigned_by,
     },
     user_id,
   );
 
+  // create activity
   await task.createTaskActivity(task_id, user_id, "create", "created the task");
 
   await team.createTeamActivity(
@@ -95,25 +118,27 @@ exports.createTask = async (
     `created task ${body.title}`,
   );
 
+  // assignment activity + email
   if (assigned_to != null) {
-    const isSelfAssign = assigned_to === user_id;
+    const selfAssign = assigned_to === user_id;
 
     let messageTask = "";
     let messageTeam = "";
 
-    if (isSelfAssign) {
+    if (selfAssign) {
       messageTask = "self-assigned the task";
+
       messageTeam = `self-assigned task ${body.title}`;
     } else {
       const assignedUser = await users.findById(assigned_to);
+
       const assigner = await users.findById(user_id);
 
-      const assignedName = assignedUser[0].name;
-
-      messageTask = `assigned task to ${assignedName}`;
-      messageTeam = `assigned task ${body.title} to ${assignedName}`;
-
       const data = await workspace.findWorkspaceWithTeam(workspace_id, team_id);
+
+      messageTask = `assigned task to ${assignedUser[0].name}`;
+
+      messageTeam = `assigned task ${body.title} to ${assignedUser[0].name}`;
 
       await sendTaskAssignByEmail(
         assignedUser[0].email,
@@ -130,7 +155,9 @@ exports.createTask = async (
     await team.createTeamActivity(team_id, user_id, "assign", messageTeam);
   }
 
-  return task_id;
+  return {
+    task_id,
+  };
 };
 
 exports.updateTask = async (
@@ -148,14 +175,16 @@ exports.updateTask = async (
 
   const current = row[0];
 
+  if (body.start_date && body.end_date && body.start_date > body.end_date) {
+    throw new Error("Start date cannot be after end date");
+  }
+
   let assigned_to = current.assigned_to_id;
   let assigned_by = current.assigned_by_id;
 
   if (workspaceRole === "owner" || workspaceRole === "moderator") {
     if ("assigned_to" in body) {
       assigned_to = body.assigned_to;
-
-      // save who performed the assignment
       assigned_by = assigned_to ? user_id : null;
     }
   } else {
@@ -168,60 +197,72 @@ exports.updateTask = async (
   }
 
   if (assigned_to != null) {
-    const checkMember = await team.checkTeamMember(
-      assigned_to,
-      current.team_id,
-    );
+    const member = await team.checkTeamMember(assigned_to, current.team_id);
 
-    if (checkMember.length === 0) {
+    if (member.length === 0) {
       throw new Error("User is not in this team");
     }
 
-    const targetMember = await workspace.checkWorkspaceMember(
+    const target = await workspace.checkWorkspaceMember(
       assigned_to,
       workspace_id,
     );
 
     if (
       workspaceRole === "moderator" &&
-      targetMember.length > 0 &&
-      targetMember[0].role === "owner"
+      target.length &&
+      target[0].role === "owner"
     ) {
-      throw new Error("Moderator cannot assign tasks to workspace owner");
+      throw new Error("Moderator cannot assign tasks to owner");
     }
   }
 
   await task.updateTask(task_id, {
-    ...body,
+    title: body.title ?? current.title,
+
+    description: body.description ?? current.description,
+
+    type: body.type ?? current.type,
+
+    status: body.status ?? current.status,
+
+    priority: body.priority ?? current.priority,
+
     assigned_to,
     assigned_by,
+
+    start_date:
+      body.start_date !== undefined ? body.start_date : current.start_date,
+
+    end_date: body.end_date !== undefined ? body.end_date : current.end_date,
   });
 
   if (assigned_to !== current.assigned_to_id && assigned_to != null) {
-    const isSelfAssign = assigned_to === user_id;
+    const self = assigned_to === user_id;
 
     let messageTask = "";
     let messageTeam = "";
 
-    if (isSelfAssign) {
+    if (self) {
       messageTask = "self-assigned the task";
+
       messageTeam = `self-assigned task ${current.title}`;
     } else {
-      const assignedUser = await users.findById(assigned_to);
+      const assigned = await users.findById(assigned_to);
+
       const assigner = await users.findById(user_id);
-
-      const assignedName = assignedUser[0].name;
-
-      messageTask = `assigned task to ${assignedName}`;
-      messageTeam = `assigned task ${current.title} to ${assignedName}`;
 
       const data = await workspace.findWorkspaceWithTeam(
         workspace_id,
         current.team_id,
       );
 
+      messageTask = `assigned task to ${assigned[0].name}`;
+
+      messageTeam = `assigned task ${current.title} to ${assigned[0].name}`;
+
       await sendTaskAssignByEmail(
-        assignedUser[0].email,
+        assigned[0].email,
         data.workspace_name,
         data.title,
         current.title,
@@ -345,24 +386,28 @@ exports.deleteTask = async (workspace_id, team_id, task_id, user_id) => {
 };
 
 exports.getMyTaskSummary = async (workspace_id, team_id, user_id) => {
-  const data = await task.getMyTaskSummary(workspace_id, team_id, user_id);
+  const data = await task.getMyTaskSummary(
+    workspace_id,
+    team_id,
+    user_id
+  );
 
   return {
-    total_tasks: data.total_tasks,
+    total_tasks: Number(data.total_tasks),
 
     status: {
-      todo: data.todo,
-      in_progress: data.in_progress,
-      submitted: data.submitted,
-      approved: data.approved,
-      rejected: data.rejected,
+      todo: Number(data.todo),
+      in_progress: Number(data.in_progress),
+      submitted: Number(data.submitted),
+      approved: Number(data.approved),
+      rejected: Number(data.rejected),
     },
 
     priority: {
-      urgent: data.urgent,
-      high: data.high,
-      medium: data.medium,
-      low: data.low,
+      urgent: Number(data.urgent),
+      high: Number(data.high),
+      medium: Number(data.medium),
+      low: Number(data.low),
     },
   };
 };

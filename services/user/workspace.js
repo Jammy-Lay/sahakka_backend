@@ -175,3 +175,42 @@ exports.removeWorkspaceMember = async (workspace_id, user_id, removed_by) => {
   await workspace.removeWorkspaceMember(workspace_id, user_id);
 
 };
+
+exports.leaveWorkspace = async (workspace_id, user_id) => {
+  const member = await workspace.checkWorkspaceMember(
+    user_id,
+    workspace_id
+  );
+
+  if (member.length === 0) {
+    throw new Error("You are not a workspace member");
+  }
+
+
+  if (member[0].role === "owner") {
+    throw new Error("Workspace owner cannot leave");
+  }
+
+
+  const teams = await team.checkUserOtherTeams(
+    workspace_id,
+    user_id
+  );
+
+
+  if (teams.length > 0) {
+    await team.removeUserFromAllTeams(
+      workspace_id,
+      user_id
+    );
+  }
+
+
+  await workspace.removeWorkspaceMember(
+    workspace_id,
+    user_id
+  );
+
+
+  return true;
+};

@@ -12,7 +12,7 @@ exports.apiLimiter = rateLimit({
 });
 
 exports.authLoginLimiter = rateLimit({
-  windowMs: 100 * 60 * 1000,
+  windowMs: 10 * 60 * 1000,
   max: 10,
   message: {
     result: false,

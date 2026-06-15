@@ -38,7 +38,7 @@ exports.getSectionsByTeam = async (team_id) => {
 };
 
 exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
-  let sql = `
+  const sql = `
     SELECT
       t.id AS team_id,
       t.title,
@@ -66,17 +66,28 @@ exports.getTeamsByWorkspace = async (workspace_id, user_id) => {
 
     AND (
       EXISTS (
-        SELECT 1 FROM workspace_members 
-        WHERE user_id = ? 
+        SELECT 1
+        FROM workspace_members
+        WHERE user_id = ?
         AND workspace_id = ?
         AND role = 'owner'
       )
       OR t.id IN (
-        SELECT team_id FROM team_members WHERE user_id = ?
+        SELECT team_id
+        FROM team_members
+        WHERE user_id = ?
       )
     )
 
-    ORDER BY t.created_at DESC `;
+    ORDER BY
+      t.created_at DESC,
+      CASE
+        WHEN wm.role = 'owner' THEN 1
+        WHEN wm.role = 'moderator' THEN 2
+        ELSE 3
+      END,
+      u.name ASC
+  `;
 
   const [rows] = await pool.query(sql, [
     process.env.BASE_URL,
@@ -248,8 +259,18 @@ exports.getTeamById = async (workspace_id, team_id) => {
       ON wm.user_id = u.id
       AND wm.workspace_id = t.workspace_id
 
-    WHERE t.workspace_id = ?
-      AND t.id = ? `;
+    WHERE
+      t.workspace_id = ?
+      AND t.id = ?
+
+    ORDER BY
+      CASE
+        WHEN wm.role = 'owner' THEN 1
+        WHEN wm.role = 'moderator' THEN 2
+        ELSE 3
+      END,
+      u.name ASC
+  `;
 
   const [rows] = await pool.query(sql, [
     process.env.BASE_URL,
