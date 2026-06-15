@@ -54,6 +54,9 @@ app.get("/", (req, res) => {
   });
 });
 
+const document = require("./routes/user/document");
+app.use("/sahakka-api/v2", document);
+
 const { apiLimiter } = require("./middlewares/rateLimit");
 app.use("/sahakka-api/v2", apiLimiter);
 
@@ -91,9 +94,6 @@ app.use("/sahakka-api/v2", invite);
 
 const submission = require("./routes/user/submission");
 app.use("/sahakka-api/v2", submission);
-
-const document = require("./routes/user/document");
-app.use("/sahakka-api/v2", document);
 
 app.use(require("./routes/demo"));
 
