@@ -2,9 +2,10 @@ const document = require("../../services/user/document");
 
 exports.createDocument = async (req, res) => {
   try {
-    const { team_id } = req.params;
+    const { workspace_id, team_id } = req.params;
 
     const data = await document.createDocument(
+      workspace_id,
       team_id,
       req.validData,
       req.user.id,
@@ -44,9 +45,13 @@ exports.getAllDocuments = async (req, res) => {
 
 exports.getDocumentById = async (req, res) => {
   try {
-    const { document_id } = req.params;
+    const { workspace_id, team_id, document_id } = req.params;
 
-    const row = await document.getDocumentById(document_id);
+    const row = await document.getDocumentById(
+      workspace_id,
+      team_id,
+      document_id,
+    );
 
     return res.json({
       result: true,
