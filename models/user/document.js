@@ -29,7 +29,7 @@ exports.getAllDocuments = async (workspace_id, team_id) => {
   return rows;
 };
 
-exports.getDocumentById = async (document_id) => {
+exports.getDocumentById = async (workspace_id, team_id, document_id) => {
   const sql = `
     SELECT
       d.id,
@@ -42,17 +42,34 @@ exports.getDocumentById = async (document_id) => {
       u.name AS created_by,
       CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar
 
+
     FROM documents d
+
+
+    INNER JOIN teams t
+      ON t.id = d.team_id
+
 
     LEFT JOIN document_blocks b
       ON b.document_id = d.id
 
+
     LEFT JOIN users u
       ON u.id = d.created_by
 
-    WHERE d.id = ? `;
 
-  const [rows] = await pool.query(sql, [process.env.BASE_URL, document_id]);
+    WHERE
+      d.id = ?
+      AND d.team_id = ?
+      AND t.workspace_id = ?
+  `;
+
+  const [rows] = await pool.query(sql, [
+    process.env.BASE_URL,
+    document_id,
+    team_id,
+    workspace_id,
+  ]);
 
   return rows;
 };

@@ -20,8 +20,12 @@ exports.getAllDocuments = async (workspace_id, team_id) => {
   }));
 };
 
-exports.getDocumentById = async (document_id) => {
-  const rows = await document.getDocumentById(document_id);
+exports.getDocumentById = async (workspace_id, team_id, document_id) => {
+  const rows = await document.getDocumentById(
+    workspace_id,
+    team_id,
+    document_id,
+  );
 
   if (rows.length === 0) {
     throw new Error("Document not found");
@@ -43,14 +47,22 @@ exports.getDocumentById = async (document_id) => {
   };
 };
 
-exports.createDocument = async (team_id, body, user_id) => {
+exports.createDocument = async (workspace_id, team_id, body, user_id) => {
   const document_id = await document.createDocument(
     team_id,
     body.title,
     user_id,
   );
 
-  const rows = await document.getDocumentById(document_id);
+  const rows = await document.getDocumentById(
+    workspace_id,
+    team_id,
+    document_id,
+  );
+
+  if (rows.length === 0) {
+    throw new Error("Document not found after create");
+  }
 
   const data = rows[0];
 
