@@ -153,33 +153,61 @@ exports.getTaskAnalytics = async () => {
 //reports
 exports.getDashboardStats = async () => {
   const [[users]] = await pool.query(`
-    SELECT COUNT(*) AS total_users
-    FROM users
+    SELECT 
+      COUNT(*) AS total,
+      SUM(DATE(created_at) = CURDATE()) AS today
+    FROM users 
+    WHERE role = "user"
   `);
 
   const [[workspaces]] = await pool.query(`
-    SELECT COUNT(*) AS total_workspaces
+    SELECT 
+      COUNT(*) AS total,
+      SUM(DATE(created_at) = CURDATE()) AS today
     FROM workspaces
   `);
 
   const [[tasks]] = await pool.query(`
-    SELECT COUNT(*) AS total_tasks
+    SELECT 
+      COUNT(*) AS total,
+      SUM(DATE(created_at) = CURDATE()) AS today
     FROM tasks
   `);
 
   const [[teams]] = await pool.query(`
-    SELECT COUNT(*) AS total_teams
+    SELECT 
+      COUNT(*) AS total,
+      SUM(DATE(created_at) = CURDATE()) AS today
     FROM teams
   `);
 
+
   return {
-    total_users: users.total_users,
-    total_workspaces: workspaces.total_workspaces,
-    total_teams: teams.total_teams,
-    total_tasks: tasks.total_tasks,
+    users: {
+      total: users.total,
+      today: users.today,
+      text: `${users.total} users, ${users.today} new today`
+    },
+
+    workspaces: {
+      total: workspaces.total,
+      today: workspaces.today,
+      text: `${workspaces.total} workspaces, ${workspaces.today} new today`
+    },
+
+    teams: {
+      total: teams.total,
+      today: teams.today,
+      text: `${teams.total} teams, ${teams.today} new today`
+    },
+
+    tasks: {
+      total: tasks.total,
+      today: tasks.today,
+      text: `${tasks.total} tasks, ${tasks.today} created today`
+    }
   };
 };
-
 //teams
 exports.getAllTeams = async () => {
   const sql = `
