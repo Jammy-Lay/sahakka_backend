@@ -284,24 +284,40 @@ exports.getMyTasks = async (workspace_id, team_id, user_id, status = null) => {
       t.start_date,
       t.end_date,
 
+
       u1.id AS created_by_id,
       u1.name AS created_by_name,
       CONCAT(?, '/uploads/avatars/', u1.avatar) AS created_by_avatar,
 
+
       u2.id AS assigned_to_id,
       u2.name AS assigned_to_name,
-      CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar
+      CONCAT(?, '/uploads/avatars/', u2.avatar) AS assigned_to_avatar,
+
+
+      u3.id AS assigned_by_id,
+      u3.name AS assigned_by_name,
+      CONCAT(?, '/uploads/avatars/', u3.avatar) AS assigned_by_avatar
+
 
     FROM tasks t
+
 
     JOIN teams tm
       ON tm.id = t.team_id
 
+
     LEFT JOIN users u1
       ON u1.id = t.created_by
 
+
     LEFT JOIN users u2
       ON u2.id = t.assigned_to
+
+
+    LEFT JOIN users u3
+      ON u3.id = t.assigned_by
+
 
     WHERE
       tm.workspace_id = ?
@@ -309,6 +325,7 @@ exports.getMyTasks = async (workspace_id, team_id, user_id, status = null) => {
       AND t.assigned_to = ? `;
 
   const params = [
+    process.env.BASE_URL,
     process.env.BASE_URL,
     process.env.BASE_URL,
     workspace_id,

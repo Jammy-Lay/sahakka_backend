@@ -37,6 +37,15 @@ router.put(
 
 router.get("/getMyWorkspace", isLogin, workspace.getMyWorkspace);
 
+router.get(
+  "/workspace/:workspace_id/team/:team_id/check-access",
+  isLogin,
+  checkAccess,
+  (req, res) => {
+    res.json({ message: "ok", role: req.workspaceRole });
+  },
+);
+
 router.put(
   "/workspace/:workspace_id/team/:team_id/member/:user_id/role",
   isLogin,
@@ -63,7 +72,7 @@ router.delete(
 );
 
 router.delete(
-  "/workspace/:workspace_id/member/:user_id",
+  "/workspace/:workspace_id/leave/:user_id",
   isLogin,
   checkAccess,
   workspace.leaveWorkspace,
