@@ -86,7 +86,7 @@ exports.updateDocumentTitle = async (
   document_id,
   body,
 ) => {
-  const rows = await document.getDocumentById(
+  const rows = await document.findDocumentById(
     workspace_id,
     team_id,
     document_id,
@@ -110,7 +110,7 @@ exports.updateDocumentContent = async (
   document_id,
   body,
 ) => {
-  const rows = await document.getDocumentById(
+  const rows = await document.findDocumentById(
     workspace_id,
     team_id,
     document_id,
@@ -129,7 +129,7 @@ exports.updateDocumentContent = async (
 };
 
 exports.deleteDocument = async (workspace_id, team_id, document_id) => {
-  const rows = await document.getDocumentById(
+  const rows = await document.findDocumentById(
     workspace_id,
     team_id,
     document_id,

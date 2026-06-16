@@ -75,6 +75,24 @@ exports.getDocumentById = async (workspace_id, team_id, document_id) => {
   return rows;
 };
 
+exports.findDocumentById = async (workspace_id, team_id, document_id) => {
+  const sql = `
+    SELECT 
+      d.id
+    FROM documents d
+    INNER JOIN teams t
+      ON t.id = d.team_id
+    WHERE
+      d.id = ?
+      AND d.team_id = ?
+      AND t.workspace_id = ?
+  `;
+
+  const [rows] = await pool.query(sql, [document_id, team_id, workspace_id]);
+
+  return rows;
+};
+
 exports.createDocument = async (team_id, title, user_id) => {
   const sql = "INSERT INTO documents (team_id,title,created_by) VALUES (?,?,?)";
 
