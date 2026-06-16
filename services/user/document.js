@@ -80,32 +80,84 @@ exports.createDocument = async (workspace_id, team_id, body, user_id) => {
   };
 };
 
-exports.updateDocumentTitle = async (document_id, body) => {
-  const rows = await document.getDocumentById(document_id);
+exports.updateDocumentTitle = async (
+  workspace_id,
+  team_id,
+  document_id,
+  body,
+  user_id,
+) => {
+  const rows = await document.getDocumentById(
+    workspace_id,
+    team_id,
+    document_id,
+  );
 
   if (rows.length === 0) {
     throw new Error("Document not found");
   }
 
-  await document.updateDocumentTitle(document_id, body.title);
+  const result = await document.updateDocumentTitle(
+    workspace_id,
+    team_id,
+    document_id,
+    body.title,
+    user_id,
+  );
+
+  if (result.affectedRows === 0) {
+    throw new Error("You are not allowed");
+  }
 };
 
-exports.updateDocumentContent = async (document_id, body) => {
-  const rows = await document.getDocumentById(document_id);
+exports.updateDocumentContent = async (
+  workspace_id,
+  team_id,
+  document_id,
+  body,
+  user_id,
+) => {
+  const rows = await document.getDocumentById(
+    workspace_id,
+    team_id,
+    document_id,
+  );
 
   if (rows.length === 0) {
     throw new Error("Document not found");
   }
 
-  await document.updateDocumentContent(document_id, body.content);
+  const result = await document.updateDocumentContent(
+    workspace_id,
+    team_id,
+    document_id,
+    body.content,
+    user_id,
+  );
+
+  if (result.affectedRows === 0) {
+    throw new Error("You are not allowed");
+  }
 };
 
-exports.deleteDocument = async (document_id) => {
-  const rows = await document.getDocumentById(document_id);
+exports.deleteDocument = async (workspace_id, team_id, document_id) => {
+  const rows = await document.getDocumentById(
+    workspace_id,
+    team_id,
+    document_id,
+  );
 
   if (rows.length === 0) {
     throw new Error("Document not found");
   }
 
-  await document.deleteDocument(document_id);
+  const result = await document.deleteDocument(
+    workspace_id,
+    team_id,
+    document_id,
+  );
+
+  if (result.affectedRows === 0) {
+    throw new Error("Delete failed");
+  }
 };

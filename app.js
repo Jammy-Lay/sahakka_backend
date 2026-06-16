@@ -25,7 +25,6 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    console.log("Blocked CORS origin:", origin);
     return callback(null, false);
   },
 
