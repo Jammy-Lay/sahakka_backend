@@ -15,18 +15,25 @@ app.set("trust proxy", 1);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || FRONTEND_URLS.includes(origin)) {
-      callback(null, origin);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+    if (!origin) {
+      return callback(null, true);
     }
+
+    if (FRONTEND_URLS.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
   },
+
   credentials: true,
+
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.options(/.*/, cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(
   helmet({
@@ -42,8 +49,6 @@ app.use(
     },
   }),
 );
-
-app.use(cors(corsOptions));
 
 app.use(express.json());
 
