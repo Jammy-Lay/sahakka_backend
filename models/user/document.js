@@ -90,18 +90,80 @@ exports.createDocument = async (team_id, title, user_id) => {
   return document_id;
 };
 
-exports.deleteDocument = async (document_id) => {
-  await pool.query("DELETE FROM documents WHERE id = ?", [document_id]);
+exports.deleteDocument = async (workspace_id, team_id, document_id) => {
+  const sql = `
+    DELETE d
+    FROM documents d
+    INNER JOIN teams t 
+      ON t.id = d.team_id
+    WHERE 
+      d.id = ?
+      AND d.team_id = ?
+      AND t.workspace_id = ?`;
+
+  const [result] = await pool.query(sql, [document_id, team_id, workspace_id]);
+
+  return result;
 };
 
-exports.updateDocumentTitle = async (document_id, title) => {
-  const sql = "UPDATE documents SET title = ? WHERE id = ?";
+exports.updateDocumentTitle = async (
+  workspace_id,
+  team_id,
+  document_id,
+  title,
+  user_id,
+) => {
+  const sql = `
+    UPDATE documents d
+    INNER JOIN teams t
+      ON t.id = d.team_id
+    SET d.title = ?
+    WHERE
+      d.id = ?
+      AND d.team_id = ?
+      AND t.workspace_id = ?
+      AND d.created_by = ?
+  `;
 
-  await pool.query(sql, [title, document_id]);
+  const [result] = await pool.query(sql, [
+    title,
+    document_id,
+    team_id,
+    workspace_id,
+    user_id,
+  ]);
+
+  return result;
 };
 
-exports.updateDocumentContent = async (document_id, content) => {
-  const sql = "UPDATE document_blocks SET content = ? WHERE document_id = ?";
+exports.updateDocumentContent = async (
+  workspace_id,
+  team_id,
+  document_id,
+  content,
+  user_id,
+) => {
+  const sql = `
+    UPDATE document_blocks b
+    INNER JOIN documents d
+      ON d.id = b.document_id
+    INNER JOIN teams t
+      ON t.id = d.team_id
+    SET b.content = ?
+    WHERE
+      d.id = ?
+      AND d.team_id = ?
+      AND t.workspace_id = ?
+      AND d.created_by = ?
+  `;
 
-  await pool.query(sql, [content, document_id]);
+  const [result] = await pool.query(sql, [
+    content,
+    document_id,
+    team_id,
+    workspace_id,
+    user_id,
+  ]);
+
+  return result;
 };

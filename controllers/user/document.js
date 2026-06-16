@@ -68,10 +68,21 @@ exports.getDocumentById = async (req, res) => {
 
 exports.updateDocumentTitle = async (req, res) => {
   try {
-    const { document_id } = req.params;
+    const { workspace_id, team_id, document_id } = req.params;
 
-    await document.updateDocumentTitle(document_id, req.validData);
-    const row = await document.getDocumentById(document_id);
+    await document.updateDocumentTitle(
+      workspace_id,
+      team_id,
+      document_id,
+      req.validData,
+      req.user.id,
+    );
+
+    const row = await document.getDocumentById(
+      workspace_id,
+      team_id,
+      document_id,
+    );
 
     return res.json({
       result: true,
@@ -88,10 +99,21 @@ exports.updateDocumentTitle = async (req, res) => {
 
 exports.updateDocumentContent = async (req, res) => {
   try {
-    const { document_id } = req.params;
+    const { workspace_id, team_id, document_id } = req.params;
 
-    await document.updateDocumentContent(document_id, req.validData);
-    const row = await document.getDocumentById(document_id);
+    await document.updateDocumentContent(
+      workspace_id,
+      team_id,
+      document_id,
+      req.validData,
+      req.user.id,
+    );
+
+    const row = await document.getDocumentById(
+      workspace_id,
+      team_id,
+      document_id,
+    );
 
     return res.json({
       result: true,
@@ -108,9 +130,14 @@ exports.updateDocumentContent = async (req, res) => {
 
 exports.deleteDocument = async (req, res) => {
   try {
-    const { document_id } = req.params;
+    const { workspace_id, team_id, document_id } = req.params;
 
-    await document.deleteDocument(document_id);
+    await document.deleteDocument(
+      workspace_id,
+      team_id,
+      document_id,
+      req.user.id,
+    );
 
     return res.json({
       result: true,
