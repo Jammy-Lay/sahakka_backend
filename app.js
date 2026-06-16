@@ -6,10 +6,9 @@ require("dotenv").config();
 const helmet = require("helmet");
 
 const app = express();
-const FRONTEND_URLS = [
-  process.env.FRONTEND_URL || "https://sahakkafront.genz.linkpc.net",
-  "http://localhost:5173",
-];
+const FRONTEND_URLS = (process.env.FRONTEND_URL || "http://localhost:5173")
+  .split(",")
+  .map((url) => url.trim());
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 app.set("trust proxy", 1);
