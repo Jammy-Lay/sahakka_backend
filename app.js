@@ -6,12 +6,14 @@ require("dotenv").config();
 const helmet = require("helmet");
 
 const app = express();
+
+app.set("trust proxy", 1);
+
 const FRONTEND_URLS = (process.env.FRONTEND_URL || "http://localhost:5173")
   .split(",")
   .map((url) => url.trim());
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
-app.set("trust proxy", 1);
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -23,7 +25,8 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    return callback(new Error("Not allowed by CORS"));
+    console.log("Blocked CORS origin:", origin);
+    return callback(null, false);
   },
 
   credentials: true,
@@ -35,15 +38,24 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.options("*", cors(corsOptions));
+
 app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginResourcePolicy: {
+      policy: "cross-origin",
+    },
+
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
+
         imgSrc: ["'self'", "data:", "blob:", ...FRONTEND_URLS, BASE_URL],
+
         scriptSrc: ["'self'"],
+
         styleSrc: ["'self'", "'unsafe-inline'"],
+
         connectSrc: ["'self'", ...FRONTEND_URLS, BASE_URL],
       },
     },
@@ -52,6 +64,7 @@ app.use(
 
 app.use(express.json());
 
+// test
 app.get("/", (req, res) => {
   res.json({
     result: true,
@@ -59,6 +72,7 @@ app.get("/", (req, res) => {
   });
 });
 
+// routes
 const document = require("./routes/user/document");
 app.use("/sahakka-api/v2", document);
 
@@ -68,8 +82,9 @@ app.use("/sahakka-api/v2", apiLimiter);
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
-    setHeaders: (res, filePath, stat) => {
+    setHeaders: (res) => {
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
+
       res.set("Access-Control-Allow-Credentials", "true");
     },
   }),
