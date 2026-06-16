@@ -85,7 +85,6 @@ exports.updateDocumentTitle = async (
   team_id,
   document_id,
   body,
-  user_id,
 ) => {
   const rows = await document.getDocumentById(
     workspace_id,
@@ -97,17 +96,12 @@ exports.updateDocumentTitle = async (
     throw new Error("Document not found");
   }
 
-  const result = await document.updateDocumentTitle(
+  await document.updateDocumentTitle(
     workspace_id,
     team_id,
     document_id,
     body.title,
-    user_id,
   );
-
-  if (result.affectedRows === 0) {
-    throw new Error("You are not allowed");
-  }
 };
 
 exports.updateDocumentContent = async (
@@ -115,7 +109,6 @@ exports.updateDocumentContent = async (
   team_id,
   document_id,
   body,
-  user_id,
 ) => {
   const rows = await document.getDocumentById(
     workspace_id,
@@ -127,17 +120,12 @@ exports.updateDocumentContent = async (
     throw new Error("Document not found");
   }
 
-  const result = await document.updateDocumentContent(
+  await document.updateDocumentContent(
     workspace_id,
     team_id,
     document_id,
     body.content,
-    user_id,
   );
-
-  if (result.affectedRows === 0) {
-    throw new Error("You are not allowed");
-  }
 };
 
 exports.deleteDocument = async (workspace_id, team_id, document_id) => {

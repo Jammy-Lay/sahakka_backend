@@ -12,13 +12,19 @@ exports.getAllDocuments = async (workspace_id, team_id) => {
       CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar
 
     FROM documents d
-    INNER JOIN teams t ON t.id = d.team_id
-    LEFT JOIN users u ON u.id = d.created_by
 
-    WHERE d.team_id = ?
-    AND t.workspace_id = ?
+    INNER JOIN teams t
+      ON t.id = d.team_id
 
-    ORDER BY d.created_at DESC `;
+    LEFT JOIN users u
+      ON u.id = d.created_by
+
+    WHERE
+      d.team_id = ?
+      AND t.workspace_id = ?
+
+    ORDER BY d.created_at DESC
+  `;
 
   const [rows] = await pool.query(sql, [
     process.env.BASE_URL,
@@ -42,21 +48,16 @@ exports.getDocumentById = async (workspace_id, team_id, document_id) => {
       u.name AS created_by,
       CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar
 
-
     FROM documents d
-
 
     INNER JOIN teams t
       ON t.id = d.team_id
 
-
     LEFT JOIN document_blocks b
       ON b.document_id = d.id
 
-
     LEFT JOIN users u
       ON u.id = d.created_by
-
 
     WHERE
       d.id = ?
@@ -75,16 +76,15 @@ exports.getDocumentById = async (workspace_id, team_id, document_id) => {
 };
 
 exports.createDocument = async (team_id, title, user_id) => {
-  const sql =
-    "INSERT INTO documents (team_id, title, created_by) VALUES (?, ?, ?)";
+  const sql = "INSERT INTO documents (team_id,title,created_by) VALUES (?,?,?)";
 
   const [result] = await pool.query(sql, [team_id, title, user_id]);
 
   const document_id = result.insertId;
 
   await pool.query(
-    "INSERT INTO document_blocks (document_id, content) VALUES (?, '')",
-    [document_id],
+    "INSERT INTO document_blocks(document_id,content) VALUES (?,?)",
+    [document_id, ""],
   );
 
   return document_id;
@@ -94,12 +94,15 @@ exports.deleteDocument = async (workspace_id, team_id, document_id) => {
   const sql = `
     DELETE d
     FROM documents d
-    INNER JOIN teams t 
+
+    INNER JOIN teams t
       ON t.id = d.team_id
-    WHERE 
+
+    WHERE
       d.id = ?
       AND d.team_id = ?
-      AND t.workspace_id = ?`;
+      AND t.workspace_id = ?
+  `;
 
   const [result] = await pool.query(sql, [document_id, team_id, workspace_id]);
 
@@ -111,18 +114,19 @@ exports.updateDocumentTitle = async (
   team_id,
   document_id,
   title,
-  user_id,
 ) => {
   const sql = `
     UPDATE documents d
+
     INNER JOIN teams t
       ON t.id = d.team_id
+
     SET d.title = ?
+
     WHERE
       d.id = ?
       AND d.team_id = ?
       AND t.workspace_id = ?
-      AND d.created_by = ?
   `;
 
   const [result] = await pool.query(sql, [
@@ -130,7 +134,6 @@ exports.updateDocumentTitle = async (
     document_id,
     team_id,
     workspace_id,
-    user_id,
   ]);
 
   return result;
@@ -141,20 +144,22 @@ exports.updateDocumentContent = async (
   team_id,
   document_id,
   content,
-  user_id,
 ) => {
   const sql = `
     UPDATE document_blocks b
+
     INNER JOIN documents d
       ON d.id = b.document_id
+
     INNER JOIN teams t
       ON t.id = d.team_id
+
     SET b.content = ?
+
     WHERE
       d.id = ?
       AND d.team_id = ?
       AND t.workspace_id = ?
-      AND d.created_by = ?
   `;
 
   const [result] = await pool.query(sql, [
@@ -162,7 +167,6 @@ exports.updateDocumentContent = async (
     document_id,
     team_id,
     workspace_id,
-    user_id,
   ]);
 
   return result;
