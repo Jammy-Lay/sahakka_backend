@@ -6,20 +6,28 @@ require("dotenv").config();
 const helmet = require("helmet");
 
 const app = express();
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URLS = [
+  process.env.FRONTEND_URL || "https://sahakkafront.genz.linkpc.net",
+  "http://localhost:5173",
+];
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 app.set("trust proxy", 1);
 
-app.options(
-  /.*/,
-  cors({
-    origin: FRONTEND_URL,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || FRONTEND_URLS.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.options(/.*/, cors(corsOptions));
 
 app.use(
   helmet({
@@ -27,23 +35,16 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "blob:", FRONTEND_URL, BASE_URL],
+        imgSrc: ["'self'", "data:", "blob:", ...FRONTEND_URLS, BASE_URL],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        connectSrc: ["'self'", FRONTEND_URL, BASE_URL],
+        connectSrc: ["'self'", ...FRONTEND_URLS, BASE_URL],
       },
     },
   }),
 );
 
-app.use(
-  cors({
-    origin: FRONTEND_URL,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -63,9 +64,8 @@ app.use("/sahakka-api/v2", apiLimiter);
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
-    setHeaders: (res) => {
+    setHeaders: (res, filePath, stat) => {
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
-      res.set("Access-Control-Allow-Origin", FRONTEND_URL);
       res.set("Access-Control-Allow-Credentials", "true");
     },
   }),
