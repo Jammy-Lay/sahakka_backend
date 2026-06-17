@@ -75,7 +75,7 @@ exports.getDocumentById = async (workspace_id, team_id, document_id) => {
   return rows;
 };
 
-exports.findDocumentById = async (workspace_id, team_id, document_id) => {
+exports.findDocumentById = async (document_id, team_id, workspace_id) => {
   const sql = `
     SELECT 
       d.id
