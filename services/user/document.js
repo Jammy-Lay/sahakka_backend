@@ -1,53 +1,6 @@
 const document = require("../../models/user/document");
 
-exports.getAllDocuments = async (workspace_id, team_id) => {
-  const rows = await document.getAllDocuments(workspace_id, team_id);
-
-  if (rows.length === 0) {
-    return [];
-  }
-
-  return rows.map((item) => ({
-    document_id: item.id,
-    title: item.title,
-    created_at: item.created_at,
-
-    created_by: {
-      user_id: item.user_id,
-      name: item.created_by,
-      avatar: item.avatar,
-    },
-  }));
-};
-
-exports.getDocumentById = async (workspace_id, team_id, document_id) => {
-  const rows = await document.getDocumentById(
-    workspace_id,
-    team_id,
-    document_id,
-  );
-
-  if (rows.length === 0) {
-    throw new Error("Document not found");
-  }
-
-  const data = rows[0];
-
-  return {
-    document_id: data.id,
-    title: data.title,
-    content: data.content || "",
-    created_at: data.created_at,
-
-    created_by: {
-      user_id: data.user_id,
-      name: data.created_by,
-      avatar: data.avatar,
-    },
-  };
-};
-
-exports.createDocument = async (workspace_id, team_id, body, user_id) => {
+exports.createDocument = async (team_id, body, user_id, workspace_id) => {
   const document_id = await document.createDocument(
     team_id,
     body.title,
@@ -55,9 +8,9 @@ exports.createDocument = async (workspace_id, team_id, body, user_id) => {
   );
 
   const rows = await document.getDocumentById(
-    workspace_id,
-    team_id,
     document_id,
+    team_id,
+    workspace_id,
   );
 
   if (rows.length === 0) {
@@ -80,11 +33,58 @@ exports.createDocument = async (workspace_id, team_id, body, user_id) => {
   };
 };
 
+exports.getAllDocuments = async (team_id, workspace_id) => {
+  const rows = await document.getAllDocuments(team_id, workspace_id);
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  return rows.map((item) => ({
+    document_id: item.id,
+    title: item.title,
+    created_at: item.created_at,
+
+    created_by: {
+      user_id: item.user_id,
+      name: item.created_by,
+      avatar: item.avatar,
+    },
+  }));
+};
+
+exports.getDocumentById = async (document_id, team_id, workspace_id) => {
+  const rows = await document.getDocumentById(
+    document_id,
+    team_id,
+    workspace_id,
+  );
+
+  if (rows.length === 0) {
+    throw new Error("Document not found");
+  }
+
+  const data = rows[0];
+
+  return {
+    document_id: data.id,
+    title: data.title,
+    content: data.content || "",
+    created_at: data.created_at,
+
+    created_by: {
+      user_id: data.user_id,
+      name: data.created_by,
+      avatar: data.avatar,
+    },
+  };
+};
+
 exports.updateDocumentTitle = async (
-  workspace_id,
-  team_id,
-  document_id,
   body,
+  document_id,
+  team_id,
+  workspace_id,
 ) => {
   const rows = await document.findDocumentById(
     document_id,
@@ -97,18 +97,18 @@ exports.updateDocumentTitle = async (
   }
 
   await document.updateDocumentTitle(
-    workspace_id,
-    team_id,
-    document_id,
     body.title,
+    document_id,
+    team_id,
+    workspace_id,
   );
 };
 
 exports.updateDocumentContent = async (
-  workspace_id,
-  team_id,
-  document_id,
   body,
+  document_id,
+  team_id,
+  workspace_id,
 ) => {
   const rows = await document.findDocumentById(
     document_id,
@@ -121,14 +121,14 @@ exports.updateDocumentContent = async (
   }
 
   await document.updateDocumentContent(
-    workspace_id,
-    team_id,
-    document_id,
     body.content,
+    document_id,
+    team_id,
+    workspace_id,
   );
 };
 
-exports.deleteDocument = async (workspace_id, team_id, document_id) => {
+exports.deleteDocument = async (document_id, team_id, workspace_id) => {
   const rows = await document.findDocumentById(
     document_id,
     team_id,
@@ -140,9 +140,9 @@ exports.deleteDocument = async (workspace_id, team_id, document_id) => {
   }
 
   const result = await document.deleteDocument(
-    workspace_id,
-    team_id,
     document_id,
+    team_id,
+    workspace_id,
   );
 
   if (result.affectedRows === 0) {
