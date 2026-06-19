@@ -76,7 +76,7 @@ exports.verifyEmail = async (req, res) => {
   try {
     await auth.verifyEmail(req.query.token);
     return res.redirect(
-      `${process.env.Frontend_URL}/verify-email?status=success`,
+      `${process.env.FRONTEND_URL}/verify-email?status=success`,
     );
   } catch (err) {
     console.log(err);
