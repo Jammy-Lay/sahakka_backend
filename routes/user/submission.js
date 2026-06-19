@@ -18,9 +18,9 @@ router.post(
   isLogin,
   uploadLimiter,
   checkAccess,
-  validateSubmitTask,
-  validate(submitTaskSchema),
   uploadSubmission,
+  validate(submitTaskSchema),
+  validateSubmitTask,
   submission.submitTask,
 );
 

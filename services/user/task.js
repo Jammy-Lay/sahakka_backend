@@ -315,6 +315,12 @@ exports.findTaskById = async (task_id) => {
         name: item.assigned_to_name,
         avatar: item.assigned_to_avatar,
       },
+
+      assigned_by: {
+        user_id: item.assigned_by_id,
+        name: item.assigned_by_name,
+        avatar: item.assigned_by_avatar,
+      },
     },
   ];
 };

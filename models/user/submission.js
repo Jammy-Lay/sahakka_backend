@@ -66,6 +66,19 @@ exports.getSubmissionById = async (submission_id) => {
   return rows;
 };
 
+exports.findSubmissionByTask = async (task_id) => {
+  const sql = `
+    SELECT *
+    FROM task_submissions
+    WHERE task_id = ?
+    ORDER BY id DESC
+    LIMIT 1 `;
+
+  const [rows] = await pool.query(sql, [task_id]);
+
+  return rows;
+};
+
 exports.getSubmissionsByWorkspaceAndTeam = async (workspace_id, team_id) => {
   const sql = `
     SELECT

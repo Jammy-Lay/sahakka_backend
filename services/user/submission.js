@@ -2,9 +2,18 @@ const submission = require("../../models/user/submission");
 const task = require("../../models/user/task");
 const team = require("../../models/user/team");
 const workspace = require("../../models/user/workspace");
+const users = require("../../models/users");
 const { sendSubmissionReviewEmail } = require("../mail/mailService");
 
 exports.submitTask = async (task_id, user, message, file) => {
+  const taskRow = await task.findTaskById(task_id);
+
+  if (taskRow.length === 0) {
+    throw new Error("Task not found");
+  }
+
+  const taskData = taskRow[0];
+
   const submission_id = await submission.createSubmission(
     task_id,
     user.id,
@@ -13,6 +22,7 @@ exports.submitTask = async (task_id, user, message, file) => {
 
   if (file) {
     const file_url = `${process.env.BASE_URL}/uploads/submissions/${file.filename}`;
+
     await submission.addSubmissionFile(submission_id, file_url);
   }
 
@@ -33,6 +43,7 @@ exports.submitTask = async (task_id, user, message, file) => {
   );
 
   const row = await submission.getSubmissionById(submission_id);
+
   const data = row[0];
 
   return {
@@ -43,6 +54,7 @@ exports.submitTask = async (task_id, user, message, file) => {
     status: data.status,
     file: data.file_url || null,
     created_at: data.created_at,
+
     submitted_by: {
       user_id: data.user_id,
       name: data.user_name,
@@ -134,8 +146,8 @@ exports.updateSubmissionStatus = async (
 
   await sendSubmissionReviewEmail(
     submitter[0].email,
-    ws[0].name,
-    tm[0].title,
+    ws.workspace_name,
+    tm.team_name,
     updated.task_title,
     updated.reviewer_name,
     updated.reviewer_avatar,
