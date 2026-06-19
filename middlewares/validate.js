@@ -1,4 +1,15 @@
 const xss = require("xss");
+const fs = require("fs");
+
+const removeUploadedFile = (req) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      if (err) {
+        console.log("Delete uploaded file error:", err.message);
+      }
+    });
+  }
+};
 
 exports.validate = (schema) => (req, res, next) => {
   const sanitizedBody = {};
@@ -16,6 +27,8 @@ exports.validate = (schema) => (req, res, next) => {
   });
 
   if (error) {
+    removeUploadedFile(req);
+
     return res.status(400).json({
       result: false,
       message: "Invalid Field",
@@ -24,7 +37,6 @@ exports.validate = (schema) => (req, res, next) => {
   }
 
   req.validData = value;
-  // console.log(value);
 
   next();
 };
@@ -38,6 +50,7 @@ exports.validateSubmitTask = async (req, res, next) => {
     const user = req.user;
 
     const checkTask = await task.findTaskById(task_id);
+
     if (checkTask.length === 0) {
       throw new Error("Task not found");
     }
@@ -52,13 +65,26 @@ exports.validateSubmitTask = async (req, res, next) => {
       throw new Error("You are not assigned to this task");
     }
 
-    const pending = await submission.findPendingByTask(task_id);
-    if (pending.length > 0) {
-      throw new Error("Task already submitted, waiting for review");
+    const lastSubmission = await submission.findSubmissionByTask(task_id);
+
+    if (lastSubmission.length > 0) {
+      const status = lastSubmission[0].status;
+
+      if (status === "pending") {
+        throw new Error("Task already submitted, waiting for review");
+      }
+
+      if (status === "approved") {
+        throw new Error("Task already approved");
+      }
+
     }
 
     next();
   } catch (err) {
+    // remove uploaded file when validation fail
+    removeUploadedFile(req);
+
     return res.status(400).json({
       result: false,
       message: err.message,
