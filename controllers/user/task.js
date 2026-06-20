@@ -41,7 +41,7 @@ exports.createTask = async (req, res) => {
       req.user.id,
     );
 
-    const row = await task.findTaskById(result);
+    const row = await task.findTaskById(result.task_id);
 
     return res.json({
       result: true,
@@ -168,11 +168,7 @@ exports.getTaskById = async (req, res) => {
   try {
     const { workspace_id, team_id, task_id } = req.params;
 
-    const data = await task.getTaskById(
-      workspace_id,
-      team_id,
-      task_id,
-    );
+    const data = await task.getTaskById(workspace_id, team_id, task_id);
 
     return res.json({
       result: true,
