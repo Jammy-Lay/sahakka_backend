@@ -113,6 +113,7 @@ exports.inviteByEmail = async (workspace_id, team_id, email, user) => {
       data.workspace_name,
       data.title,
       user.name,
+      user.avatar,
       token,
     );
   }

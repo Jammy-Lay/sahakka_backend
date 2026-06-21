@@ -36,6 +36,6 @@ router.post(
   invite.inviteByEmail,
 );
 
-router.get("/invite/accept", isLogin, invite.acceptInvite);
+router.get("/invite/accept", invite.acceptInvite);
 
 module.exports = router;
