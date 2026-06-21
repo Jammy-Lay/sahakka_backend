@@ -108,15 +108,19 @@ exports.inviteByEmail = async (workspace_id, team_id, email, user) => {
   if (row.length > 0) {
     const data = await workspace.findWorkspaceWithTeam(workspace_id, team_id);
 
+    const inviter = await users.findById(user.id);
+
     await sendInviteByEmail(
       email,
       data.workspace_name,
       data.title,
       user.name,
-      user.avatar,
+      inviter[0].avatar,
       token,
     );
   }
 
-  return { message: "Invite sent successfully" };
+  return {
+    message: "Invite sent successfully",
+  };
 };
