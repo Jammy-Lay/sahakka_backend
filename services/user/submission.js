@@ -141,7 +141,7 @@ exports.updateSubmissionStatus = async (
       ? `approved submission for task ${data.task_title}`
       : `rejected submission for task ${data.task_title}`;
 
-  await task.createTeamActivity(team_id, user.id, "review", teamMessage);
+  await team.createTeamActivity(team_id, user.id, "review", teamMessage);
 
   const updatedRow = await submission.getSubmissionById(submission_id);
   const updated = updatedRow[0];
