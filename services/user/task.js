@@ -147,6 +147,8 @@ exports.createTask = async (
         body.title,
         assigner[0].name,
         assigner[0].avatar,
+        workspace_id,
+        team_id,
       );
     }
 
@@ -268,6 +270,8 @@ exports.updateTask = async (
         current.title,
         assigner[0].name,
         assigner[0].avatar,
+        workspace_id,
+        current.team_id,
       );
     }
 
