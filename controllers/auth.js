@@ -89,7 +89,7 @@ exports.verifyEmail = async (req, res) => {
 
     const status = messages[err.message] || "error";
     return res.redirect(
-      `${process.env.Frontend_URL}/verify-email?status=${status}`,
+      `${process.env.FRONTEND_URL}/verify-email?status=${status}`,
     );
   }
 };

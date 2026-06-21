@@ -136,6 +136,13 @@ exports.updateSubmissionStatus = async (
       : "rejected the submission",
   );
 
+  const teamMessage =
+    status === "approved"
+      ? `approved submission for task ${data.task_title}`
+      : `rejected submission for task ${data.task_title}`;
+
+  await task.createTeamActivity(team_id, user.id, "review", teamMessage);
+
   const updatedRow = await submission.getSubmissionById(submission_id);
   const updated = updatedRow[0];
 
@@ -153,6 +160,8 @@ exports.updateSubmissionStatus = async (
     updated.reviewer_avatar,
     status,
     feedback,
+    workspace_id,
+    team_id,
   );
 
   return {

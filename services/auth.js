@@ -175,7 +175,7 @@ exports.forgotPassword = async (email) => {
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000);
-  const expire_at = new Date(Date.now() + 1 * 60 * 1000);
+  const expire_at = new Date(Date.now() + 3 * 60 * 1000);
 
   const row = await users.checkUerSendOtp(email);
 
@@ -197,7 +197,7 @@ exports.resendOtp = async (email) => {
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000);
-  const expire_at = new Date(Date.now() + 5 * 60 * 1000);
+  const expire_at = new Date(Date.now() + 3 * 60 * 1000);
 
   await users.updateOtp(otp, expire_at, email);
 

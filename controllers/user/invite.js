@@ -63,17 +63,11 @@ exports.acceptInvite = async (req, res) => {
   try {
     const { token } = req.query;
 
-    const result = await invite.joinByToken(token, req.user);
-
-    return res.json({
-      result: true,
-      message: "Invite accepted successfully",
-      data: result,
-    });
-  } catch (err) {
+    return res.redirect(`${process.env.FRONTEND_URL}/invite?token=${token}`);
+  } catch (error) {
     return res.status(400).json({
       result: false,
-      message: err.message,
+      message: error.message,
     });
   }
 };
