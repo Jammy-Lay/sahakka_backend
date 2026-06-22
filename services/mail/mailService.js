@@ -734,129 +734,294 @@ const sendSubmissionReviewEmail = async (
 
 const sendActivateAccountMail = async (user) => {
   await transporter.sendMail({
-    from: `"Task Management System" <${process.env.EMAIL_USER}>`,
+    from: `Sahakka Dev <noreply@myapp.com>`,
     to: user.email,
     subject: "Your Account Has Been Activated",
     html: `
-      <div style="
-        max-width:600px;
-        margin:auto;
-        font-family:Arial,sans-serif;
-        background:#f4f4f4;
-        padding:30px;
-      ">
+      <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Activated</title>
+  <style>
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; background-color: #eef1f5; }
 
-        <div style="
-          background:#ffffff;
-          border-radius:10px;
-          overflow:hidden;
-          box-shadow:0 2px 10px rgba(0,0,0,0.1);
-        ">
+    @media screen and (max-width: 600px) {
+      .email-wrapper { padding: 24px 12px !important; }
+      .email-card { width: 100% !important; border-radius: 14px !important; }
+      .inner-content { padding: 32px 22px !important; }
+      .cta-button { display: block !important; width: 100% !important; box-sizing: border-box; text-align: center !important; }
+      .heading { font-size: 20px !important; }
+      .logo-img { width: 44px !important; height: 44px !important; }
+      .logo-text { font-size: 20px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#eef1f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
 
-          <div style="
-            background:#16a34a;
-            padding:20px;
-            text-align:center;
-            color:white;
-          ">
-            <h1>Account Activated</h1>
-          </div>
+  <!-- Preheader -->
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    Your Sahakka account is now active. You can log in and start working right away.
+  </div>
 
-          <div style="padding:30px; color:#333;">
-            <h2>Hello ${user.name},</h2>
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-wrapper" style="background-color:#eef1f5; padding:48px 16px;">
+    <tr>
+      <td align="center">
 
-            <p>
-              Your account has been successfully activated by the administrator.
-            </p>
+        <!-- Card -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="560" class="email-card" style="max-width:560px; width:100%; background-color:#ffffff; border:1px solid #e7ebf0; border-radius:18px; box-shadow:0 8px 24px rgba(15,23,42,0.05);">
+          <tr>
+            <td class="inner-content" style="padding:44px 48px;">
 
-            <p>
-              You can now login and access the system.
-            </p>
+              <!-- Logo -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:32px;">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td valign="middle" style="padding-right:10px;">
+                          <img src="${process.env.BASE_URL}/uploads/images/image.png" alt="Sahakka" width="44" height="44" class="logo-img" style="display:block; width:44px; height:44px; border-radius:12px;">
+                        </td>
+                        <td valign="middle">
+                          <span class="logo-text" style="font-size:24px; font-weight:700; color:#0f172a; letter-spacing:-0.3px;">Sahakka</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
-            <div style="margin:30px 0; text-align:center;">
-              <a href="${process.env.BASE_URL}/sahakka-api/v2/login"
-                style="
-                  background:#16a34a;
-                  color:white;
-                  padding:12px 25px;
-                  text-decoration:none;
-                  border-radius:5px;
-                  display:inline-block;
-                ">
-                Login Now
-              </a>
-            </div>
+              <!-- Status badge -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:20px;">
+                <tr>
+                  <td align="center">
+                    <span style="display:inline-block; background-color:#f0fdf4; color:#16a34a; font-size:12px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; padding:5px 14px; border-radius:999px; border:1px solid #bbf7d0;">
+                      ✓ &nbsp;Account Activate
+                    </span>
+                  </td>
+                </tr>
+              </table>
 
-            <p>
-              Thank you,<br>
-              Task Management Team
-            </p>
-          </div>
+              <!-- Heading -->
+              <h1 class="heading" style="margin:0 0 10px 0; font-size:22px; line-height:1.3; font-weight:700; color:#0f172a; text-align:center; letter-spacing:-0.3px;">
+                You're all set, ${user.name}
+              </h1>
+              <p style="margin:0 0 32px 0; font-size:14px; color:#64748b; text-align:center; line-height:1.6;">
+                Your account has been activated by the administrator.<br>You can now log in and start using Sahakka.
+              </p>
 
-        </div>
-      </div>
+              <!-- Info box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f8fafc; border-radius:10px; margin-bottom:28px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="font-size:13px; color:#475569; line-height:1.8;">
+                          <strong style="color:#0f172a;">Account:</strong> ${user.email}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px; color:#475569; line-height:1.8;">
+                          <strong style="color:#0f172a;">Activated by:</strong> Administrator
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:14px;">
+                <tr>
+                  <td align="center">
+                    <a href="${process.env.FRONTEND_URL}/login" target="_blank" class="cta-button"
+                      style="display:inline-block; padding:14px 34px; font-size:15px; font-weight:600; color:#ffffff; text-decoration:none; border-radius:10px; background-color:#171717;">
+                      Log In Now
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 28px 0; font-size:12px; color:#94a3b8; text-align:center;">
+                If you didn't expect this, please contact your administrator.
+              </p>
+
+              <!-- Divider -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #f1f5f9; margin-bottom:22px;"><tr><td>&nbsp;</td></tr></table>
+
+              <!-- Sign-off -->
+              <p style="margin:0; font-size:13px; color:#94a3b8; text-align:center; line-height:1.6;">
+                Thanks for being part of the team.<br>
+                <strong style="color:#64748b;">Sahakka Dev</strong>
+              </p>
+
+            </td>
+          </tr>
+        </table>
+        <!-- /Card -->
+
+        <!-- Footer -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="560" style="max-width:560px; width:100%; margin-top:24px;">
+          <tr>
+            <td align="center" style="font-size:12px; color:#94a3b8; line-height:1.6;">
+              Sent by Sahakka &bull; &copy; ${new Date().getFullYear()} Sahakka Inc. All rights reserved.
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
     `,
   });
 };
 
 const sendBlockedAccountMail = async (user) => {
   await transporter.sendMail({
-    from: `"Task Management System" <${process.env.EMAIL_USER}>`,
+    from: `Sahakka Dev <noreply@myapp.com>`,
     to: user.email,
     subject: "Your Account Has Been Blocked",
     html: `
-      <div style="
-        max-width:600px;
-        margin:auto;
-        font-family:Arial,sans-serif;
-        background:#f4f4f4;
-        padding:30px;
-      ">
+      <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Blocked</title>
+  <style>
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; background-color: #eef1f5; }
 
-        <div style="
-          background:#ffffff;
-          border-radius:10px;
-          overflow:hidden;
-          box-shadow:0 2px 10px rgba(0,0,0,0.1);
-        ">
+    @media screen and (max-width: 600px) {
+      .email-wrapper { padding: 24px 12px !important; }
+      .email-card { width: 100% !important; border-radius: 14px !important; }
+      .inner-content { padding: 32px 22px !important; }
+      .heading { font-size: 20px !important; }
+      .logo-img { width: 44px !important; height: 44px !important; }
+      .logo-text { font-size: 20px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#eef1f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
 
-          <div style="
-            background:#dc2626;
-            padding:20px;
-            text-align:center;
-            color:white;
-          ">
-            <h1>Account Blocked</h1>
-          </div>
+  <!-- Preheader -->
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    Your Sahakka account has been blocked by the administrator.
+  </div>
 
-          <div style="padding:30px; color:#333;">
-            <h2>Hello ${user.name},</h2>
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-wrapper" style="background-color:#eef1f5; padding:48px 16px;">
+    <tr>
+      <td align="center">
 
-            <p>
-              Your account has been blocked by the administrator.
-            </p>
+        <!-- Card -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="560" class="email-card" style="max-width:560px; width:100%; background-color:#ffffff; border:1px solid #e7ebf0; border-radius:18px; box-shadow:0 8px 24px rgba(15,23,42,0.05);">
+          <tr>
+            <td class="inner-content" style="padding:44px 48px;">
 
-            <p>
-              If you believe this was a mistake, please contact support.
-            </p>
+              <!-- Logo -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:32px;">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td valign="middle" style="padding-right:10px;">
+                          <img src="${process.env.BASE_URL}/uploads/images/image.png" alt="Sahakka" width="44" height="44" class="logo-img" style="display:block; width:44px; height:44px; border-radius:12px;">
+                        </td>
+                        <td valign="middle">
+                          <span class="logo-text" style="font-size:24px; font-weight:700; color:#0f172a; letter-spacing:-0.3px;">Sahakka</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
-            <div style="
-              background:#fef2f2;
-              padding:15px;
-              border-left:5px solid #dc2626;
-              margin-top:20px;
-            ">
-              Access to the system has been temporarily disabled.
-            </div>
+              <!-- Status badge -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:20px;">
+                <tr>
+                  <td align="center">
+                    <span style="display:inline-block; background-color:#fff1f2; color:#dc2626; font-size:12px; font-weight:600; letter-spacing:0.4px; text-transform:uppercase; padding:5px 14px; border-radius:999px; border:1px solid #fecdd3;">
+                      ✕ &nbsp;Account Blocked
+                    </span>
+                  </td>
+                </tr>
+              </table>
 
-            <p style="margin-top:30px;">
-              Thank you,<br>
-              Task Management Team
-            </p>
-          </div>
+              <!-- Heading -->
+              <h1 class="heading" style="margin:0 0 10px 0; font-size:22px; line-height:1.3; font-weight:700; color:#0f172a; text-align:center; letter-spacing:-0.3px;">
+                Your account has been blocked
+              </h1>
+              <p style="margin:0 0 32px 0; font-size:14px; color:#64748b; text-align:center; line-height:1.6;">
+                Dear user ${user.name}, an administrator has restricted<br>access to your Sahakka account.
+              </p>
 
-        </div>
-      </div>
+              <!-- Info box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f8fafc; border-radius:10px; margin-bottom:28px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="font-size:13px; color:#475569; line-height:1.8;">
+                          <strong style="color:#0f172a;">Account:</strong> ${user.email}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px; color:#475569; line-height:1.8;">
+                          <strong style="color:#0f172a;">Blocked by:</strong> Administrator
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Notice box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:28px;">
+                <tr>
+                  <td style="background-color:#fff1f2; border-radius:10px; border:1px solid #fecdd3; padding:16px 20px; font-size:13px; color:#9f1239; line-height:1.7;">
+                    Access to your account has been temporarily disabled. If you believe this is a mistake, please reach out to your administrator or contact support.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top:1px solid #f1f5f9; margin-bottom:22px;"><tr><td>&nbsp;</td></tr></table>
+
+              <!-- Sign-off -->
+              <p style="margin:0; font-size:13px; color:#94a3b8; text-align:center; line-height:1.6;">
+                If you need help, reply to this email.<br>
+                <strong style="color:#64748b;">Sahakka Dev</strong>
+              </p>
+
+            </td>
+          </tr>
+        </table>
+        <!-- /Card -->
+
+        <!-- Footer -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="560" style="max-width:560px; width:100%; margin-top:24px;">
+          <tr>
+            <td align="center" style="font-size:12px; color:#94a3b8; line-height:1.6;">
+              Sent by Sahakka &bull; &copy; ${new Date().getFullYear()} Sahakka Inc. All rights reserved.
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
     `,
   });
 };
