@@ -26,17 +26,17 @@ exports.findByToken = async (token) => {
 
 exports.findByWorkspaceAndTeam = async (workspace_id, team_id) => {
   const sql =
-    "SELECT token FROM invites WHERE workspace_id = ? AND team_id = ?";
+    "SELECT  id, token, email, status FROM invites WHERE workspace_id = ? AND team_id = ?";
+
   const [row] = await pool.query(sql, [workspace_id, team_id]);
+
   return row;
 };
 
 exports.updateToken = async (workspace_id, team_id, token, expires_at) => {
-  const sql = `
-    UPDATE invites 
-    SET token = ?, expires_at = ?, status = 'pending'
-    WHERE workspace_id = ? AND team_id = ?
-  `;
+  const sql =
+    "UPDATE invites  SET  token = ?,  expires_at = ?,  status = 'pending', email = NULL WHERE workspace_id = ? AND team_id = ? ";
+
   await pool.query(sql, [token, expires_at, workspace_id, team_id]);
 };
 
