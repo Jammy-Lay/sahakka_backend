@@ -6,11 +6,12 @@ const crypto = require("crypto");
 const { sendInviteByEmail } = require("../mail/mailService");
 
 exports.createTokenInvite = async (workspace_id, team_id) => {
-  const token = crypto.randomBytes(4).toString("hex"); // 8 chars
-  const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day
+  const token = crypto.randomBytes(4).toString("hex");
+  const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const row = await invite.findByWorkspaceAndTeam(workspace_id, team_id);
-  if (row.length === 0) {
+
+  if (row.length === 0 || row[0].status === "accepted") {
     await invite.createTokenInvite(workspace_id, team_id, token, expires_at);
   } else {
     await invite.updateToken(workspace_id, team_id, token, expires_at);
