@@ -102,16 +102,16 @@ exports.createTask = async (team_id, body, user_id) => {
 exports.updateTask = async (task_id, body) => {
   const sql = `
     UPDATE tasks SET
-      title=?,
-      description=?,
-      type=?,
-      status=?,
-      priority=?,
-      assigned_to=?,
-      assigned_by=?,
-      start_date=?,
-      end_date=?
-    WHERE id=?
+      title= ?,
+      description= ?,
+      type = ?,
+      status = ?,
+      priority = ?,
+      assigned_to = ?,
+      assigned_by = ?,
+      start_date = ?,
+      end_date = ?
+    WHERE id = ?
   `;
 
   await pool.query(sql, [

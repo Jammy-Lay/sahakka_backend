@@ -167,6 +167,7 @@ exports.updateTask = async (
   body,
   workspaceRole,
   workspace_id,
+  team_id,
   user_id,
 ) => {
   const row = await task.findTaskById(task_id);
@@ -176,6 +177,13 @@ exports.updateTask = async (
   }
 
   const current = row[0];
+
+  // check task belong to this team
+  const checkTaskInTeam = await task.checkTaskInTeam(task_id, team_id);
+
+  if (checkTaskInTeam.length === 0) {
+    throw new Error("Task is not in this team");
+  }
 
   if (body.start_date && body.end_date && body.start_date > body.end_date) {
     throw new Error("Start date cannot be after end date");
@@ -199,7 +207,7 @@ exports.updateTask = async (
   }
 
   if (assigned_to != null) {
-    const member = await team.checkTeamMember(assigned_to, current.team_id);
+    const member = await team.checkTeamMember(assigned_to, team_id);
 
     if (member.length === 0) {
       throw new Error("User is not in this team");
@@ -231,6 +239,7 @@ exports.updateTask = async (
     priority: body.priority ?? current.priority,
 
     assigned_to,
+
     assigned_by,
 
     start_date:
@@ -239,6 +248,7 @@ exports.updateTask = async (
     end_date: body.end_date !== undefined ? body.end_date : current.end_date,
   });
 
+  // only when assigned user changed
   if (assigned_to !== current.assigned_to_id && assigned_to != null) {
     const self = assigned_to === user_id;
 
@@ -254,10 +264,7 @@ exports.updateTask = async (
 
       const assigner = await users.findById(user_id);
 
-      const data = await workspace.findWorkspaceWithTeam(
-        workspace_id,
-        current.team_id,
-      );
+      const data = await workspace.findWorkspaceWithTeam(workspace_id, team_id);
 
       messageTask = `assigned task to ${assigned[0].name}`;
 
@@ -271,18 +278,13 @@ exports.updateTask = async (
         assigner[0].name,
         assigner[0].avatar,
         workspace_id,
-        current.team_id,
+        team_id,
       );
     }
 
     await task.createTaskActivity(task_id, user_id, "assign", messageTask);
 
-    await team.createTeamActivity(
-      current.team_id,
-      user_id,
-      "assign",
-      messageTeam,
-    );
+    await team.createTeamActivity(team_id, user_id, "assign", messageTeam);
   }
 
   return true;
