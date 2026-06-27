@@ -198,12 +198,13 @@ exports.updateTask = async (
       assigned_by = assigned_to ? user_id : null;
     }
   } else {
-    if ("assigned_to" in body && body.assigned_to !== user_id) {
-      throw new Error("You are not allowed to assign task to other users");
+    if ("assigned_to" in body) {
+      if (body.assigned_to !== null && body.assigned_to !== user_id) {
+        throw new Error("You are not allowed to assign task to other users");
+      }
+      assigned_to = body.assigned_to;
+      assigned_by = assigned_to ? user_id : null;
     }
-
-    assigned_to = user_id;
-    assigned_by = user_id;
   }
 
   if (assigned_to != null) {

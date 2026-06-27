@@ -30,35 +30,6 @@ exports.getTasksByTeam = async (req, res) => {
   }
 };
 
-exports.createTask = async (req, res) => {
-  try {
-    const { team_id, workspace_id } = req.params;
-
-    const result = await task.createTask(
-      team_id,
-      req.validData,
-      req.workspaceRole,
-      workspace_id,
-      req.user.id,
-    );
-
-    const row = await task.findTaskById(result.task_id);
-
-    const io = getIO();
-    const room = `workspace:${workspace_id}:team:${team_id}`;
-    io.to(room).emit("task-created", row[0]);
-
-    return res.json({
-      result: true,
-      message: "Task created successfully",
-      data: row[0],
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(400).json({ result: false, message: error.message });
-  }
-};
-
 exports.updateTask = async (req, res) => {
   try {
     const { task_id, workspace_id, team_id } = req.params;
@@ -73,18 +44,75 @@ exports.updateTask = async (req, res) => {
     );
 
     const row = await task.findTaskById(task_id);
+    const updatedTask = row[0];
 
     const io = getIO();
     const room = `workspace:${workspace_id}:team:${team_id}`;
-    io.to(room).emit("task-updated", row[0]);
+    io.to(room).emit("task-updated", updatedTask);
+
+    // Send personal notification
+    if (
+      updatedTask.assigned_to?.user_id &&
+      updatedTask.assigned_to.user_id !== req.user.id
+    ) {
+      io.to(`user:${updatedTask.assigned_to.user_id}`).emit(
+        "task-assigned-to-you",
+        {
+          task: updatedTask,
+          assigned_by: updatedTask.assigned_by,
+        },
+      );
+    }
 
     return res.json({
       result: true,
       message: "Task updated successfully",
-      data: row[0],
+      data: updatedTask,
     });
   } catch (error) {
-    console.log(error);
+    return res.status(400).json({ result: false, message: error.message });
+  }
+};
+
+exports.createTask = async (req, res) => {
+  try {
+    const { team_id, workspace_id } = req.params;
+
+    const result = await task.createTask(
+      team_id,
+      req.validData,
+      req.workspaceRole,
+      workspace_id,
+      req.user.id,
+    );
+
+    const row = await task.findTaskById(result.task_id);
+    const newTask = row[0];
+
+    const io = getIO();
+    const room = `workspace:${workspace_id}:team:${team_id}`;
+    io.to(room).emit("task-created", newTask);
+
+    // Send personal notification
+    if (
+      newTask.assigned_to?.user_id &&
+      newTask.assigned_to.user_id !== req.user.id
+    ) {
+      io.to(`user:${newTask.assigned_to.user_id}`).emit(
+        "task-assigned-to-you",
+        {
+          task: newTask,
+          assigned_by: newTask.assigned_by,
+        },
+      );
+    }
+
+    return res.json({
+      result: true,
+      message: "Task created successfully",
+      data: newTask,
+    });
+  } catch (error) {
     return res.status(400).json({ result: false, message: error.message });
   }
 };
