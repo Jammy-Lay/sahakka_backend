@@ -1,4 +1,5 @@
 const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
 
 let io;
 
@@ -15,21 +16,29 @@ const initSocket = (server) => {
     },
   });
 
-  io.on("connection", (socket) => {
-    console.log("connected:", socket.id);
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error("Unauthorized"));
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.user = decoded;
+      next();
+    } catch {
+      next(new Error("Invalid token"));
+    }
+  });
 
-    // Join a workspace+team room
+  io.on("connection", (socket) => {
+    console.log("connected:", socket.id, "user:", socket.user?.id);
+
     socket.on("join-workspace", ({ workspace_id, team_id }) => {
       const room = `workspace:${workspace_id}:team:${team_id}`;
       socket.join(room);
-      console.log(`${socket.id} joined room ${room}`);
     });
 
-    // Leave a workspace+team room
     socket.on("leave-workspace", ({ workspace_id, team_id }) => {
       const room = `workspace:${workspace_id}:team:${team_id}`;
       socket.leave(room);
-      console.log(`${socket.id} left room ${room}`);
     });
 
     socket.on("disconnect", () => {
@@ -41,9 +50,7 @@ const initSocket = (server) => {
 };
 
 const getIO = () => {
-  if (!io) {
-    throw new Error("Socket.io not initialized!");
-  }
+  if (!io) throw new Error("Socket.io not initialized!");
   return io;
 };
 
