@@ -113,8 +113,6 @@ app.use("/sahakka-api/v2", invite);
 const submission = require("./routes/user/submission");
 app.use("/sahakka-api/v2", submission);
 
-app.use(require("./routes/demo"));
-
 const server = http.createServer(app);
 
 const { initSocket } = require("./configs/socket");

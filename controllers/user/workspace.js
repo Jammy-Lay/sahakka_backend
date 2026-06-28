@@ -1,5 +1,6 @@
 const workspace = require("../../services/user/workspace");
 const team = require("../../services/user/team");
+const { getIO } = require("../../configs/socket");
 
 exports.createWorkspace = async (req, res) => {
   try {
@@ -68,7 +69,19 @@ exports.getMyWorkspace = async (req, res) => {
 exports.deleteWorkspace = async (req, res) => {
   try {
     const { workspace_id } = req.params;
+
+    const members = await workspace.getWorkspaceMembers(workspace_id);
+
     await workspace.deleteWorkspace(workspace_id, req.user.id);
+
+    const io = getIO();
+    members.forEach((member) => {
+      if (member.user_id !== req.user.id) {
+        io.to(`user:${member.user_id}`).emit("kicked-from-workspace", {
+          workspace_id,
+        });
+      }
+    });
 
     return res.json({
       result: true,
@@ -89,6 +102,14 @@ exports.updateWorkspace = async (req, res) => {
     await workspace.updateWorkspace(req.validData.name, workspace_id);
     const row = await workspace.findById(workspace_id, req.user);
 
+    const io = getIO();
+    const members = await workspace.getWorkspaceMembers(workspace_id);
+    members.forEach((member) => {
+      io.to(`user:${member.user_id}`).emit("workspace-updated", {
+        workspace_id,
+      });
+    });
+
     return res.json({
       result: true,
       message: "Update Workspace Successfully",
@@ -96,16 +117,13 @@ exports.updateWorkspace = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(400).json({
-      result: false,
-      message: error.message,
-    });
+    return res.status(400).json({ result: false, message: error.message });
   }
 };
 
 exports.updateMemberRole = async (req, res) => {
   try {
-    const { workspace_id, team_id, user_id } = req.params;
+    const { workspace_id, user_id } = req.params;
     const { role } = req.validData;
 
     const result = await workspace.updateMemberRole(
@@ -114,6 +132,9 @@ exports.updateMemberRole = async (req, res) => {
       role,
     );
 
+    const io = getIO();
+    io.to(`user:${user_id}`).emit("role-updated", { workspace_id, role });
+
     return res.json({
       result: true,
       message: "Role updated successfully",
@@ -121,11 +142,7 @@ exports.updateMemberRole = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-
-    return res.status(400).json({
-      result: false,
-      message: error.message,
-    });
+    return res.status(400).json({ result: false, message: error.message });
   }
 };
 
@@ -152,34 +169,55 @@ exports.removeWorkspaceMember = async (req, res) => {
   try {
     const { workspace_id, user_id } = req.params;
 
+    const teams = await team.getTeamsByWorkspace(workspace_id, user_id);
+
     await workspace.removeWorkspaceMember(workspace_id, user_id, req.user.id);
 
-    return res.json({
-      result: true,
-      message: "Member removed successfully",
+    const io = getIO();
+
+    io.to(`user:${user_id}`).emit("kicked-from-workspace", { workspace_id });
+
+    teams.forEach((t) => {
+      io.to(`workspace:${workspace_id}:team:${t.team_id}`).emit(
+        "team-member-removed",
+        {
+          workspace_id,
+          team_id: t.team_id,
+          user_id,
+        },
+      );
     });
+
+    return res.json({ result: true, message: "Member removed successfully" });
   } catch (error) {
-    return res.status(400).json({
-      result: false,
-      message: error.message,
-    });
+    return res.status(400).json({ result: false, message: error.message });
   }
 };
 
 exports.leaveWorkspace = async (req, res) => {
   try {
     const { workspace_id } = req.params;
+    const user_id = req.user.id;
 
-    await workspace.leaveWorkspace(workspace_id, req.user.id);
+    const teams = await team.getTeamsByWorkspace(workspace_id, user_id);
 
-    return res.json({
-      result: true,
-      message: "Left workspace successfully",
+    await workspace.leaveWorkspace(workspace_id, user_id);
+
+    const io = getIO();
+
+    teams.forEach((t) => {
+      io.to(`workspace:${workspace_id}:team:${t.team_id}`).emit(
+        "team-member-removed",
+        {
+          workspace_id,
+          team_id: t.team_id,
+          user_id,
+        },
+      );
     });
+
+    return res.json({ result: true, message: "Left workspace successfully" });
   } catch (err) {
-    return res.status(400).json({
-      result: false,
-      message: err.message,
-    });
+    return res.status(400).json({ result: false, message: err.message });
   }
 };
