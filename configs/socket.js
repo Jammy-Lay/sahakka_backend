@@ -31,6 +31,10 @@ const initSocket = (server) => {
   io.on("connection", (socket) => {
     console.log("connected:", socket.id, "user:", socket.user?.id);
 
+    if (socket.user?.id) {
+      socket.join(`user:${socket.user.id}`);
+    }
+
     socket.on("join-workspace", ({ workspace_id, team_id }) => {
       const room = `workspace:${workspace_id}:team:${team_id}`;
       socket.join(room);

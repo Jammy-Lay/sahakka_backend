@@ -1,4 +1,6 @@
 const invite = require("../../services/user/invite");
+const { getIO } = require("../../configs/socket");
+
 exports.createTokenInvite = async (req, res) => {
   try {
     const { workspace_id, team_id } = req.params;
@@ -22,6 +24,14 @@ exports.joinByToken = async (req, res) => {
   try {
     const result = await invite.joinByToken(req.validData.token, req.user);
 
+    const io = getIO();
+    const room = `workspace:${result.workspace_id}:team:${result.team_id}`;
+    io.to(room).emit("member-joined", {
+      workspace_id: result.workspace_id,
+      team_id: result.team_id,
+      user: req.user,
+    });
+    
     return res.json({
       result: true,
       message: "Joined successfully",

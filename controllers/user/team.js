@@ -1,5 +1,6 @@
 const team = require("../../services/user/team");
 const workspace = require("../../services/user/workspace");
+const { getIO } = require("../../configs/socket");
 
 exports.createTeam = async (req, res) => {
   try {
@@ -94,17 +95,25 @@ exports.getTeamActivityById = async (req, res) => {
 exports.deleteTeam = async (req, res) => {
   try {
     const { team_id, workspace_id } = req.params;
+
+    const members = await team.getTeamMembers(workspace_id, team_id);
+
     await team.deleteTeam(team_id, workspace_id);
-    return res.json({
-      result: true,
-      message: "Delete Team Successfully",
+
+    const io = getIO();
+    members.forEach((member) => {
+      if (member.user_id !== req.user.id) {
+        io.to(`user:${member.user_id}`).emit("kicked-from-team", {
+          workspace_id,
+          team_id,
+        });
+      }
     });
+
+    return res.json({ result: true, message: "Delete Team Successfully" });
   } catch (error) {
     console.log(error);
-    return res.status(400).json({
-      result: false,
-      message: error.message,
-    });
+    return res.status(400).json({ result: false, message: error.message });
   }
 };
 
@@ -124,6 +133,15 @@ exports.updateTeam = async (req, res) => {
       req.user,
     );
 
+    const io = getIO();
+    const members = await team.getTeamMembers(workspace_id, team_id);
+    members.forEach((member) => {
+      io.to(`user:${member.user_id}`).emit("team-updated", {
+        workspace_id,
+        team_id,
+      });
+    });
+
     return res.json({
       result: true,
       message: "Update Team Successfully",
@@ -131,10 +149,7 @@ exports.updateTeam = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(400).json({
-      result: false,
-      message: error.message,
-    });
+    return res.status(400).json({ result: false, message: error.message });
   }
 };
 
@@ -143,6 +158,22 @@ exports.removeTeamMember = async (req, res) => {
     const { workspace_id, team_id, user_id } = req.params;
 
     await team.removeTeamMember(workspace_id, team_id, user_id, req.user.id);
+
+    const io = getIO();
+
+    io.to(`user:${user_id}`).emit("kicked-from-team", {
+      workspace_id,
+      team_id,
+    });
+
+    io.to(`workspace:${workspace_id}:team:${team_id}`).emit(
+      "team-member-removed",
+      {
+        workspace_id,
+        team_id,
+        user_id,
+      },
+    );
 
     return res.json({
       result: true,
