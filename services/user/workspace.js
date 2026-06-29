@@ -155,62 +155,51 @@ exports.getWorkspaceMembers = async (workspace_id) => {
 
 exports.removeWorkspaceMember = async (workspace_id, user_id, removed_by) => {
   const member = await workspace.checkWorkspaceMember(user_id, workspace_id);
-
-  if (member.length === 0) {
-    throw new Error("Member not found");
-  }
-
-  if (member[0].role === "owner") {
+  if (member.length === 0) throw new Error("Member not found");
+  if (member[0].role === "owner")
     throw new Error("Workspace owner cannot be removed");
-  }
 
   const userInfo = await users.findById(user_id);
+  if (userInfo.length === 0) throw new Error("User not found");
 
-  if (userInfo.length === 0) {
-    throw new Error("User not found");
-  }
+  const userTeams = await team.checkUserOtherTeams(workspace_id, user_id);
 
   await team.removeUserFromAllTeams(workspace_id, user_id);
-
   await workspace.removeWorkspaceMember(workspace_id, user_id);
 
+  for (const t of userTeams) {
+    await team.createTeamActivity(
+      t.team_id,
+      removed_by,
+      "remove",
+      `removed ${userInfo[0].name} from the team`,
+    );
+  }
 };
 
 exports.leaveWorkspace = async (workspace_id, user_id) => {
-  const member = await workspace.checkWorkspaceMember(
-    user_id,
-    workspace_id
-  );
-
-  if (member.length === 0) {
-    throw new Error("You are not a workspace member");
-  }
-
-
-  if (member[0].role === "owner") {
+  const member = await workspace.checkWorkspaceMember(user_id, workspace_id);
+  if (member.length === 0) throw new Error("You are not a workspace member");
+  if (member[0].role === "owner")
     throw new Error("Workspace owner cannot leave");
+
+  const userInfo = await users.findById(user_id);
+
+  const userTeams = await team.checkUserOtherTeams(workspace_id, user_id);
+
+  if (userTeams.length > 0) {
+    await team.removeUserFromAllTeams(workspace_id, user_id);
+
+    for (const t of userTeams) {
+      await team.createTeamActivity(
+        t.team_id,
+        user_id,
+        "leave",
+        `has left the team`,
+      );
+    }
   }
 
-
-  const teams = await team.checkUserOtherTeams(
-    workspace_id,
-    user_id
-  );
-
-
-  if (teams.length > 0) {
-    await team.removeUserFromAllTeams(
-      workspace_id,
-      user_id
-    );
-  }
-
-
-  await workspace.removeWorkspaceMember(
-    workspace_id,
-    user_id
-  );
-
-
+  await workspace.removeWorkspaceMember(workspace_id, user_id);
   return true;
 };

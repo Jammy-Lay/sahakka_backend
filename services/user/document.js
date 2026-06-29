@@ -1,4 +1,5 @@
 const document = require("../../models/user/document");
+const team = require("../../models/user/team");
 
 exports.createDocument = async (team_id, body, user_id, workspace_id) => {
   const document_id = await document.createDocument(
@@ -18,6 +19,13 @@ exports.createDocument = async (team_id, body, user_id, workspace_id) => {
   }
 
   const data = rows[0];
+
+  await team.createTeamActivity(
+    team_id,
+    user_id,
+    "create",
+    `created document ${body.title}`,
+  );
 
   return {
     document_id: data.id,
@@ -85,6 +93,7 @@ exports.updateDocumentTitle = async (
   document_id,
   team_id,
   workspace_id,
+  user_id,
 ) => {
   const rows = await document.findDocumentById(
     document_id,
@@ -101,6 +110,13 @@ exports.updateDocumentTitle = async (
     document_id,
     team_id,
     workspace_id,
+  );
+
+  await team.createTeamActivity(
+    team_id,
+    user_id,
+    "update",
+    `renamed document ${rows[0].title} to ${body.title}`,
   );
 };
 
@@ -128,7 +144,12 @@ exports.updateDocumentContent = async (
   );
 };
 
-exports.deleteDocument = async (document_id, team_id, workspace_id) => {
+exports.deleteDocument = async (
+  document_id,
+  team_id,
+  workspace_id,
+  user_id,
+) => {
   const rows = await document.findDocumentById(
     document_id,
     team_id,
@@ -148,4 +169,11 @@ exports.deleteDocument = async (document_id, team_id, workspace_id) => {
   if (result.affectedRows === 0) {
     throw new Error("Delete failed");
   }
+
+  await team.createTeamActivity(
+    team_id,
+    user_id,
+    "delete",
+    `deleted document ${rows[0].title}`,
+  );
 };

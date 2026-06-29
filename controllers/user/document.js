@@ -77,6 +77,7 @@ exports.updateDocumentTitle = async (req, res) => {
       document_id,
       team_id,
       workspace_id,
+      req.user.id,
     );
     const row = await document.getDocumentById(
       document_id,
@@ -134,7 +135,12 @@ exports.updateDocumentContent = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     const { workspace_id, team_id, document_id } = req.params;
-    await document.deleteDocument(document_id, team_id, workspace_id);
+    await document.deleteDocument(
+      document_id,
+      team_id,
+      workspace_id,
+      req.user.id,
+    );
 
     const io = getIO();
     io.to(`workspace:${workspace_id}:team:${team_id}`).emit(

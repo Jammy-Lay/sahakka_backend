@@ -102,12 +102,22 @@ exports.deleteTeam = async (req, res) => {
 
     const io = getIO();
     members.forEach((member) => {
-      if (member.user_id !== req.user.id) {
+      if (String(member.user_id) === String(req.user.id)) {
+        io.to(`user:${member.user_id}`).emit("team-updated", {
+          workspace_id,
+          team_id,
+        });
+      } else {
         io.to(`user:${member.user_id}`).emit("kicked-from-team", {
           workspace_id,
           team_id,
         });
       }
+    });
+
+    io.to(`workspace:${workspace_id}:team:${team_id}`).emit("team-deleted", {
+      workspace_id,
+      team_id,
     });
 
     return res.json({ result: true, message: "Delete Team Successfully" });
@@ -181,7 +191,6 @@ exports.removeTeamMember = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-
     return res.status(400).json({
       result: false,
       message: error.message,
