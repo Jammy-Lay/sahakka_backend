@@ -1,7 +1,8 @@
 const pool = require("../../configs/db");
 
 exports.createDocument = async (team_id, title, user_id) => {
-  const sql = "INSERT INTO documents (team_id, title, created_by) VALUES (?, ?, ?)";
+  const sql =
+    "INSERT INTO documents (team_id, title, created_by) VALUES (?, ?, ?)";
 
   const [result] = await pool.query(sql, [team_id, title, user_id]);
 
@@ -156,7 +157,8 @@ exports.updateDocumentContent = async (
 exports.findDocumentById = async (document_id, team_id, workspace_id) => {
   const sql = `
     SELECT 
-      d.id
+      d.id,
+      d.title
     FROM documents d
     INNER JOIN teams t
       ON t.id = d.team_id

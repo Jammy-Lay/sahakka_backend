@@ -76,7 +76,11 @@ exports.deleteWorkspace = async (req, res) => {
 
     const io = getIO();
     members.forEach((member) => {
-      if (member.user_id !== req.user.id) {
+      if (String(member.user_id) === String(req.user.id)) {
+        io.to(`user:${member.user_id}`).emit("workspace-updated", {
+          workspace_id,
+        });
+      } else {
         io.to(`user:${member.user_id}`).emit("kicked-from-workspace", {
           workspace_id,
         });
@@ -208,11 +212,7 @@ exports.leaveWorkspace = async (req, res) => {
     teams.forEach((t) => {
       io.to(`workspace:${workspace_id}:team:${t.team_id}`).emit(
         "team-member-removed",
-        {
-          workspace_id,
-          team_id: t.team_id,
-          user_id,
-        },
+        { workspace_id, team_id: t.team_id, user_id },
       );
     });
 

@@ -178,7 +178,6 @@ exports.updateTask = async (
 
   const current = row[0];
 
-  // check task belong to this team
   const checkTaskInTeam = await task.checkTaskInTeam(task_id, team_id);
 
   if (checkTaskInTeam.length === 0) {
@@ -187,6 +186,19 @@ exports.updateTask = async (
 
   if (body.start_date && body.end_date && body.start_date > body.end_date) {
     throw new Error("Start date cannot be after end date");
+  }
+
+  const lockedStatusesChange = ["submitted", "approved", "rejected"];
+  if ("status" in body && lockedStatusesChange.includes(current.status)) {
+    throw new Error(`Cannot update status when task is ${current.status}`);
+  }
+
+  const lockedStatusesAssignee = ["submitted", "approved"];
+  if (
+    "assigned_to" in body &&
+    lockedStatusesAssignee.includes(current.status)
+  ) {
+    throw new Error(`Cannot change assignee when task is ${current.status}`);
   }
 
   let assigned_to = current.assigned_to_id;
@@ -249,7 +261,6 @@ exports.updateTask = async (
     end_date: body.end_date !== undefined ? body.end_date : current.end_date,
   });
 
-  // only when assigned user changed
   if (assigned_to !== current.assigned_to_id && assigned_to != null) {
     const self = assigned_to === user_id;
 
