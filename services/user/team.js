@@ -118,8 +118,23 @@ exports.deleteTeam = async (team_id, workspace_id) => {
   await team.deleteTeam(team_id);
 };
 
-exports.updateTeam = async (title, description, team_id) => {
+exports.updateTeam = async (title, description, team_id, user_id) => {
+  const oldTeam = await team.findById(team_id);
+
+  if (!oldTeam) {
+    throw new Error("Team not found");
+  }
+
   await team.updateTeam(title, description, team_id);
+
+  if (oldTeam.team_name !== title) {
+    await team.createTeamActivity(
+      team_id,
+      user_id,
+      "update",
+      `renamed team ${oldTeam.team_name} to ${title}`,
+    );
+  }
 };
 
 exports.findTeam = async (team_id) => {

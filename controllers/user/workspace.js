@@ -103,7 +103,7 @@ exports.deleteWorkspace = async (req, res) => {
 exports.updateWorkspace = async (req, res) => {
   try {
     const { workspace_id } = req.params;
-    await workspace.updateWorkspace(req.validData.name, workspace_id);
+    await workspace.updateWorkspace(req.validData.name, workspace_id, req.user.id);
     const row = await workspace.findById(workspace_id, req.user);
 
     const io = getIO();
@@ -137,7 +137,14 @@ exports.updateMemberRole = async (req, res) => {
     );
 
     const io = getIO();
-    io.to(`user:${user_id}`).emit("role-updated", { workspace_id, role });
+    const members = await workspace.getWorkspaceMembers(workspace_id);
+    members.forEach((member) => {
+      io.to(`user:${member.user_id}`).emit("role-updated", {
+        workspace_id,
+        user_id,
+        role,
+      });
+    });
 
     return res.json({
       result: true,

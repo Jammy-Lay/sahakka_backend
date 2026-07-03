@@ -91,9 +91,15 @@ exports.createTask = async (
     if (
       workspaceRole === "moderator" &&
       target.length > 0 &&
-      target[0].role === "owner"
+      assigned_to !== user_id
     ) {
-      throw new Error("Moderator cannot assign tasks to owner");
+      const targetRole = target[0].role;
+      if (targetRole === "owner") {
+        throw new Error("Moderator cannot assign tasks to owner");
+      }
+      if (targetRole === "moderator") {
+        throw new Error("Moderator cannot assign tasks to another moderator");
+      }
     }
   }
 
@@ -184,21 +190,21 @@ exports.updateTask = async (
     throw new Error("Task is not in this team");
   }
 
+  const fullyLockedStatuses = ["submitted", "approved"];
+  if (fullyLockedStatuses.includes(current.status)) {
+    throw new Error(`Cannot update task when task is ${current.status}`);
+  }
+
+  if (
+    current.status === "rejected" &&
+    "status" in body &&
+    body.status !== current.status
+  ) {
+    throw new Error("Cannot change status when task is rejected");
+  }
+
   if (body.start_date && body.end_date && body.start_date > body.end_date) {
     throw new Error("Start date cannot be after end date");
-  }
-
-  const lockedStatusesChange = ["submitted", "approved", "rejected"];
-  if ("status" in body && lockedStatusesChange.includes(current.status)) {
-    throw new Error(`Cannot update status when task is ${current.status}`);
-  }
-
-  const lockedStatusesAssignee = ["submitted", "approved"];
-  if (
-    "assigned_to" in body &&
-    lockedStatusesAssignee.includes(current.status)
-  ) {
-    throw new Error(`Cannot change assignee when task is ${current.status}`);
   }
 
   let assigned_to = current.assigned_to_id;
@@ -234,52 +240,45 @@ exports.updateTask = async (
     if (
       workspaceRole === "moderator" &&
       target.length &&
-      target[0].role === "owner"
+      assigned_to !== user_id
     ) {
-      throw new Error("Moderator cannot assign tasks to owner");
+      const targetRole = target[0].role;
+      if (targetRole === "owner") {
+        throw new Error("Moderator cannot assign tasks to owner");
+      }
+      if (targetRole === "moderator") {
+        throw new Error("Moderator cannot assign tasks to another moderator");
+      }
     }
   }
 
   await task.updateTask(task_id, {
     title: body.title ?? current.title,
-
     description: body.description ?? current.description,
-
     type: body.type ?? current.type,
-
     status: body.status ?? current.status,
-
     priority: body.priority ?? current.priority,
-
     assigned_to,
-
     assigned_by,
-
     start_date:
       body.start_date !== undefined ? body.start_date : current.start_date,
-
     end_date: body.end_date !== undefined ? body.end_date : current.end_date,
   });
 
   if (assigned_to !== current.assigned_to_id && assigned_to != null) {
     const self = assigned_to === user_id;
-
     let messageTask = "";
     let messageTeam = "";
 
     if (self) {
       messageTask = "self-assigned the task";
-
       messageTeam = `self-assigned task ${current.title}`;
     } else {
       const assigned = await users.findById(assigned_to);
-
       const assigner = await users.findById(user_id);
-
       const data = await workspace.findWorkspaceWithTeam(workspace_id, team_id);
 
       messageTask = `assigned task to ${assigned[0].name}`;
-
       messageTeam = `assigned task ${current.title} to ${assigned[0].name}`;
 
       await sendTaskAssignByEmail(
@@ -295,8 +294,39 @@ exports.updateTask = async (
     }
 
     await task.createTaskActivity(task_id, user_id, "assign", messageTask);
-
     await team.createTeamActivity(team_id, user_id, "assign", messageTeam);
+  }
+
+  if (assigned_to === null && current.assigned_to_id !== null) {
+    const previouslyAssigned = await users.findById(current.assigned_to_id);
+
+    await task.createTaskActivity(
+      task_id,
+      user_id,
+      "unassign",
+      `unassigned ${previouslyAssigned[0].name} from the task`,
+    );
+    await team.createTeamActivity(
+      team_id,
+      user_id,
+      "unassign",
+      `unassigned ${previouslyAssigned[0].name} from task ${current.title}`,
+    );
+  }
+
+  if ("title" in body && body.title && body.title !== current.title) {
+    await task.createTaskActivity(
+      task_id,
+      user_id,
+      "update",
+      `renamed task ${current.title} to ${body.title}`,
+    );
+    await team.createTeamActivity(
+      team_id,
+      user_id,
+      "update",
+      `renamed task ${current.title} to ${body.title}`,
+    );
   }
 
   return true;

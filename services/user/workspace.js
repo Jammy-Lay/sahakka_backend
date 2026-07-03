@@ -99,8 +99,27 @@ exports.deleteWorkspace = async (workspace_id, owner_id) => {
   await workspace.deleteWorkspace(workspace_id);
 };
 
-exports.updateWorkspace = async (name, workspace_id) => {
+exports.updateWorkspace = async (name, workspace_id, user_id) => {
+  const oldWorkspace = await workspace.findById(workspace_id);
+
+  if (!oldWorkspace) {
+    throw new Error("Workspace not found");
+  }
+
   await workspace.updateWorkspace(name, workspace_id);
+
+  if (oldWorkspace.workspace_name !== name) {
+    const allTeams = await team.getTeamsInWorkspace(workspace_id);
+
+    for (const t of allTeams) {
+      await team.createTeamActivity(
+        t.team_id,
+        user_id,
+        "update",
+        `renamed workspace ${oldWorkspace.workspace_name} to ${name}`,
+      );
+    }
+  }
 };
 
 exports.updateMemberRole = async (workspace_id, user_id, role) => {

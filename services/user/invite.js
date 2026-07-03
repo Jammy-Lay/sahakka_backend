@@ -70,6 +70,13 @@ exports.joinByToken = async (token, user) => {
 
   await invite.updateStatus(data.id, "accepted");
 
+  const action = data.email ? "join_by_invite" : "join_by_passcode";
+  const message = data.email
+    ? "joined the team via email invite"
+    : "joined the team using an invite passcode";
+
+  await team.createTeamActivity(data.team_id, user.id, action, message);
+
   return {
     workspace_id: data.workspace_id,
     team_id: data.team_id,
