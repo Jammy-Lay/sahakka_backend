@@ -3,65 +3,10 @@ const task = require("../../models/user/task");
 const team = require("../../models/user/team");
 const workspace = require("../../models/user/workspace");
 const users = require("../../models/users");
-const { sendSubmissionReviewEmail } = require("../mail/mailService");
-
-exports.submitTask = async (task_id, user, message, file) => {
-  const taskRow = await task.findTaskById(task_id);
-
-  if (taskRow.length === 0) {
-    throw new Error("Task not found");
-  }
-
-  const taskData = taskRow[0];
-
-  const submission_id = await submission.createSubmission(
-    task_id,
-    user.id,
-    message,
-  );
-
-  if (file) {
-    const file_url = `${process.env.BASE_URL}/uploads/submissions/${file.filename}`;
-
-    await submission.addSubmissionFile(submission_id, file_url);
-  }
-
-  await task.updateStatus("submitted", task_id);
-
-  await task.createTaskActivity(
-    task_id,
-    user.id,
-    "submit",
-    "submitted task for review",
-  );
-
-  await team.createTeamActivity(
-    taskData.team_id,
-    user.id,
-    "submit",
-    `submitted task ${taskData.title} for review`,
-  );
-
-  const row = await submission.getSubmissionById(submission_id);
-
-  const data = row[0];
-
-  return {
-    submission_id: data.id,
-    task_id: data.task_id,
-    title: data.task_title,
-    message: data.message,
-    status: data.status,
-    file: data.file_url || null,
-    created_at: data.created_at,
-
-    submitted_by: {
-      user_id: data.user_id,
-      name: data.user_name,
-      avatar: data.user_avatar,
-    },
-  };
-};
+const {
+  sendSubmissionReviewEmail,
+  sendTaskSubmittedEmail,
+} = require("../mail/mailService");
 
 exports.getAllSubmissions = async (workspace_id, team_id) => {
   const rows = await submission.getSubmissionsByWorkspaceAndTeam(
@@ -90,6 +35,89 @@ exports.getAllSubmissions = async (workspace_id, team_id) => {
   }));
 };
 
+exports.submitTask = async (task_id, user, message, file) => {
+  const taskRow = await task.findTaskById(task_id);
+
+  if (taskRow.length === 0) {
+    throw new Error("Task not found");
+  }
+
+  const taskData = taskRow[0];
+
+  const teamData = await team.findById(taskData.team_id);
+  const workspace_id = teamData.workspace_id;
+
+  const submission_id = await submission.createSubmission(
+    task_id,
+    user.id,
+    message,
+  );
+
+  if (file) {
+    const file_url = `${process.env.BASE_URL}/uploads/submissions/${file.filename}`;
+    await submission.addSubmissionFile(submission_id, file_url);
+  }
+
+  await task.updateStatus("submitted", task_id);
+
+  await task.createTaskActivity(
+    task_id,
+    user.id,
+    "submit",
+    "submitted task for review",
+  );
+
+  await team.createTeamActivity(
+    taskData.team_id,
+    user.id,
+    "submit",
+    `submitted task ${taskData.title} for review`,
+  );
+
+  const wsData = await workspace.findById(workspace_id);
+  const ownerRows = await workspace.findOwnerByWorkspaceId(workspace_id);
+
+  if (ownerRows && ownerRows.length > 0) {
+    const owner = ownerRows[0];
+
+    if (owner.id !== user.id) {
+      const submitter = await users.findById(user.id);
+      const tm = await team.findById(taskData.team_id);
+
+      await sendTaskSubmittedEmail(
+        owner.email,
+        wsData.workspace_name,
+        tm.team_name,
+        taskData.title,
+        submission_id,
+        submitter[0].name,
+        submitter[0].avatar,
+        message,
+        workspace_id,
+        taskData.team_id,
+      );
+    }
+  }
+
+  const row = await submission.getSubmissionById(submission_id);
+  const data = row[0];
+
+  return {
+    submission_id: data.id,
+    task_id: data.task_id,
+    title: data.task_title,
+    message: data.message,
+    status: data.status,
+    file: data.file_url || null,
+    created_at: data.created_at,
+    submitted_by: {
+      user_id: data.user_id,
+      name: data.user_name,
+      avatar: data.user_avatar,
+    },
+  };
+};
+
 exports.updateSubmissionStatus = async (
   workspace_id,
   team_id,
@@ -100,23 +128,15 @@ exports.updateSubmissionStatus = async (
 ) => {
   const row = await submission.getSubmissionById(submission_id);
 
-  if (row.length === 0) {
-    throw new Error("Submission not found");
-  }
+  if (row.length === 0) throw new Error("Submission not found");
 
   const data = row[0];
 
-  if (data.team_id != team_id) {
+  if (data.team_id != team_id)
     throw new Error("Submission does not belong to this team");
-  }
-
-  if (data.workspace_id != workspace_id) {
+  if (data.workspace_id != workspace_id)
     throw new Error("Submission does not belong to this workspace");
-  }
-
-  if (data.status !== "pending") {
-    throw new Error("Submission already reviewed");
-  }
+  if (data.status !== "pending") throw new Error("Submission already reviewed");
 
   await submission.updateSubmissionStatus(
     submission_id,
@@ -136,33 +156,41 @@ exports.updateSubmissionStatus = async (
       : "rejected the submission",
   );
 
-  const teamMessage =
+  await team.createTeamActivity(
+    team_id,
+    user.id,
+    "review",
     status === "approved"
       ? `approved submission for task ${data.task_title}`
-      : `rejected submission for task ${data.task_title}`;
-
-  await team.createTeamActivity(team_id, user.id, "review", teamMessage);
+      : `rejected submission for task ${data.task_title}`,
+  );
 
   const updatedRow = await submission.getSubmissionById(submission_id);
   const updated = updatedRow[0];
 
   const submitter = await users.findById(updated.user_id);
-
   const ws = await workspace.findById(data.workspace_id);
   const tm = await team.findById(data.team_id);
 
-  await sendSubmissionReviewEmail(
-    submitter[0].email,
-    ws.workspace_name,
-    tm.team_name,
-    updated.task_title,
-    updated.reviewer_name,
-    updated.reviewer_avatar,
-    status,
-    feedback,
-    workspace_id,
-    team_id,
-  );
+  const taskRow = await task.findTaskById(data.task_id);
+  const taskType = taskRow[0]?.type ?? "task";
+
+  if (updated.user_id !== user.id) {
+    await sendSubmissionReviewEmail(
+      submitter[0].email,
+      ws.workspace_name,
+      tm.team_name,
+      updated.task_title,
+      data.task_id,
+      taskType,
+      updated.reviewer_name,
+      updated.reviewer_avatar,
+      status,
+      feedback,
+      workspace_id,
+      team_id,
+    );
+  }
 
   return {
     submission_id: updated.id,
@@ -171,7 +199,6 @@ exports.updateSubmissionStatus = async (
     status: updated.status,
     feedback: updated.feedback,
     reviewed_at: updated.reviewed_at,
-
     reviewed_by: {
       user_id: updated.reviewer_id,
       name: updated.reviewer_name,

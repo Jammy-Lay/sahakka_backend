@@ -157,3 +157,20 @@ exports.findWorkspaceByName = async (name) => {
   ]);
   return rows;
 };
+
+exports.findOwnerByWorkspaceId = async (workspace_id) => {
+  const sql = `
+    SELECT
+      u.id,
+      u.name,
+      u.email,
+      CONCAT(?, '/uploads/avatars/', u.avatar) AS avatar
+    FROM workspace_members wm
+    JOIN users u ON u.id = wm.user_id
+    WHERE wm.workspace_id = ? AND wm.role = 'owner'
+    LIMIT 1
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, workspace_id]);
+  return rows;
+};

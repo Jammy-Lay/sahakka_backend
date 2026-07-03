@@ -150,12 +150,13 @@ exports.createTeamActivity = async (team_id, user_id, action, message) => {
   let sql =
     "INSERT INTO team_activities (team_id, user_id, action, message) VALUES (?, ?, ?, ?)";
 
-  const result = await pool.query(sql, [team_id, user_id, action, message]);
+  const [result] = await pool.query(sql, [team_id, user_id, action, message]);
   return result.insertId;
 };
 
 exports.findById = async (team_id) => {
-  let sql = "SELECT id AS team_id, title as team_name FROM teams WHERE id = ?";
+  let sql =
+    "SELECT id AS team_id, title AS team_name, workspace_id FROM teams WHERE id = ?";
   const [row] = await pool.query(sql, [team_id]);
   return row[0];
 };
@@ -176,11 +177,9 @@ exports.removeTeamMember = async (team_id, user_id) => {
 
 exports.checkUserOtherTeams = async (workspace_id, user_id) => {
   let sql =
-    "SELECT tm.id FROM team_members tm JOIN teams t ON t.id = tm.team_id WHERE t.workspace_id = ? AND tm.user_id = ?";
-
-  const [rows] = await pool.query(sql, [workspace_id, user_id]);
-
-  return rows;
+    "SELECT tm.team_id FROM team_members tm JOIN teams t ON t.id = tm.team_id WHERE t.workspace_id = ? AND tm.user_id = ?";
+  const [row] = await pool.query(sql, [workspace_id, user_id]);
+  return row;
 };
 
 exports.getTeamMembers = async (workspace_id, team_id) => {
@@ -278,5 +277,11 @@ exports.getTeamById = async (workspace_id, team_id) => {
     team_id,
   ]);
 
+  return rows;
+};
+
+exports.getTeamsInWorkspace = async (workspace_id) => {
+  const sql = "SELECT id AS team_id FROM teams WHERE workspace_id = ?";
+  const [rows] = await pool.query(sql, [workspace_id]);
   return rows;
 };

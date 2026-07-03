@@ -135,6 +135,7 @@ exports.updateTeam = async (req, res) => {
       req.validData.title,
       req.validData.description,
       team_id,
+      req.user.id
     );
 
     const row = await workspace.findWorkspaceWithTeam(
@@ -167,34 +168,34 @@ exports.removeTeamMember = async (req, res) => {
   try {
     const { workspace_id, team_id, user_id } = req.params;
 
+    const members = await team.getTeamMembers(workspace_id, team_id);
+
     await team.removeTeamMember(workspace_id, team_id, user_id, req.user.id);
 
     const io = getIO();
-
     io.to(`user:${user_id}`).emit("kicked-from-team", {
       workspace_id,
       team_id,
     });
 
-    io.to(`workspace:${workspace_id}:team:${team_id}`).emit(
-      "team-member-removed",
-      {
+    members.forEach((member) => {
+      if (String(member.user_id) === String(user_id)) return;
+      io.to(`user:${member.user_id}`).emit("team-member-removed", {
         workspace_id,
         team_id,
         user_id,
-      },
+      });
+    });
+
+    io.to(`workspace:${workspace_id}:team:${team_id}`).emit(
+      "team-member-removed",
+      { workspace_id, team_id, user_id },
     );
 
-    return res.json({
-      result: true,
-      message: "Member removed successfully",
-    });
+    return res.json({ result: true, message: "Member removed successfully" });
   } catch (error) {
     console.error(error);
-    return res.status(400).json({
-      result: false,
-      message: error.message,
-    });
+    return res.status(400).json({ result: false, message: error.message });
   }
 };
 

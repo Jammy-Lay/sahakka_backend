@@ -213,7 +213,7 @@ exports.createTaskActivity = async (task_id, user_id, action, message) => {
   let sql =
     "INSERT INTO task_activities (task_id, user_id, action, message) VALUES (?, ?, ?, ?)";
 
-  const result = await pool.query(sql, [task_id, user_id, action, message]);
+  const [result] = await pool.query(sql, [task_id, user_id, action, message]);
   return result.insertId;
 };
 

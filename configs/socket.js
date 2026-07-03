@@ -36,8 +36,12 @@ const initSocket = (server) => {
     }
 
     socket.on("join-workspace", ({ workspace_id, team_id }) => {
+      if (socket.currentRoom) {
+        socket.leave(socket.currentRoom);
+      }
       const room = `workspace:${workspace_id}:team:${team_id}`;
       socket.join(room);
+      socket.currentRoom = room;
     });
 
     socket.on("leave-workspace", ({ workspace_id, team_id }) => {
