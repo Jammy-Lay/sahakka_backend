@@ -236,3 +236,8 @@ exports.getTeamById = async (workspace_id, team_id) => {
 
   return result;
 };
+
+exports.getCoMembersOfUser = async (userId) => {
+  const rows = await team.getCoMembersOfUser(userId);
+  return rows.map((row) => row.user_id);
+};

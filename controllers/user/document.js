@@ -118,7 +118,7 @@ exports.updateDocumentContent = async (req, res) => {
 
     const io = getIO();
     io.to(`workspace:${workspace_id}:team:${team_id}`).emit(
-      "document-updated",
+      "document-updated-content",
       row,
     );
 
