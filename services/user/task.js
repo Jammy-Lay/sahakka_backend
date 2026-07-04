@@ -225,7 +225,7 @@ exports.updateTask = async (
     }
   }
 
-  if (assigned_to != null) {
+  if ("assigned_to" in body && assigned_to != null) {
     const member = await team.checkTeamMember(assigned_to, team_id);
 
     if (member.length === 0) {
@@ -306,6 +306,7 @@ exports.updateTask = async (
       "unassign",
       `unassigned ${previouslyAssigned[0].name} from the task`,
     );
+    
     await team.createTeamActivity(
       team_id,
       user_id,

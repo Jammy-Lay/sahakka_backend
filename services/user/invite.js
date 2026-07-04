@@ -14,7 +14,7 @@ exports.createTokenInvite = async (workspace_id, team_id) => {
   if (row.length === 0 || row[0].status === "accepted") {
     await invite.createTokenInvite(workspace_id, team_id, token, expires_at);
   } else {
-    await invite.updateToken(workspace_id, team_id, token, expires_at);
+    await invite.updateToken(row[0].id, token, expires_at);
   }
 
   return {
@@ -102,7 +102,7 @@ exports.inviteByEmail = async (workspace_id, team_id, email, user) => {
   const existingInvite = await invite.findByEmail(workspace_id, team_id, email);
 
   if (existingInvite.length > 0) {
-    await invite.updateToken(workspace_id, team_id, token, expires_at);
+    await invite.updateTokenByEmail(existingInvite[0].id, token, expires_at);
   } else {
     await invite.createInviteByEmail(
       workspace_id,
