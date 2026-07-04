@@ -35,14 +35,14 @@ exports.deleteAvatar = async (req, res) => {
     const io = getIO();
     const coMembers = await team.getCoMembersOfUser(userId);
     coMembers.forEach((member) => {
-      io.to(`user:${member.user_id}`).emit("profile-updated", {
+      io.to(`user:${member}`).emit("profile-updated", {
         user_id: userId,
-        avatar: null,
+        avatar: result.avatar,
       });
     });
     io.to(`user:${userId}`).emit("profile-updated", {
       user_id: userId,
-      avatar: null,
+      avatar: result.avatar,
     });
 
     res.status(200).json({
@@ -64,7 +64,7 @@ exports.changeAvatar = async (req, res) => {
     const io = getIO();
     const coMembers = await team.getCoMembersOfUser(userId);
     coMembers.forEach((member) => {
-      io.to(`user:${member.user_id}`).emit("profile-updated", {
+      io.to(`user:${member}`).emit("profile-updated", {
         user_id: userId,
         avatar: result.avatar,
       });
@@ -94,8 +94,9 @@ exports.changeName = async (req, res) => {
 
     const io = getIO();
     const coMembers = await team.getCoMembersOfUser(userId);
+
     coMembers.forEach((member) => {
-      io.to(`user:${member.user_id}`).emit("profile-updated", {
+      io.to(`user:${member}`).emit("profile-updated", {
         user_id: userId,
         name: req.validData.name,
       });
@@ -105,12 +106,8 @@ exports.changeName = async (req, res) => {
       name: req.validData.name,
     });
 
-    res.status(200).json({
-      message: result.message,
-    });
+    res.status(200).json({ message: result.message });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 };

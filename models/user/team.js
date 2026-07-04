@@ -288,10 +288,11 @@ exports.getTeamsInWorkspace = async (workspace_id) => {
 
 exports.getCoMembersOfUser = async (userId) => {
   const sql = `
-    SELECT DISTINCT wm2.user_id
-    FROM workspace_members wm1
-    JOIN workspace_members wm2 ON wm1.workspace_id = wm2.workspace_id
-    WHERE wm1.user_id = ? AND wm2.user_id != ?
+    SELECT DISTINCT tm2.user_id
+    FROM team_members tm1
+    JOIN team_members tm2 ON tm1.team_id = tm2.team_id
+    WHERE tm1.user_id = ?
+    AND tm2.user_id != ?
   `;
   const [rows] = await pool.query(sql, [userId, userId]);
   return rows;
