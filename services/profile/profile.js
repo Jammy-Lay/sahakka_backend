@@ -95,23 +95,11 @@ exports.changeAvatar = async (userId, file) => {
     throw new Error("User not found");
   }
 
-  // get old avatar name
   const oldAvatar = user.avatar ? user.avatar.split("/").pop() : null;
 
   try {
-    // update database with new avatar
     await profileModel.updateAvatar(userId, file.filename);
-
-    // delete old avatar only if NOT default
-    if (oldAvatar && oldAvatar !== "default-avatar.png") {
-      const oldAvatarPath = path.join(uploadPath, oldAvatar);
-
-      if (fs.existsSync(oldAvatarPath)) {
-        fs.unlinkSync(oldAvatarPath);
-      }
-    }
   } catch (error) {
-    // remove uploaded file if database failed
     const newFilePath = path.join(uploadPath, file.filename);
 
     if (fs.existsSync(newFilePath)) {
@@ -121,11 +109,27 @@ exports.changeAvatar = async (userId, file) => {
     throw new Error("Failed to update avatar");
   }
 
+  if (oldAvatar && oldAvatar !== "default-avatar.png") {
+    try {
+      const oldAvatarPath = path.join(uploadPath, oldAvatar);
+
+      if (fs.existsSync(oldAvatarPath)) {
+        fs.unlinkSync(oldAvatarPath);
+      }
+    } catch (error) {
+      console.error(
+        `Failed to delete old avatar "${oldAvatar}":`,
+        error.message,
+      );
+    }
+  }
+
   return {
     message: "Avatar updated successfully",
     avatar: `${process.env.BASE_URL}/uploads/avatars/${file.filename}`,
   };
 };
+
 exports.changeName = async (user_id, name) => {
   const user = await auth.findById(user_id);
   if (!user) {

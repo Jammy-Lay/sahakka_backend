@@ -58,7 +58,7 @@ exports.submitTask = async (req, res) => {
     return res.json({
       result: true,
       message: "Task submitted successfully",
-      data: result,
+      data: result.submission,
     });
   } catch (error) {
     console.log(error);
@@ -95,7 +95,7 @@ exports.updateSubmissionStatus = async (req, res) => {
     return res.json({
       result: true,
       message: "Submission updated successfully",
-      data: result,
+      data: result.submission,
     });
   } catch (err) {
     return res.status(400).json({ result: false, message: err.message });

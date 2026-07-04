@@ -102,7 +102,7 @@ exports.submitTask = async (task_id, user, message, file) => {
   const row = await submission.getSubmissionById(submission_id);
   const data = row[0];
 
-  return {
+  const submissionData = {
     submission_id: data.id,
     task_id: data.task_id,
     title: data.task_title,
@@ -115,6 +115,17 @@ exports.submitTask = async (task_id, user, message, file) => {
       name: data.user_name,
       avatar: data.user_avatar,
     },
+  };
+
+  const taskUpdateData = {
+    task_id: data.task_id,
+    title: data.task_title,
+    status: "submitted",
+  };
+
+  return {
+    task: taskUpdateData,
+    submission: submissionData,
   };
 };
 
@@ -192,7 +203,7 @@ exports.updateSubmissionStatus = async (
     );
   }
 
-  return {
+  const submissionData = {
     submission_id: updated.id,
     task_id: updated.task_id,
     title: updated.task_title,
@@ -204,5 +215,16 @@ exports.updateSubmissionStatus = async (
       name: updated.reviewer_name,
       avatar: updated.reviewer_avatar,
     },
+  };
+
+  const taskUpdateData = {
+    task_id: updated.task_id,
+    title: updated.task_title,
+    status: updated.status,
+  };
+
+  return {
+    task: taskUpdateData,
+    submission: submissionData,
   };
 };
