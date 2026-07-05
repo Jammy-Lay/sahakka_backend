@@ -176,8 +176,11 @@ exports.removeTeamMember = async (
 
   const otherTeams = await team.checkUserOtherTeams(workspace_id, user_id);
 
+  let removedFromWorkspace = false;
+
   if (otherTeams.length === 0) {
     await workspace.removeWorkspaceMember(workspace_id, user_id);
+    removedFromWorkspace = true;
   }
 
   await team.createTeamActivity(
@@ -186,6 +189,8 @@ exports.removeTeamMember = async (
     "remove",
     `removed ${userInfo[0].name} from the team`,
   );
+
+  return { removedFromWorkspace };
 };
 
 exports.getTeamMembers = async (workspace_id, team_id) => {

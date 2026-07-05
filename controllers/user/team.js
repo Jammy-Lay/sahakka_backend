@@ -135,7 +135,7 @@ exports.updateTeam = async (req, res) => {
       req.validData.title,
       req.validData.description,
       team_id,
-      req.user.id
+      req.user.id,
     );
 
     const row = await workspace.findWorkspaceWithTeam(
@@ -170,13 +170,25 @@ exports.removeTeamMember = async (req, res) => {
 
     const members = await team.getTeamMembers(workspace_id, team_id);
 
-    await team.removeTeamMember(workspace_id, team_id, user_id, req.user.id);
-
-    const io = getIO();
-    io.to(`user:${user_id}`).emit("kicked-from-team", {
+    const { removedFromWorkspace } = await team.removeTeamMember(
       workspace_id,
       team_id,
-    });
+      user_id,
+      req.user.id,
+    );
+
+    const io = getIO();
+
+    if (removedFromWorkspace) {
+      io.to(`user:${user_id}`).emit("kicked-from-workspace", {
+        workspace_id,
+      });
+    } else {
+      io.to(`user:${user_id}`).emit("kicked-from-team", {
+        workspace_id,
+        team_id,
+      });
+    }
 
     members.forEach((member) => {
       if (String(member.user_id) === String(user_id)) return;
