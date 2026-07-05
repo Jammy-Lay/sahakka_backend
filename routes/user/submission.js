@@ -41,4 +41,11 @@ router.put(
   submission.updateSubmissionStatus,
 );
 
+router.get(
+  "/workspace/:workspace_id/team/:team_id/task/:task_id/feedback",
+  isLogin,
+  checkAccess,
+  submission.getFeedbackByTask,
+);
+
 module.exports = router;

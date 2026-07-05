@@ -86,6 +86,7 @@ exports.getSubmissionsByWorkspaceAndTeam = async (workspace_id, team_id) => {
       s.task_id,
       s.message,
       s.status,
+      s.feedback,
       s.created_at,
 
       u.id AS user_id,
@@ -126,4 +127,29 @@ exports.updateSubmissionStatus = async (
     "UPDATE task_submissions SET  status = ?,  feedback = ?,  reviewed_by = ?,  reviewed_at = NOW() WHERE id = ?";
 
   await pool.query(sql, [status, feedback, reviewed_by, submission_id]);
+};
+
+exports.getSubmissionFeedbackByTask = async (task_id) => {
+  const sql = `
+    SELECT
+      s.id AS submission_id,
+      s.task_id,
+      s.feedback,
+      s.status,
+      s.reviewed_at,
+
+      r.id AS reviewer_id,
+      r.name AS reviewer_name,
+      CONCAT(?, '/uploads/avatars/', r.avatar) AS reviewer_avatar
+
+    FROM task_submissions s
+    LEFT JOIN users r ON r.id = s.reviewed_by
+
+    WHERE s.task_id = ?
+    ORDER BY s.id DESC
+    LIMIT 1
+  `;
+
+  const [rows] = await pool.query(sql, [process.env.BASE_URL, task_id]);
+  return rows;
 };
