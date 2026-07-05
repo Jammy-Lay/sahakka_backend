@@ -265,54 +265,78 @@ exports.updateTask = async (
     end_date: body.end_date !== undefined ? body.end_date : current.end_date,
   });
 
-  if (assigned_to !== current.assigned_to_id && assigned_to != null) {
-    const self = assigned_to === user_id;
-    let messageTask = "";
-    let messageTeam = "";
+  if (assigned_to !== current.assigned_to_id) {
+    const wasReassignedToSomeoneElse =
+      current.assigned_to_id !== null && assigned_to !== null;
 
-    if (self) {
-      messageTask = "self-assigned the task";
-      messageTeam = `self-assigned task ${current.title}`;
-    } else {
-      const assigned = await users.findById(assigned_to);
-      const assigner = await users.findById(user_id);
-      const data = await workspace.findWorkspaceWithTeam(workspace_id, team_id);
+    if (wasReassignedToSomeoneElse) {
+      const previouslyAssigned = await users.findById(current.assigned_to_id);
 
-      messageTask = `assigned task to ${assigned[0].name}`;
-      messageTeam = `assigned task ${current.title} to ${assigned[0].name}`;
-
-      await sendTaskAssignByEmail(
-        assigned[0].email,
-        data.workspace_name,
-        data.title,
-        current.title,
-        assigner[0].name,
-        assigner[0].avatar,
-        workspace_id,
+      await task.createTaskActivity(
+        task_id,
+        user_id,
+        "unassign",
+        `unassigned ${previouslyAssigned[0].name} from the task`,
+      );
+      await team.createTeamActivity(
         team_id,
+        user_id,
+        "unassign",
+        `unassigned ${previouslyAssigned[0].name} from task ${current.title}`,
       );
     }
 
-    await task.createTaskActivity(task_id, user_id, "assign", messageTask);
-    await team.createTeamActivity(team_id, user_id, "assign", messageTeam);
-  }
+    if (assigned_to != null) {
+      const self = assigned_to === user_id;
+      let messageTask = "";
+      let messageTeam = "";
 
-  if (assigned_to === null && current.assigned_to_id !== null) {
-    const previouslyAssigned = await users.findById(current.assigned_to_id);
+      if (self) {
+        messageTask = "self-assigned the task";
+        messageTeam = `self-assigned task ${current.title}`;
+      } else {
+        const assigned = await users.findById(assigned_to);
+        const assigner = await users.findById(user_id);
+        const data = await workspace.findWorkspaceWithTeam(
+          workspace_id,
+          team_id,
+        );
 
-    await task.createTaskActivity(
-      task_id,
-      user_id,
-      "unassign",
-      `unassigned ${previouslyAssigned[0].name} from the task`,
-    );
-    
-    await team.createTeamActivity(
-      team_id,
-      user_id,
-      "unassign",
-      `unassigned ${previouslyAssigned[0].name} from task ${current.title}`,
-    );
+        messageTask = `assigned task to ${assigned[0].name}`;
+        messageTeam = `assigned task ${current.title} to ${assigned[0].name}`;
+
+        await sendTaskAssignByEmail(
+          assigned[0].email,
+          data.workspace_name,
+          data.title,
+          current.title,
+          assigner[0].name,
+          assigner[0].avatar,
+          workspace_id,
+          team_id,
+        );
+      }
+
+      await task.createTaskActivity(task_id, user_id, "assign", messageTask);
+      await team.createTeamActivity(team_id, user_id, "assign", messageTeam);
+    }
+
+    if (assigned_to === null && current.assigned_to_id !== null) {
+      const previouslyAssigned = await users.findById(current.assigned_to_id);
+
+      await task.createTaskActivity(
+        task_id,
+        user_id,
+        "unassign",
+        `unassigned ${previouslyAssigned[0].name} from the task`,
+      );
+      await team.createTeamActivity(
+        team_id,
+        user_id,
+        "unassign",
+        `unassigned ${previouslyAssigned[0].name} from task ${current.title}`,
+      );
+    }
   }
 
   if ("title" in body && body.title && body.title !== current.title) {

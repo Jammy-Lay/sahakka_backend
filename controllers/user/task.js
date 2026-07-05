@@ -50,6 +50,15 @@ exports.updateTask = async (req, res) => {
     const room = `workspace:${workspace_id}:team:${team_id}`;
     io.to(room).emit("task-updated", updatedTask);
 
+    const members = await team.getTeamMembers(workspace_id, team_id);
+    members.forEach((member) => {
+      io.to(`user:${member.user_id}`).emit("task-updated", {
+        workspace_id,
+        team_id,
+        task: updatedTask,
+      });
+    });
+
     // Send personal notification
     if (
       updatedTask.assigned_to?.user_id &&
@@ -92,6 +101,14 @@ exports.createTask = async (req, res) => {
     const io = getIO();
     const room = `workspace:${workspace_id}:team:${team_id}`;
     io.to(room).emit("task-created", newTask);
+    const members = await team.getTeamMembers(workspace_id, team_id);
+    members.forEach((member) => {
+      io.to(`user:${member.user_id}`).emit("task-created", {
+        workspace_id,
+        team_id,
+        task: newTask,
+      });
+    });
 
     // Send personal notification
     if (
@@ -126,6 +143,14 @@ exports.deleteTask = async (req, res) => {
     const io = getIO();
     const room = `workspace:${workspace_id}:team:${team_id}`;
     io.to(room).emit("task-deleted", { task_id: Number(task_id) });
+    const members = await team.getTeamMembers(workspace_id, team_id);
+    members.forEach((member) => {
+      io.to(`user:${member.user_id}`).emit("task-deleted", {
+        workspace_id,
+        team_id,
+        task_id: Number(task_id),
+      });
+    });
 
     return res.json({
       result: true,

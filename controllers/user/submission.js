@@ -97,7 +97,21 @@ exports.updateSubmissionStatus = async (req, res) => {
       message: "Submission updated successfully",
       data: result.submission,
     });
-  } catch (err) {
-    return res.status(400).json({ result: false, message: err.message });
+  } catch (error) {
+    return res.status(400).json({ result: false, message: error.message });
+  }
+};
+
+exports.getFeedbackByTask = async (req, res) => {
+  try {
+    const { team_id, task_id } = req.params;
+    const result = await submission.getFeedbackByTask(team_id, task_id);
+    return res.status(200).json({
+      result: true,
+      message: "Get Feedback Successfully",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
   }
 };
