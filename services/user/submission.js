@@ -24,6 +24,7 @@ exports.getAllSubmissions = async (workspace_id, team_id) => {
 
     message: item.message,
     status: item.status,
+    feedback: item.feedback || null,
     file: item.file_url || null,
     created_at: item.created_at,
 
@@ -226,5 +227,34 @@ exports.updateSubmissionStatus = async (
   return {
     task: taskUpdateData,
     submission: submissionData,
+  };
+};
+
+exports.getFeedbackByTask = async (team_id, task_id) => {
+  const checkTaskInTeam = await task.checkTaskInTeam(task_id, team_id);
+
+  if (checkTaskInTeam.length === 0) {
+    throw new Error("Task is not in this team");
+  }
+
+  const row = await submission.getSubmissionFeedbackByTask(task_id);
+
+  if (row.length === 0) throw new Error("No submission found for this task");
+
+  const data = row[0];
+
+  return {
+    submission_id: data.submission_id,
+    task_id: data.task_id,
+    feedback: data.feedback || null,
+    status: data.status,
+    reviewed_at: data.reviewed_at,
+    reviewed_by: data.reviewer_id
+      ? {
+          user_id: data.reviewer_id,
+          name: data.reviewer_name,
+          avatar: data.reviewer_avatar,
+        }
+      : null,
   };
 };
