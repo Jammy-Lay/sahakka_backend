@@ -267,12 +267,17 @@ const sendTaskAssignByEmail = async (
   workspaceName,
   teamName,
   taskTitle,
+  taskId,
+  taskType,
   assignerName,
   assignerAvatar,
   workspaceId,
   teamId,
 ) => {
-  const taskLink = `${process.env.FRONTEND_URL}/workspace/${workspaceId}/team/${teamId}/tasks`;
+  const taskRoute = ["bug", "improvement"].includes(taskType)
+    ? "issues"
+    : "tasks";
+  const taskLink = `${process.env.FRONTEND_URL}/workspace/${workspaceId}/team/${teamId}/${taskRoute}?task_id=${taskId}`;
 
   await transporter.sendMail({
     from: `Sahakka Dev <noreply@myapp.com>`,
