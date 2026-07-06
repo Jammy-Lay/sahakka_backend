@@ -34,7 +34,7 @@ exports.loginUserSchema = Joi.object({
   email: Joi.string()
     .trim()
     .lowercase()
-    .pattern(/^[a-zA-Z0-9._%+-]+@(gmail\.com|sahakka\.com)$/)
+    .pattern(/^[a-zA-Z0-9._%+-]+@(gmail\.com|support\.com)$/)
     .required()
     .messages({
       "string.pattern.base": "Email must be a valid Gmail address (@gmail.com)",
