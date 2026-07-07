@@ -64,7 +64,7 @@ exports.login = async (body) => {
   );
 
   if (!userInfo[0].is_verified) {
-    throw new Error("Email not verify");
+    throw new Error("Please verify your email before logging in");
   }
 
   await users.addToken(token, userInfo[0].id);
